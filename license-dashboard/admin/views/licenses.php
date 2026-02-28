@@ -5,7 +5,7 @@
 		<?php esc_html_e( 'Add New', 'pdf-license-manager' ); ?>
 	</a>
 
-	<?php if ( isset( $_GET['action'] ) && 'new' === $_GET['action'] ) : ?>
+	<?php if ( isset( $_GET['action'] ) && 'new' === sanitize_text_field( wp_unslash( $_GET['action'] ) ) ) : ?>
 		<!-- Create License Form -->
 		<div class="plm-section" style="max-width: 600px;">
 			<h2><?php esc_html_e( 'Create New License', 'pdf-license-manager' ); ?></h2>
@@ -14,51 +14,51 @@
 				<input type="hidden" name="action" value="plm_create_license">
 				<table class="form-table">
 					<tr>
-						<th><label for="license_type"><?php esc_html_e( 'Type', 'pdf-license-manager' ); ?></label></th>
+						<th scope="row"><label for="license_type"><?php esc_html_e( 'Type', 'pdf-license-manager' ); ?></label></th>
 						<td>
 							<select name="license_type" id="license_type">
-								<option value="premium">Premium</option>
-								<option value="pro_plus">Pro+ Enterprise</option>
+								<option value="premium"><?php esc_html_e( 'Premium', 'pdf-license-manager' ); ?></option>
+								<option value="pro_plus"><?php esc_html_e( 'Pro+ Enterprise', 'pdf-license-manager' ); ?></option>
 							</select>
 						</td>
 					</tr>
 					<tr>
-						<th><label for="plan"><?php esc_html_e( 'Plan', 'pdf-license-manager' ); ?></label></th>
+						<th scope="row"><label for="plan"><?php esc_html_e( 'Plan', 'pdf-license-manager' ); ?></label></th>
 						<td>
 							<select name="plan" id="plan">
-								<option value="starter">Starter (1 Site)</option>
-								<option value="professional">Professional (5 Sites)</option>
-								<option value="agency">Agency (Unlimited)</option>
-								<option value="enterprise">Enterprise (Unlimited)</option>
-								<option value="dev">Development</option>
+								<option value="starter"><?php esc_html_e( 'Starter (1 Site)', 'pdf-license-manager' ); ?></option>
+								<option value="professional"><?php esc_html_e( 'Professional (5 Sites)', 'pdf-license-manager' ); ?></option>
+								<option value="agency"><?php esc_html_e( 'Agency (Unlimited)', 'pdf-license-manager' ); ?></option>
+								<option value="enterprise"><?php esc_html_e( 'Enterprise (Unlimited)', 'pdf-license-manager' ); ?></option>
+								<option value="dev"><?php esc_html_e( 'Development', 'pdf-license-manager' ); ?></option>
 							</select>
 						</td>
 					</tr>
 					<tr>
-						<th><label for="customer_email"><?php esc_html_e( 'Customer Email', 'pdf-license-manager' ); ?></label></th>
+						<th scope="row"><label for="customer_email"><?php esc_html_e( 'Customer Email', 'pdf-license-manager' ); ?></label></th>
 						<td><input type="email" name="customer_email" id="customer_email" class="regular-text" required></td>
 					</tr>
 					<tr>
-						<th><label for="customer_name"><?php esc_html_e( 'Customer Name', 'pdf-license-manager' ); ?></label></th>
+						<th scope="row"><label for="customer_name"><?php esc_html_e( 'Customer Name', 'pdf-license-manager' ); ?></label></th>
 						<td><input type="text" name="customer_name" id="customer_name" class="regular-text"></td>
 					</tr>
 					<tr>
-						<th><label for="site_limit"><?php esc_html_e( 'Site Limit', 'pdf-license-manager' ); ?></label></th>
-						<td><input type="number" name="site_limit" id="site_limit" value="1" min="0" class="small-text"> <span class="description">0 = Unlimited</span></td>
+						<th scope="row"><label for="site_limit"><?php esc_html_e( 'Site Limit', 'pdf-license-manager' ); ?></label></th>
+						<td><input type="number" name="site_limit" id="site_limit" value="1" min="0" class="small-text"> <span class="description"><?php esc_html_e( '0 = Unlimited', 'pdf-license-manager' ); ?></span></td>
 					</tr>
 					<tr>
-						<th><label for="duration"><?php esc_html_e( 'Duration', 'pdf-license-manager' ); ?></label></th>
+						<th scope="row"><label for="duration"><?php esc_html_e( 'Duration', 'pdf-license-manager' ); ?></label></th>
 						<td>
 							<select name="duration" id="duration">
-								<option value="365">1 Year (365 days)</option>
-								<option value="730">2 Years (730 days)</option>
-								<option value="lifetime">Lifetime</option>
-								<option value="90">90 Days (Trial)</option>
+								<option value="365"><?php esc_html_e( '1 Year (365 days)', 'pdf-license-manager' ); ?></option>
+								<option value="730"><?php esc_html_e( '2 Years (730 days)', 'pdf-license-manager' ); ?></option>
+								<option value="lifetime"><?php esc_html_e( 'Lifetime', 'pdf-license-manager' ); ?></option>
+								<option value="90"><?php esc_html_e( '90 Days (Trial)', 'pdf-license-manager' ); ?></option>
 							</select>
 						</td>
 					</tr>
 					<tr>
-						<th><label for="notes"><?php esc_html_e( 'Notes', 'pdf-license-manager' ); ?></label></th>
+						<th scope="row"><label for="notes"><?php esc_html_e( 'Notes', 'pdf-license-manager' ); ?></label></th>
 						<td><textarea name="notes" id="notes" rows="3" class="large-text"></textarea></td>
 					</tr>
 				</table>
@@ -69,35 +69,53 @@
 		<!-- Filter Bar -->
 		<form method="get" class="plm-filter-bar">
 			<input type="hidden" name="page" value="plm-licenses">
-			<select name="status">
+			<label for="plm-filter-status" class="screen-reader-text"><?php esc_html_e( 'Filter by status', 'pdf-license-manager' ); ?></label>
+			<select name="status" id="plm-filter-status">
 				<option value=""><?php esc_html_e( 'All Statuses', 'pdf-license-manager' ); ?></option>
-				<option value="active" <?php selected( $status_filter, 'active' ); ?>>Active</option>
-				<option value="inactive" <?php selected( $status_filter, 'inactive' ); ?>>Inactive</option>
-				<option value="expired" <?php selected( $status_filter, 'expired' ); ?>>Expired</option>
-				<option value="grace_period" <?php selected( $status_filter, 'grace_period' ); ?>>Grace Period</option>
-				<option value="revoked" <?php selected( $status_filter, 'revoked' ); ?>>Revoked</option>
+				<option value="active" <?php selected( $status_filter, 'active' ); ?>><?php esc_html_e( 'Active', 'pdf-license-manager' ); ?></option>
+				<option value="inactive" <?php selected( $status_filter, 'inactive' ); ?>><?php esc_html_e( 'Inactive', 'pdf-license-manager' ); ?></option>
+				<option value="expired" <?php selected( $status_filter, 'expired' ); ?>><?php esc_html_e( 'Expired', 'pdf-license-manager' ); ?></option>
+				<option value="grace_period" <?php selected( $status_filter, 'grace_period' ); ?>><?php esc_html_e( 'Grace Period', 'pdf-license-manager' ); ?></option>
+				<option value="revoked" <?php selected( $status_filter, 'revoked' ); ?>><?php esc_html_e( 'Revoked', 'pdf-license-manager' ); ?></option>
 			</select>
-			<select name="type">
+			<label for="plm-filter-type" class="screen-reader-text"><?php esc_html_e( 'Filter by type', 'pdf-license-manager' ); ?></label>
+			<select name="type" id="plm-filter-type">
 				<option value=""><?php esc_html_e( 'All Types', 'pdf-license-manager' ); ?></option>
-				<option value="premium" <?php selected( $type_filter, 'premium' ); ?>>Premium</option>
-				<option value="pro_plus" <?php selected( $type_filter, 'pro_plus' ); ?>>Pro+</option>
+				<option value="premium" <?php selected( $type_filter, 'premium' ); ?>><?php esc_html_e( 'Premium', 'pdf-license-manager' ); ?></option>
+				<option value="pro_plus" <?php selected( $type_filter, 'pro_plus' ); ?>><?php esc_html_e( 'Pro+', 'pdf-license-manager' ); ?></option>
 			</select>
-			<input type="search" name="s" value="<?php echo esc_attr( $search ); ?>" placeholder="<?php esc_attr_e( 'Search key or email...', 'pdf-license-manager' ); ?>">
+			<label for="plm-search" class="screen-reader-text"><?php esc_html_e( 'Search licenses', 'pdf-license-manager' ); ?></label>
+			<input type="search" name="s" id="plm-search" value="<?php echo esc_attr( $search ); ?>" placeholder="<?php esc_attr_e( 'Search key or email...', 'pdf-license-manager' ); ?>">
 			<?php submit_button( __( 'Filter', 'pdf-license-manager' ), 'secondary', 'submit', false ); ?>
 		</form>
 
+		<?php if ( isset( $total_licenses ) && $total_licenses > 0 ) : ?>
+		<p class="plm-result-count">
+			<?php
+			printf(
+				/* translators: 1: Number of licenses shown, 2: Total number of licenses */
+				esc_html__( 'Showing %1$d of %2$d licenses.', 'pdf-license-manager' ),
+				count( $licenses ),
+				$total_licenses
+			);
+			?>
+		</p>
+		<?php endif; ?>
+
 		<!-- Licenses Table -->
+		<div class="plm-table-responsive">
 		<table class="widefat fixed striped plm-table">
+			<caption class="screen-reader-text"><?php esc_html_e( 'List of licenses', 'pdf-license-manager' ); ?></caption>
 			<thead>
 				<tr>
-					<th><?php esc_html_e( 'License Key', 'pdf-license-manager' ); ?></th>
-					<th><?php esc_html_e( 'Type', 'pdf-license-manager' ); ?></th>
-					<th><?php esc_html_e( 'Plan', 'pdf-license-manager' ); ?></th>
-					<th><?php esc_html_e( 'Status', 'pdf-license-manager' ); ?></th>
-					<th><?php esc_html_e( 'Sites', 'pdf-license-manager' ); ?></th>
-					<th><?php esc_html_e( 'Days Remaining', 'pdf-license-manager' ); ?></th>
-					<th><?php esc_html_e( 'Email', 'pdf-license-manager' ); ?></th>
-					<th><?php esc_html_e( 'Created', 'pdf-license-manager' ); ?></th>
+					<th scope="col"><?php esc_html_e( 'License Key', 'pdf-license-manager' ); ?></th>
+					<th scope="col"><?php esc_html_e( 'Type', 'pdf-license-manager' ); ?></th>
+					<th scope="col"><?php esc_html_e( 'Plan', 'pdf-license-manager' ); ?></th>
+					<th scope="col"><?php esc_html_e( 'Status', 'pdf-license-manager' ); ?></th>
+					<th scope="col"><?php esc_html_e( 'Sites', 'pdf-license-manager' ); ?></th>
+					<th scope="col"><?php esc_html_e( 'Days Remaining', 'pdf-license-manager' ); ?></th>
+					<th scope="col"><?php esc_html_e( 'Email', 'pdf-license-manager' ); ?></th>
+					<th scope="col"><?php esc_html_e( 'Created', 'pdf-license-manager' ); ?></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -114,13 +132,13 @@
 								<code><?php echo esc_html( PLM_License::mask_key( $lic->license_key ) ); ?></code>
 							</a>
 						</td>
-						<td><span class="plm-badge plm-badge-<?php echo esc_attr( $lic->license_type ); ?>"><?php echo 'pro_plus' === $lic->license_type ? 'Pro+' : 'Premium'; ?></span></td>
+						<td><span class="plm-badge plm-badge-<?php echo esc_attr( $lic->license_type ); ?>"><?php echo esc_html( 'pro_plus' === $lic->license_type ? __( 'Pro+', 'pdf-license-manager' ) : __( 'Premium', 'pdf-license-manager' ) ); ?></span></td>
 						<td><?php echo esc_html( ucfirst( $lic->plan ) ); ?></td>
 						<td><span class="plm-badge plm-badge-<?php echo esc_attr( $lic->status ); ?>"><?php echo esc_html( str_replace( '_', ' ', $lic->status ) ); ?></span></td>
 						<td><?php echo esc_html( $active_sites . '/' . ( 0 === (int) $lic->site_limit ? "\u{221E}" : $lic->site_limit ) ); ?></td>
 						<td>
 							<?php if ( null === $days ) : ?>
-								<span class="plm-text-success">Lifetime</span>
+								<span class="plm-text-success"><?php esc_html_e( 'Lifetime', 'pdf-license-manager' ); ?></span>
 							<?php elseif ( $days <= 0 ) : ?>
 								<span class="plm-text-danger"><?php echo esc_html( $days ); ?> <?php esc_html_e( 'days', 'pdf-license-manager' ); ?></span>
 							<?php elseif ( $days <= 14 ) : ?>
@@ -136,5 +154,12 @@
 				<?php endif; ?>
 			</tbody>
 		</table>
+		</div>
+
+		<?php if ( ! empty( $pagination_links ) ) : ?>
+		<div class="plm-pagination">
+			<?php echo $pagination_links; // Already escaped by paginate_links(). ?>
+		</div>
+		<?php endif; ?>
 	<?php endif; ?>
 </div>

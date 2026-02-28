@@ -39,12 +39,14 @@
 	<!-- API Info -->
 	<div class="plm-section">
 		<h2><?php esc_html_e( 'API Endpoints', 'pdf-license-manager' ); ?></h2>
+		<div class="plm-table-responsive">
 		<table class="widefat fixed">
+			<caption class="screen-reader-text"><?php esc_html_e( 'Available API endpoints', 'pdf-license-manager' ); ?></caption>
 			<thead>
 				<tr>
-					<th><?php esc_html_e( 'Method', 'pdf-license-manager' ); ?></th>
-					<th><?php esc_html_e( 'Endpoint', 'pdf-license-manager' ); ?></th>
-					<th><?php esc_html_e( 'Description', 'pdf-license-manager' ); ?></th>
+					<th scope="col"><?php esc_html_e( 'Method', 'pdf-license-manager' ); ?></th>
+					<th scope="col"><?php esc_html_e( 'Endpoint', 'pdf-license-manager' ); ?></th>
+					<th scope="col"><?php esc_html_e( 'Description', 'pdf-license-manager' ); ?></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -68,5 +70,6 @@
 				<?php endforeach; ?>
 			</tbody>
 		</table>
+		</div>
 	</div>
 </div>
