@@ -3,7 +3,7 @@
  * Plugin Name: PDF License Manager
  * Plugin URI: https://pdfviewer.drossmedia.de
  * Description: Central license management dashboard for PDF Embed & SEO Optimize (WordPress, Drupal, React/Next.js).
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Dross:Media
  * Author URI: https://dross.net/media/
  * License: GPL v2 or later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'PLM_VERSION', '1.0.0' );
+define( 'PLM_VERSION', '1.0.1' );
 define( 'PLM_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'PLM_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'PLM_PLUGIN_FILE', __FILE__ );
@@ -54,6 +54,7 @@ final class PDF_License_Manager {
 		require_once PLM_PLUGIN_DIR . 'includes/class-plm-geoip.php';
 		require_once PLM_PLUGIN_DIR . 'includes/class-plm-stripe.php';
 		require_once PLM_PLUGIN_DIR . 'includes/class-plm-admin.php';
+		require_once PLM_PLUGIN_DIR . 'includes/class-plm-dashboard-widget.php';
 	}
 
 	private function init_hooks(): void {
@@ -65,6 +66,7 @@ final class PDF_License_Manager {
 		if ( is_admin() ) {
 			$admin = new PLM_Admin();
 			$admin->init();
+			PLM_Dashboard_Widget::init();
 		}
 	}
 }

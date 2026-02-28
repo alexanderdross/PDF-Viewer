@@ -26,18 +26,20 @@
 		<!-- Geo Distribution -->
 		<div class="plm-section">
 			<h2><?php esc_html_e( 'Geo Distribution (Top 20)', 'pdf-license-manager' ); ?></h2>
+			<div class="plm-table-responsive">
 			<table class="widefat fixed striped">
+				<caption class="screen-reader-text"><?php esc_html_e( 'Installation count by country', 'pdf-license-manager' ); ?></caption>
 				<thead>
 					<tr>
-						<th><?php esc_html_e( 'Country', 'pdf-license-manager' ); ?></th>
-						<th style="text-align:right;"><?php esc_html_e( 'Installations', 'pdf-license-manager' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Country', 'pdf-license-manager' ); ?></th>
+						<th scope="col" class="plm-text-right"><?php esc_html_e( 'Installations', 'pdf-license-manager' ); ?></th>
 					</tr>
 				</thead>
 				<tbody>
 					<?php foreach ( $geo_distribution as $geo ) : ?>
 					<tr>
 						<td><?php echo esc_html( $geo->country_code . ' — ' . $geo->country_name ); ?></td>
-						<td style="text-align:right;"><strong><?php echo esc_html( $geo->count ); ?></strong></td>
+						<td class="plm-text-right"><strong><?php echo esc_html( $geo->count ); ?></strong></td>
 					</tr>
 					<?php endforeach; ?>
 					<?php if ( empty( $geo_distribution ) ) : ?>
@@ -45,6 +47,7 @@
 					<?php endif; ?>
 				</tbody>
 			</table>
+			</div>
 		</div>
 
 		<!-- Platform Distribution -->
@@ -55,7 +58,7 @@
 			foreach ( $platform_distribution as $p ) :
 				$pct = $total_platform > 0 ? round( ( $p->count / $total_platform ) * 100 ) : 0;
 			?>
-			<div class="plm-bar-row">
+			<div class="plm-bar-row" role="progressbar" aria-valuenow="<?php echo esc_attr( $pct ); ?>" aria-valuemin="0" aria-valuemax="100" aria-label="<?php echo esc_attr( ucfirst( $p->platform ) ); ?>">
 				<span class="plm-bar-label"><?php echo esc_html( ucfirst( $p->platform ) ); ?></span>
 				<div class="plm-bar-track">
 					<div class="plm-bar-fill plm-bar-<?php echo esc_attr( $p->platform ); ?>" style="width: <?php echo esc_attr( $pct ); ?>%;"></div>
@@ -67,25 +70,27 @@
 			<p><?php esc_html_e( 'No data.', 'pdf-license-manager' ); ?></p>
 			<?php endif; ?>
 
-			<h2 style="margin-top: 24px;"><?php esc_html_e( 'Licenses by Type', 'pdf-license-manager' ); ?></h2>
+			<h2 class="plm-section-subtitle"><?php esc_html_e( 'Licenses by Type', 'pdf-license-manager' ); ?></h2>
 			<table class="widefat fixed striped">
+				<caption class="screen-reader-text"><?php esc_html_e( 'License count by type', 'pdf-license-manager' ); ?></caption>
 				<tbody>
 					<?php foreach ( $type_distribution as $t ) : ?>
 					<tr>
-						<td><?php echo 'pro_plus' === $t->license_type ? 'Pro+ Enterprise' : 'Premium'; ?></td>
-						<td style="text-align:right;"><strong><?php echo esc_html( $t->count ); ?></strong></td>
+						<td><?php echo esc_html( 'pro_plus' === $t->license_type ? __( 'Pro+ Enterprise', 'pdf-license-manager' ) : __( 'Premium', 'pdf-license-manager' ) ); ?></td>
+						<td class="plm-text-right"><strong><?php echo esc_html( $t->count ); ?></strong></td>
 					</tr>
 					<?php endforeach; ?>
 				</tbody>
 			</table>
 
-			<h2 style="margin-top: 24px;"><?php esc_html_e( 'Active Licenses by Plan', 'pdf-license-manager' ); ?></h2>
+			<h2 class="plm-section-subtitle"><?php esc_html_e( 'Active Licenses by Plan', 'pdf-license-manager' ); ?></h2>
 			<table class="widefat fixed striped">
+				<caption class="screen-reader-text"><?php esc_html_e( 'Active license count by plan', 'pdf-license-manager' ); ?></caption>
 				<tbody>
 					<?php foreach ( $plan_distribution as $p ) : ?>
 					<tr>
 						<td><?php echo esc_html( ucfirst( $p->plan ) ); ?></td>
-						<td style="text-align:right;"><strong><?php echo esc_html( $p->count ); ?></strong></td>
+						<td class="plm-text-right"><strong><?php echo esc_html( $p->count ); ?></strong></td>
 					</tr>
 					<?php endforeach; ?>
 				</tbody>
