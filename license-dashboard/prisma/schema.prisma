@@ -1,0 +1,156 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum LicenseType {
+  premium
+  pro_plus
+}
+
+enum LicensePlan {
+  starter
+  professional
+  agency
+  enterprise
+  lifetime
+  dev
+}
+
+enum LicenseStatus {
+  active
+  expired
+  grace_period
+  revoked
+  inactive
+}
+
+enum Platform {
+  wordpress
+  drupal
+  react
+}
+
+model License {
+  id                    String        @id @default(uuid())
+  licenseKey            String        @unique @map("license_key") @db.VarChar(100)
+  type                  LicenseType
+  plan                  LicensePlan
+  status                LicenseStatus @default(inactive)
+  siteLimit             Int           @map("site_limit")
+  customerEmail         String        @map("customer_email") @db.VarChar(255)
+  customerName          String?       @map("customer_name") @db.VarChar(255)
+  stripeCustomerId      String?       @map("stripe_customer_id") @db.VarChar(255)
+  stripeSubscriptionId  String?       @map("stripe_subscription_id") @db.VarChar(255)
+  expiresAt             DateTime?     @map("expires_at")
+  activatedAt           DateTime?     @map("activated_at")
+  createdAt             DateTime      @default(now()) @map("created_at")
+  updatedAt             DateTime      @updatedAt @map("updated_at")
+  notes                 String?       @db.Text
+
+  installations         Installation[]
+  auditLogs             AuditLog[]
+  stripeEvents          StripeEvent[]
+
+  @@index([status])
+  @@index([customerEmail])
+  @@index([stripeCustomerId])
+  @@index([expiresAt])
+  @@map("licenses")
+}
+
+model Installation {
+  id              String    @id @default(uuid())
+  licenseId       String    @map("license_id")
+  siteUrl         String    @map("site_url") @db.VarChar(500)
+  platform        Platform
+  pluginVersion   String    @map("plugin_version") @db.VarChar(20)
+  phpVersion      String?   @map("php_version") @db.VarChar(20)
+  cmsVersion      String?   @map("cms_version") @db.VarChar(20)
+  nodeVersion     String?   @map("node_version") @db.VarChar(20)
+  activatedAt     DateTime  @default(now()) @map("activated_at")
+  lastCheckedAt   DateTime  @default(now()) @map("last_checked_at")
+  deactivatedAt   DateTime? @map("deactivated_at")
+  isActive        Boolean   @default(true) @map("is_active")
+  isLocal         Boolean   @default(false) @map("is_local")
+
+  license         License   @relation(fields: [licenseId], references: [id], onDelete: Cascade)
+  geoData         GeoData?
+
+  @@unique([licenseId, siteUrl])
+  @@index([licenseId])
+  @@index([siteUrl])
+  @@index([isActive])
+  @@index([platform])
+  @@index([lastCheckedAt])
+  @@map("installations")
+}
+
+model GeoData {
+  id              String   @id @default(uuid())
+  installationId  String   @unique @map("installation_id")
+  ipAnonymized    String?  @map("ip_anonymized") @db.VarChar(45)
+  countryCode     String   @map("country_code") @db.Char(2)
+  countryName     String   @map("country_name") @db.VarChar(100)
+  region          String?  @db.VarChar(100)
+  city            String?  @db.VarChar(100)
+  latitude        Decimal? @db.Decimal(10, 7)
+  longitude       Decimal? @db.Decimal(10, 7)
+  continent       String?  @db.VarChar(50)
+  timezone        String?  @db.VarChar(50)
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+
+  installation    Installation @relation(fields: [installationId], references: [id], onDelete: Cascade)
+
+  @@index([countryCode])
+  @@map("geo_data")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  licenseId   String?  @map("license_id")
+  eventType   String   @map("event_type") @db.VarChar(50)
+  details     Json     @default("{}")
+  ipAddress   String?  @map("ip_address") @db.VarChar(45)
+  userAgent   String?  @map("user_agent") @db.VarChar(500)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  license     License? @relation(fields: [licenseId], references: [id], onDelete: SetNull)
+
+  @@index([licenseId])
+  @@index([eventType])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model StripeEvent {
+  id              String   @id @default(uuid())
+  stripeEventId   String   @unique @map("stripe_event_id") @db.VarChar(100)
+  eventType       String   @map("event_type") @db.VarChar(100)
+  licenseId       String?  @map("license_id")
+  payload         Json     @default("{}")
+  processed       Boolean  @default(false)
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  license         License? @relation(fields: [licenseId], references: [id], onDelete: SetNull)
+
+  @@index([eventType])
+  @@map("stripe_events")
+}
+
+model StripeProductMap {
+  id               String      @id @default(uuid())
+  stripeProductId  String      @map("stripe_product_id") @db.VarChar(100)
+  stripePriceId    String?     @map("stripe_price_id") @db.VarChar(100)
+  licenseType      LicenseType @map("license_type")
+  plan             LicensePlan
+  siteLimit        Int         @map("site_limit")
+  durationDays     Int         @map("duration_days")
+  createdAt        DateTime    @default(now()) @map("created_at")
+
+  @@map("stripe_product_map")
+}
