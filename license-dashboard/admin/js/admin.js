@@ -24,5 +24,51 @@
 				}
 			});
 		}
+
+		// Copy license key to clipboard.
+		var copyBtn = document.querySelector('.plm-copy-key');
+		if (copyBtn) {
+			copyBtn.addEventListener('click', function () {
+				var target = document.querySelector(this.getAttribute('data-clipboard-target'));
+				if (!target) return;
+
+				var text = target.textContent.trim();
+				if (navigator.clipboard && navigator.clipboard.writeText) {
+					navigator.clipboard.writeText(text).then(function () {
+						copyBtn.textContent = plmAdmin.copied;
+						copyBtn.classList.add('plm-copied');
+						setTimeout(function () {
+							copyBtn.textContent = plmAdmin.copy;
+							copyBtn.classList.remove('plm-copied');
+						}, 2000);
+					});
+				} else {
+					// Fallback for older browsers.
+					var range = document.createRange();
+					range.selectNodeContents(target);
+					var selection = window.getSelection();
+					selection.removeAllRanges();
+					selection.addRange(range);
+					document.execCommand('copy');
+					selection.removeAllRanges();
+					copyBtn.textContent = plmAdmin.copied;
+					copyBtn.classList.add('plm-copied');
+					setTimeout(function () {
+						copyBtn.textContent = plmAdmin.copy;
+						copyBtn.classList.remove('plm-copied');
+					}, 2000);
+				}
+			});
+		}
+
+		// Revoke license confirmation with localized string.
+		var revokeForm = document.querySelector('.plm-revoke-form');
+		if (revokeForm) {
+			revokeForm.addEventListener('submit', function (e) {
+				if (!confirm(plmAdmin.confirmRevoke)) {
+					e.preventDefault();
+				}
+			});
+		}
 	});
 })();

@@ -10,6 +10,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 class PLM_Admin {
 
 	/**
+	 * Items per page for paginated lists.
+	 */
+	private const PER_PAGE = 50;
+
+	/**
 	 * Initialize admin hooks.
 	 */
 	public function init(): void {
@@ -98,6 +103,11 @@ class PLM_Admin {
 		}
 		wp_enqueue_style( 'plm-admin', PLM_PLUGIN_URL . 'admin/css/admin.css', array(), PLM_VERSION );
 		wp_enqueue_script( 'plm-admin', PLM_PLUGIN_URL . 'admin/js/admin.js', array(), PLM_VERSION, true );
+		wp_localize_script( 'plm-admin', 'plmAdmin', array(
+			'confirmRevoke' => __( 'Are you sure you want to revoke this license?', 'pdf-license-manager' ),
+			'copy'          => __( 'Copy', 'pdf-license-manager' ),
+			'copied'        => __( 'Copied!', 'pdf-license-manager' ),
+		) );
 	}
 
 	/**
@@ -121,6 +131,36 @@ class PLM_Admin {
 			'expired_licenses'     => (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$t_lic} WHERE status = 'expired'" ),
 			'revoked_licenses'     => (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$t_lic} WHERE status = 'revoked'" ),
 		);
+	}
+
+	/**
+	 * Build pagination links for admin list pages.
+	 *
+	 * @param int    $total    Total number of items.
+	 * @param int    $per_page Items per page.
+	 * @param int    $current  Current page number.
+	 * @param string $page_slug The admin page slug (e.g. 'plm-licenses').
+	 * @param array  $extra_args Additional query args to preserve.
+	 * @return string HTML pagination links or empty string.
+	 */
+	private function build_pagination( int $total, int $per_page, int $current, string $page_slug, array $extra_args = array() ): string {
+		$total_pages = (int) ceil( $total / $per_page );
+
+		if ( $total_pages <= 1 ) {
+			return '';
+		}
+
+		$base_url = admin_url( 'admin.php' );
+		$args     = array_merge( array( 'page' => $page_slug ), $extra_args );
+
+		return paginate_links( array(
+			'base'      => add_query_arg( 'paged', '%#%', add_query_arg( $args, $base_url ) ),
+			'format'    => '',
+			'current'   => $current,
+			'total'     => $total_pages,
+			'prev_text' => '&laquo;',
+			'next_text' => '&raquo;',
+		) );
 	}
 
 	// -------------------------------------------------------------------------
@@ -167,13 +207,38 @@ class PLM_Admin {
 		}
 
 		$where_sql = implode( ' AND ', $where );
-		$query     = "SELECT * FROM {$table} WHERE {$where_sql} ORDER BY created_at DESC LIMIT 100";
 
+		// Get total count for pagination.
+		$count_query = "SELECT COUNT(*) FROM {$table} WHERE {$where_sql}";
 		if ( ! empty( $values ) ) {
-			$query = $wpdb->prepare( $query, $values );
+			$count_query = $wpdb->prepare( $count_query, $values );
 		}
+		$total_licenses = (int) $wpdb->get_var( $count_query );
+
+		// Paginate.
+		$per_page = self::PER_PAGE;
+		$current_page = isset( $_GET['paged'] ) ? max( 1, absint( $_GET['paged'] ) ) : 1;
+		$offset = ( $current_page - 1 ) * $per_page;
+
+		$query = $wpdb->prepare(
+			"SELECT * FROM {$table} WHERE {$where_sql} ORDER BY created_at DESC LIMIT %d OFFSET %d",
+			array_merge( $values, array( $per_page, $offset ) )
+		);
 
 		$licenses = $wpdb->get_results( $query );
+
+		// Build pagination links.
+		$extra_args = array();
+		if ( $status_filter ) {
+			$extra_args['status'] = $status_filter;
+		}
+		if ( $type_filter ) {
+			$extra_args['type'] = $type_filter;
+		}
+		if ( $search ) {
+			$extra_args['s'] = $search;
+		}
+		$pagination_links = $this->build_pagination( $total_licenses, $per_page, $current_page, 'plm-licenses', $extra_args );
 
 		include PLM_PLUGIN_DIR . 'admin/views/licenses.php';
 	}
@@ -199,7 +264,7 @@ class PLM_Admin {
 		) );
 
 		$audit_logs = $wpdb->get_results( $wpdb->prepare(
-			"SELECT * FROM {$t_log} WHERE license_id = %d ORDER BY created_at DESC LIMIT 30",
+			"SELECT * FROM {$t_log} WHERE license_id = %d ORDER BY created_at DESC LIMIT 50",
 			$license_id
 		) );
 
@@ -224,19 +289,38 @@ class PLM_Admin {
 		}
 
 		$where_sql = implode( ' AND ', $where );
-		$query     = "SELECT i.*, l.license_key, l.license_type, l.plan, l.status AS license_status, l.expires_at AS license_expires_at,
+
+		// Get total count for pagination.
+		$count_query = "SELECT COUNT(*) FROM {$t_inst} i WHERE {$where_sql}";
+		if ( ! empty( $values ) ) {
+			$count_query = $wpdb->prepare( $count_query, $values );
+		}
+		$total_installations = (int) $wpdb->get_var( $count_query );
+
+		// Paginate.
+		$per_page = self::PER_PAGE;
+		$current_page = isset( $_GET['paged'] ) ? max( 1, absint( $_GET['paged'] ) ) : 1;
+		$offset = ( $current_page - 1 ) * $per_page;
+
+		$query = $wpdb->prepare(
+			"SELECT i.*, l.license_key, l.license_type, l.plan, l.status AS license_status, l.expires_at AS license_expires_at,
 					  g.country_code, g.country_name, g.region, g.city
 					  FROM {$t_inst} i
 					  JOIN {$t_lic} l ON l.id = i.license_id
 					  LEFT JOIN {$t_geo} g ON g.installation_id = i.id
 					  WHERE {$where_sql}
-					  ORDER BY i.last_checked_at DESC LIMIT 200";
-
-		if ( ! empty( $values ) ) {
-			$query = $wpdb->prepare( $query, $values );
-		}
+					  ORDER BY i.last_checked_at DESC LIMIT %d OFFSET %d",
+			array_merge( $values, array( $per_page, $offset ) )
+		);
 
 		$installations = $wpdb->get_results( $query );
+
+		// Build pagination links.
+		$extra_args = array();
+		if ( $platform_filter ) {
+			$extra_args['platform'] = $platform_filter;
+		}
+		$pagination_links = $this->build_pagination( $total_installations, $per_page, $current_page, 'plm-installations', $extra_args );
 
 		include PLM_PLUGIN_DIR . 'admin/views/installations.php';
 	}
@@ -283,11 +367,23 @@ class PLM_Admin {
 		$t_log = PLM_Database::table( 'audit_logs' );
 		$t_lic = PLM_Database::table( 'licenses' );
 
-		$logs = $wpdb->get_results(
+		// Get total count for pagination.
+		$total_logs = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$t_log}" );
+
+		// Paginate.
+		$per_page = self::PER_PAGE;
+		$current_page = isset( $_GET['paged'] ) ? max( 1, absint( $_GET['paged'] ) ) : 1;
+		$offset = ( $current_page - 1 ) * $per_page;
+
+		$logs = $wpdb->get_results( $wpdb->prepare(
 			"SELECT a.*, l.license_key, l.license_type
 			 FROM {$t_log} a LEFT JOIN {$t_lic} l ON l.id = a.license_id
-			 ORDER BY a.created_at DESC LIMIT 200"
-		);
+			 ORDER BY a.created_at DESC LIMIT %d OFFSET %d",
+			$per_page,
+			$offset
+		) );
+
+		$pagination_links = $this->build_pagination( $total_logs, $per_page, $current_page, 'plm-audit-log' );
 
 		include PLM_PLUGIN_DIR . 'admin/views/audit-log.php';
 	}
