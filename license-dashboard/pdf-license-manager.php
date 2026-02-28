@@ -54,6 +54,7 @@ final class PDF_License_Manager {
 		require_once PLM_PLUGIN_DIR . 'includes/class-plm-geoip.php';
 		require_once PLM_PLUGIN_DIR . 'includes/class-plm-stripe.php';
 		require_once PLM_PLUGIN_DIR . 'includes/class-plm-admin.php';
+		require_once PLM_PLUGIN_DIR . 'includes/class-plm-dashboard-widget.php';
 	}
 
 	private function init_hooks(): void {
@@ -65,6 +66,7 @@ final class PDF_License_Manager {
 		if ( is_admin() ) {
 			$admin = new PLM_Admin();
 			$admin->init();
+			PLM_Dashboard_Widget::init();
 		}
 	}
 }
