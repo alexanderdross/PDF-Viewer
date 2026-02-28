@@ -1,0 +1,193 @@
+/* PDF License Manager - Admin Styles */
+
+.plm-wrap {
+	max-width: 1400px;
+}
+
+/* KPI Grid */
+.plm-kpi-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 16px;
+	margin: 20px 0;
+}
+
+.plm-kpi-card {
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+}
+
+.plm-kpi-card.plm-kpi-alert {
+	border-color: #dba617;
+}
+
+.plm-kpi-label {
+	font-size: 13px;
+	color: #646970;
+	margin-bottom: 4px;
+}
+
+.plm-kpi-value {
+	font-size: 32px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+/* Sections */
+.plm-section {
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	padding: 20px;
+	margin: 20px 0;
+}
+
+.plm-section h2 {
+	margin-top: 0;
+	padding: 0;
+}
+
+/* 2 Column Grid */
+.plm-grid-2 {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 20px;
+}
+
+@media (max-width: 1024px) {
+	.plm-grid-2 {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* Badges */
+.plm-badge {
+	display: inline-block;
+	padding: 2px 8px;
+	border-radius: 3px;
+	font-size: 12px;
+	font-weight: 500;
+	line-height: 1.6;
+	background: #f0f0f1;
+	color: #50575e;
+}
+
+.plm-badge-active { background: #d1fae5; color: #065f46; }
+.plm-badge-expired { background: #fee2e2; color: #991b1b; }
+.plm-badge-grace_period { background: #fef3c7; color: #92400e; }
+.plm-badge-revoked { background: #f0f0f1; color: #50575e; }
+.plm-badge-inactive { background: #f0f0f1; color: #8c8f94; }
+
+.plm-badge-premium { background: #dbeafe; color: #1e40af; }
+.plm-badge-pro_plus { background: #ede9fe; color: #6b21a8; }
+
+.plm-badge-wordpress { background: #dbeafe; color: #1e40af; }
+.plm-badge-drupal { background: #e0f2fe; color: #0369a1; }
+.plm-badge-react { background: #cffafe; color: #0e7490; }
+
+/* Text Colors */
+.plm-text-success { color: #059669; }
+.plm-text-warning { color: #d97706; }
+.plm-text-danger { color: #dc2626; }
+.plm-text-muted { color: #8c8f94; }
+
+/* Tables */
+.plm-table th,
+.plm-table td {
+	vertical-align: middle;
+}
+
+.plm-row-inactive {
+	opacity: 0.5;
+}
+
+/* Filter Bar */
+.plm-filter-bar {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+	margin: 16px 0;
+	flex-wrap: wrap;
+}
+
+.plm-filter-bar select,
+.plm-filter-bar input[type="search"] {
+	height: 32px;
+}
+
+/* Bar Charts */
+.plm-bar-row {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin: 8px 0;
+}
+
+.plm-bar-label {
+	width: 100px;
+	font-size: 13px;
+	font-weight: 500;
+}
+
+.plm-bar-track {
+	flex: 1;
+	height: 16px;
+	background: #f0f0f1;
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+.plm-bar-fill {
+	height: 100%;
+	border-radius: 8px;
+	transition: width 0.3s;
+}
+
+.plm-bar-wordpress { background: #2271b1; }
+.plm-bar-drupal { background: #0ea5e9; }
+.plm-bar-react { background: #06b6d4; }
+
+.plm-bar-value {
+	width: 100px;
+	font-size: 13px;
+	color: #646970;
+	text-align: right;
+}
+
+/* Version Grid */
+.plm-version-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+	gap: 12px;
+}
+
+.plm-version-card {
+	background: #f6f7f7;
+	border-radius: 4px;
+	padding: 16px;
+	text-align: center;
+}
+
+.plm-version-number {
+	display: block;
+	font-size: 20px;
+	font-weight: 600;
+}
+
+.plm-version-count {
+	display: block;
+	font-size: 12px;
+	color: #646970;
+	margin-top: 4px;
+}
+
+/* Actions */
+.plm-actions {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+}

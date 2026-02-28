@@ -83,7 +83,7 @@ Aufbau eines zentralen **License Checker & Dashboard Systems**, das folgende Ker
 │         ┌────────────────────┼────────────────────┐                 │
 │         ▼                    ▼                    ▼                 │
 │  ┌─────────────┐  ┌──────────────────┐  ┌──────────────────┐      │
-│  │  Dashboard   │  │  PostgreSQL DB   │  │  Stripe API      │      │
+│  │  Dashboard   │  │  MySQL / MariaDB │  │  Stripe API      │      │
 │  │  (Admin UI)  │  │  (Lizenzen,      │  │  (Payments,      │      │
 │  │  dashboard.  │  │   Statistiken)   │  │   Subscriptions) │      │
 │  │  pdfviewer.  │  │                  │  │                  │      │
@@ -109,35 +109,38 @@ Das System besteht aus vier Hauptkomponenten:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    Next.js Application                           │
+│              WordPress + Custom Plugin (pdf-license-manager)      │
 │               dashboard.pdfviewer.drossmedia.de                  │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
 │  ┌─────────────────────────┐  ┌──────────────────────────────┐  │
-│  │   Frontend (React)      │  │   API Routes (Node.js)       │  │
+│  │   Admin UI (WP-Admin)   │  │   REST API (WP REST)         │  │
 │  │                         │  │                              │  │
-│  │  • Dashboard Pages      │  │  /api/v1/license/validate    │  │
-│  │  • Lizenz-Verwaltung    │  │  /api/v1/license/activate    │  │
-│  │  • Statistiken          │  │  /api/v1/license/deactivate  │  │
-│  │  • Geo-Map              │  │  /api/v1/license/check       │  │
-│  │  • Stripe-Übersicht     │  │  /api/v1/webhook/stripe      │  │
-│  │                         │  │  /api/v1/heartbeat           │  │
+│  │  • Dashboard Pages      │  │  /wp-json/plm/v1/license/    │  │
+│  │  • Lizenz-Verwaltung    │  │    validate                  │  │
+│  │  • Statistiken          │  │    activate                  │  │
+│  │  • Geo-Map              │  │    deactivate                │  │
+│  │  • Stripe-Übersicht     │  │    check                     │  │
+│  │                         │  │  /wp-json/plm/v1/webhook/    │  │
+│  │                         │  │    stripe                    │  │
 │  └─────────────────────────┘  └──────────────────────────────┘  │
 │                                                                  │
 │  ┌─────────────────────────┐  ┌──────────────────────────────┐  │
-│  │   Prisma ORM            │  │   Services                   │  │
-│  │                         │  │                              │  │
-│  │  • License Model        │  │  • LicenseService            │  │
-│  │  • Installation Model   │  │  • StripeService             │  │
-│  │  • Activation Model     │  │  • GeoIpService              │  │
-│  │  • GeoData Model        │  │  • NotificationService       │  │
-│  │  • AuditLog Model       │  │  • AuditService              │  │
-│  │  • StripeEvent Model    │  │  • StatsService              │  │
+│  │   Custom DB Tables      │  │   PHP Classes                │  │
+│  │   (via dbDelta)         │  │                              │  │
+│  │                         │  │  • PLM_License               │  │
+│  │  • plm_licenses         │  │  • PLM_API                   │  │
+│  │  • plm_installations    │  │  • PLM_Stripe                │  │
+│  │  • plm_geo_data         │  │  • PLM_GeoIP                 │  │
+│  │  • plm_audit_logs       │  │  • PLM_Admin                 │  │
+│  │  • plm_stripe_events    │  │  • PLM_Database              │  │
+│  │  • plm_stripe_product_  │  │                              │  │
+│  │    map                  │  │                              │  │
 │  └─────────────────────────┘  └──────────────────────────────┘  │
 │                                                                  │
 ├─────────────────────────────────────────────────────────────────┤
-│              PostgreSQL          MaxMind GeoLite2                 │
-│              (Datenbank)         (Lokale GeoIP DB)                │
+│           MySQL / MariaDB          MaxMind GeoLite2               │
+│              (Datenbank)           (Lokale GeoIP DB)              │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -511,9 +514,9 @@ Die bestehenden Plugins/Module (WordPress, Drupal, React) müssen angepasst werd
 | NFA-SEC-02 | Rate Limiting auf allen öffentlichen Endpunkten |
 | NFA-SEC-03 | Stripe Webhook Signature Verification |
 | NFA-SEC-04 | CORS: Nur erlaubte Origins (Dashboard-Domain) für Admin-Endpunkte, API-Endpunkte für Plugins offen |
-| NFA-SEC-05 | SQL Injection Prevention via Prisma ORM (Parameterized Queries) |
+| NFA-SEC-05 | SQL Injection Prevention via WordPress `$wpdb->prepare()` (Parameterized Queries) |
 | NFA-SEC-06 | Admin-Passwort: bcrypt mit Cost Factor ≥ 12 |
-| NFA-SEC-07 | License Keys: kryptographisch sichere Generierung (crypto.randomBytes) |
+| NFA-SEC-07 | License Keys: kryptographisch sichere Generierung (`random_bytes()` PHP) |
 | NFA-SEC-08 | Keine Speicherung sensibler Stripe-Daten (nur Referenz-IDs) |
 | NFA-SEC-09 | Audit-Log für alle schreibenden Operationen |
 
@@ -541,7 +544,7 @@ Die bestehenden Plugins/Module (WordPress, Drupal, React) müssen angepasst werd
 
 | ID | Anforderung |
 |----|-------------|
-| NFA-MAINT-01 | TypeScript-Codebase für Typensicherheit |
+| NFA-MAINT-01 | PHP 8.0+ Codebase mit strikter Typisierung (Typed Properties, Return Types) |
 | NFA-MAINT-02 | Automatisierte Tests (Unit + Integration) mit ≥ 80% Coverage für API-Endpunkte |
 | NFA-MAINT-03 | CI/CD Pipeline für automatisches Deployment |
 | NFA-MAINT-04 | Structured Logging (JSON) für Fehleranalyse |
@@ -963,45 +966,78 @@ Diese Endpunkte sind nur für den authentifizierten Admin zugänglich (JWT Cooki
 
 | Komponente | Technologie | Begründung |
 |------------|-------------|------------|
-| **Framework** | Next.js 15 (App Router) | Full-Stack TypeScript, SSR, API Routes |
-| **Runtime** | Node.js 20 LTS | Stabil, langfristig unterstützt |
-| **Sprache** | TypeScript 5+ | Typensicherheit, bestehendes React-Ökosystem |
-| **ORM** | Prisma 6 | Type-Safe Queries, Migrations, Schema-First |
-| **Datenbank** | PostgreSQL 16 | JSONB-Support, bewährt, performant |
-| **UI Framework** | React 19 + Tailwind CSS 4 | Schnelle Entwicklung, modernes Design |
-| **UI-Komponenten** | shadcn/ui | Zugänglich, customizable, headless |
-| **Charts** | Recharts | React-native Charts, einfache Integration |
-| **Karten** | react-simple-maps oder Leaflet | Geo-Visualisierung |
-| **Auth** | next-auth (Auth.js) oder Custom JWT | Admin-Authentifizierung |
-| **E-Mail** | Resend oder Nodemailer + SMTP | Transaktions-E-Mails |
-| **Rate Limiting** | upstash/ratelimit oder custom (Redis) | API-Schutz |
-| **Geo-IP** | maxmind/geoip2-node + GeoLite2 | Lokale IP-Geolokalisierung |
-| **Payments** | Stripe Node.js SDK | Webhook-Verarbeitung, Subscription-Management |
-| **Validierung** | Zod | Input-Validierung, Schema-Definition |
-| **Testing** | Vitest + Playwright | Unit-Tests + E2E-Tests |
+| **CMS** | WordPress 6.x | Bewährtes CMS, gleicher Stack wie Shop (pdfviewer.drossmedia.de) |
+| **Sprache** | PHP 8.0+ | Standard WordPress-Entwicklung |
+| **Datenbank** | MySQL 8.0 / MariaDB 10.6+ | WordPress-Standard, einfaches Hosting |
+| **Plugin** | Custom WordPress Plugin (`pdf-license-manager`) | Eigene Admin-Seiten, REST API, DB-Tabellen |
+| **Admin UI** | WordPress Admin + Custom CSS | Native WP-Admin-Integration, keine zusätzliche UI-Bibliothek |
+| **Auth** | WordPress-eigenes Login-System | `manage_options` Capability für Admin-Zugriff |
+| **E-Mail** | `wp_mail()` + SMTP Plugin | WordPress-Standard, SMTP über Plugin konfigurierbar |
+| **Rate Limiting** | WordPress Transients API | Einfach, keine externen Abhängigkeiten |
+| **Geo-IP** | MaxMind GeoLite2 + `maxmind-db/reader` (PHP) | Lokale IP-Geolokalisierung, kein externer API-Call |
+| **Payments** | Stripe direkt (Webhook-Signatur-Verifikation in PHP) | Kein WooCommerce nötig, schlanke Stripe-Integration |
+| **Validierung** | WordPress Sanitization API (`sanitize_text_field`, `absint`, etc.) | Bewährte WordPress-Sicherheitsfunktionen |
 
 ### 7.2 Infrastruktur
 
 | Komponente | Empfehlung | Begründung |
 |------------|------------|------------|
-| **Hosting** | Hetzner Cloud (Deutschland) oder Vercel | DSGVO-konform, EU-Standort |
-| **Datenbank** | Managed PostgreSQL (Hetzner / Supabase EU) | Backups, Wartung inklusive |
-| **Domain** | `dashboard.pdfviewer.drossmedia.de` | Subdomain des bestehenden Shops |
+| **Hosting** | Hetzner Cloud oder Managed WordPress (Deutschland) | DSGVO-konform, EU-Standort |
+| **Datenbank** | MySQL 8.0 (im WordPress-Hosting enthalten) | Standard, keine separate DB nötig |
+| **Domain** | `dashboard.pdfviewer.drossmedia.de` | Separate WordPress-Installation als Subdomain |
 | **SSL** | Let's Encrypt (automatisch) | Kostenlos, automatische Erneuerung |
-| **CI/CD** | GitHub Actions | Automatisiertes Testing & Deployment |
 | **Monitoring** | Uptime-Kuma (Self-Hosted) oder Betterstack | Health-Check Monitoring |
 | **Backups** | Automatisch täglich, 30 Tage Retention | Datensicherheit |
 
-### 7.3 MaxMind GeoLite2 Setup
+### 7.3 WordPress Plugin-Architektur
+
+```
+license-dashboard/                    (WordPress Plugin: pdf-license-manager)
+├── pdf-license-manager.php           # Plugin-Hauptdatei, Bootstrap
+├── includes/
+│   ├── class-plm-database.php        # DB-Tabellen (dbDelta), Schema
+│   ├── class-plm-license.php         # Key-Generator, Validierung, Hilfsfunktionen
+│   ├── class-plm-api.php             # REST API (validate, activate, deactivate, check)
+│   ├── class-plm-geoip.php           # MaxMind GeoLite2 Integration
+│   ├── class-plm-stripe.php          # Stripe Webhook (ohne SDK, native PHP)
+│   └── class-plm-admin.php           # Admin-Seiten, Form-Handler
+├── admin/
+│   ├── views/                        # PHP-Templates für Admin-Seiten
+│   │   ├── dashboard.php             # KPI-Übersicht
+│   │   ├── licenses.php              # Lizenz-Liste + Erstellen
+│   │   ├── license-detail.php        # Einzelansicht + Aktionen
+│   │   ├── installations.php         # Installations-Tabelle
+│   │   ├── stats.php                 # Statistiken + Geo-Verteilung
+│   │   ├── audit-log.php             # Audit-Log
+│   │   └── settings.php              # Stripe-Mapping, System-Info
+│   ├── css/admin.css                 # Admin-Styles
+│   └── js/admin.js                   # Admin-Scripts
+└── assets/                           # Statische Assets
+```
+
+### 7.4 MaxMind GeoLite2 Setup
 
 | Aspekt | Details |
 |--------|---------|
 | **Datenbank** | GeoLite2-City (kostenlos, Registrierung erforderlich) |
 | **Größe** | ~70 MB (unkomprimiert) |
 | **Update** | Wöchentlich/Monatlich via `geoipupdate` CLI |
-| **Integration** | `@maxmind/geoip2-node` npm Package |
+| **Integration** | `maxmind-db/reader` PHP Package (via Composer) oder PHP GeoIP Extension |
+| **Speicherort** | `wp-content/uploads/plm/GeoLite2-City.mmdb` |
 | **Genauigkeit** | Land: 99,8%, Stadt: ~75% (reicht für Dashboard) |
 | **Lizenz** | Creative Commons Attribution-ShareAlike 4.0 |
+
+### 7.5 Stripe-Integration (ohne WooCommerce)
+
+Die Stripe-Integration erfolgt **direkt** ohne WooCommerce:
+
+| Aspekt | Details |
+|--------|---------|
+| **Checkout** | Stripe Checkout Session (hosted) auf dem Shop (pdfviewer.drossmedia.de) |
+| **Webhooks** | Empfang unter `dashboard.pdfviewer.drossmedia.de/wp-json/plm/v1/webhook/stripe` |
+| **Signatur** | Native PHP HMAC-SHA256 Verifikation (kein Stripe SDK nötig) |
+| **Konfiguration** | `PLM_STRIPE_WEBHOOK_SECRET` in `wp-config.php` |
+| **Produkt-Mapping** | Konfigurierbar im Dashboard unter Settings |
 
 ---
 
@@ -1011,7 +1047,7 @@ Diese Endpunkte sind nur für den authentifizierten Admin zugänglich (JWT Cooki
 
 | Aufgabe | Beschreibung | Priorität |
 |---------|-------------|-----------|
-| Projekt-Setup | Next.js Projekt, TypeScript, Prisma, PostgreSQL | MUSS |
+| Projekt-Setup | WordPress-Installation, Custom Plugin, MySQL-Datenbank | MUSS |
 | Datenbank-Schema | Alle Tabellen gem. Datenmodell (Kap. 5) anlegen | MUSS |
 | Admin-Auth | Login-System für Dashboard | MUSS |
 | License CRUD | Lizenzen erstellen, bearbeiten, löschen (Dashboard) | MUSS |
@@ -1026,14 +1062,14 @@ Diese Endpunkte sind nur für den authentifizierten Admin zugänglich (JWT Cooki
 | Deactivate-Endpunkt | `POST /license/deactivate` | MUSS |
 | Check-Endpunkt | `POST /license/check` (Heartbeat) | MUSS |
 | Rate Limiting | Request-Limitierung für alle öffentlichen Endpunkte | MUSS |
-| Input-Validierung | Zod-Schemas für alle Requests | MUSS |
+| Input-Validierung | WordPress Sanitization API für alle Requests | MUSS |
 | Health-Check | `GET /health` Endpunkt | MUSS |
 
 ### Phase 3: Geo-IP & Installationen (Wochen 5–6)
 
 | Aufgabe | Beschreibung | Priorität |
 |---------|-------------|-----------|
-| MaxMind Integration | GeoLite2-Datenbank einbinden, `geoip2-node` | MUSS |
+| MaxMind Integration | GeoLite2-Datenbank einbinden, `maxmind-db/reader` (PHP) | MUSS |
 | Geo-Daten bei Aktivierung | IP → Geo bei `/license/activate` | MUSS |
 | Installations-Dashboard | Listenansicht aller Installationen | MUSS |
 | Geo-Karte | Weltkarte mit Installationen pro Land | MUSS |
@@ -1162,7 +1198,7 @@ Unlimited:   PDF$UNLIMITED#XXXX@XXXX!XXXX
 Development: PDF$DEV#XXXX-XXXX@XXXX!XXXX
 ```
 
-Wobei `X` = alphanumerisches Zeichen (A-Z, 0-9), generiert via `crypto.randomBytes()`.
+Wobei `X` = alphanumerisches Zeichen (A-Z, 0-9), generiert via `random_bytes()` (PHP).
 
 ### Regex-Validierung
 
