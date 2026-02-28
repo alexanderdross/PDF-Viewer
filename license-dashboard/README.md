@@ -5,7 +5,7 @@
 | Eigenschaft | Wert |
 |-------------|------|
 | **Plugin-Slug** | `pdf-license-manager` |
-| **Version** | 1.0.0 |
+| **Version** | 1.0.1 |
 | **Plattform** | WordPress 6.0+ / PHP 8.0+ / MySQL 8.0+ |
 | **Domain** | `dashboard.pdfviewer.drossmedia.de` |
 | **Autor** | Dross:Media |
@@ -152,7 +152,7 @@ define( 'PLM_STRIPE_WEBHOOK_SECRET', 'whsec_...' );
 
 | Konstante | Standardwert | Beschreibung |
 |-----------|-------------|-------------|
-| `PLM_VERSION` | `'1.0.0'` | Plugin-Version |
+| `PLM_VERSION` | `'1.0.1'` | Plugin-Version |
 | `PLM_GRACE_PERIOD_DAYS` | `14` | Tage nach Ablauf, in denen Features aktiv bleiben |
 | `PLM_LATEST_PLUGIN_VERSION` | `'1.3.0'` | Aktuelle Version der PDF-Plugins (f&uuml;r Update-Checks) |
 
@@ -272,7 +272,7 @@ Health-Check f&uuml;r Monitoring.
 ```json
 {
   "status": "ok",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "database": "connected",
   "timestamp": "2026-02-28T12:00:00+00:00"
 }
