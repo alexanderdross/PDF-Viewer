@@ -110,7 +110,7 @@ Das System besteht aus vier Hauptkomponenten:
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │              WordPress + Custom Plugin (pdf-license-manager)      │
-│               dashboard.pdfviewer.drossmedia.de                  │
+│               pdfviewer.drossmedia.de                  │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
 │  ┌─────────────────────────┐  ┌──────────────────────────────┐  │
@@ -149,8 +149,8 @@ Das System besteht aus vier Hauptkomponenten:
 | Komponente | Domain | Beschreibung |
 |------------|--------|-------------|
 | Online-Shop | `pdfviewer.drossmedia.de` | WordPress + Stripe (Bestand) |
-| License Dashboard | `dashboard.pdfviewer.drossmedia.de` | Admin-Dashboard (Neu) |
-| License API | `dashboard.pdfviewer.drossmedia.de/api/v1/` | Öffentliche REST API (Neu) |
+| License Dashboard | `pdfviewer.drossmedia.de` | Admin-Dashboard (Neu) |
+| License API | `pdfviewer.drossmedia.de/api/v1/` | Öffentliche REST API (Neu) |
 
 ### 2.3 Authentifizierung
 
@@ -231,7 +231,7 @@ Die License API ist der zentrale Anlaufpunkt für alle Plugin-/Modul-Installatio
 
 ### 3.2 Dashboard (Admin-Bereich)
 
-Das Dashboard wird unter `dashboard.pdfviewer.drossmedia.de` gehostet und ist ausschließlich für den Administrator zugänglich.
+Das Dashboard wird unter `pdfviewer.drossmedia.de` gehostet und ist ausschließlich für den Administrator zugänglich.
 
 #### FA-DASH-01: Login & Authentifizierung
 
@@ -470,7 +470,7 @@ Die bestehenden Plugins/Module (WordPress, Drupal, React) müssen angepasst werd
 | **Beschreibung** | Transparenz darüber, welche Daten übertragen werden |
 | **Daten** | License Key, Site URL (Domain), Plattform (WP/Drupal/React), Plugin-Version, PHP-Version (WP/Drupal), WordPress/Drupal-Version, Node.js-Version (React), Server-IP (automatisch via Request) |
 | **Nicht übertragen** | Benutzer-Daten, Inhalte, PDF-Dateien, persönliche Informationen, Admin-E-Mail |
-| **Hinweis im Plugin** | Unter Lizenz-Seite: "This plugin communicates with dashboard.pdfviewer.drossmedia.de for license validation. [Learn more]" |
+| **Hinweis im Plugin** | Unter Lizenz-Seite: "This plugin communicates with pdfviewer.drossmedia.de for license validation. [Learn more]" |
 | **Priorität** | MUSS |
 
 #### FA-PLUGIN-06: Update-Check
@@ -729,7 +729,7 @@ Die bestehenden Plugins/Module (WordPress, Drupal, React) müssen angepasst werd
 
 ### 6.1 Öffentliche Endpunkte (Plugin-Kommunikation)
 
-Alle öffentlichen Endpunkte sind unter `https://dashboard.pdfviewer.drossmedia.de/api/v1/` erreichbar.
+Alle öffentlichen Endpunkte sind unter `https://pdfviewer.drossmedia.de/api/v1/` erreichbar.
 
 ---
 
@@ -984,7 +984,7 @@ Diese Endpunkte sind nur für den authentifizierten Admin zugänglich (JWT Cooki
 |------------|------------|------------|
 | **Hosting** | Hetzner Cloud oder Managed WordPress (Deutschland) | DSGVO-konform, EU-Standort |
 | **Datenbank** | MySQL 8.0 (im WordPress-Hosting enthalten) | Standard, keine separate DB nötig |
-| **Domain** | `dashboard.pdfviewer.drossmedia.de` | Separate WordPress-Installation als Subdomain |
+| **Domain** | `pdfviewer.drossmedia.de` | Separate WordPress-Installation als Subdomain |
 | **SSL** | Let's Encrypt (automatisch) | Kostenlos, automatische Erneuerung |
 | **Monitoring** | Uptime-Kuma (Self-Hosted) oder Betterstack | Health-Check Monitoring |
 | **Backups** | Automatisch täglich, 30 Tage Retention | Datensicherheit |
@@ -1034,7 +1034,7 @@ Die Stripe-Integration erfolgt **direkt** ohne WooCommerce:
 | Aspekt | Details |
 |--------|---------|
 | **Checkout** | Stripe Checkout Session (hosted) auf dem Shop (pdfviewer.drossmedia.de) |
-| **Webhooks** | Empfang unter `dashboard.pdfviewer.drossmedia.de/wp-json/plm/v1/webhook/stripe` |
+| **Webhooks** | Empfang unter `pdfviewer.drossmedia.de/wp-json/plm/v1/webhook/stripe` |
 | **Signatur** | Native PHP HMAC-SHA256 Verifikation (kein Stripe SDK nötig) |
 | **Konfiguration** | `PLM_STRIPE_WEBHOOK_SECRET` in `wp-config.php` |
 | **Produkt-Mapping** | Konfigurierbar im Dashboard unter Settings |

@@ -7,7 +7,7 @@
 | **Plugin-Slug** | `pdf-license-manager` |
 | **Version** | 1.0.1 |
 | **Plattform** | WordPress 6.0+ / PHP 8.0+ / MySQL 8.0+ |
-| **Domain** | `dashboard.pdfviewer.drossmedia.de` |
+| **Domain** | `pdfviewer.drossmedia.de` |
 | **Autor** | Dross:Media |
 | **Lizenz** | GPL v2 or later |
 
@@ -33,7 +33,7 @@
 
 ## &Uuml;bersicht
 
-Das PDF License Manager Plugin ist ein eigenst&auml;ndiges WordPress-Plugin, das auf einer separaten WordPress-Installation (`dashboard.pdfviewer.drossmedia.de`) betrieben wird. Es stellt eine REST API bereit, die von den PDF Embed & SEO Optimize Plugins/Modulen (WordPress, Drupal, React/Next.js) angesprochen wird, um Lizenzschl&uuml;ssel zu validieren, zu aktivieren und zu &uuml;berpr&uuml;fen.
+Das PDF License Manager Plugin ist ein eigenst&auml;ndiges WordPress-Plugin, das auf einer separaten WordPress-Installation (`pdfviewer.drossmedia.de`) betrieben wird. Es stellt eine REST API bereit, die von den PDF Embed & SEO Optimize Plugins/Modulen (WordPress, Drupal, React/Next.js) angesprochen wird, um Lizenzschl&uuml;ssel zu validieren, zu aktivieren und zu &uuml;berpr&uuml;fen.
 
 ### Kernfunktionen
 
@@ -58,7 +58,7 @@ Das PDF License Manager Plugin ist ein eigenst&auml;ndiges WordPress-Plugin, das
                        ▼
 ┌──────────────────────────────────────────────────────────────┐
 │  WordPress + pdf-license-manager Plugin                      │
-│  dashboard.pdfviewer.drossmedia.de                           │
+│  pdfviewer.drossmedia.de                           │
 ├──────────────────────────────────────────────────────────────┤
 │                                                              │
 │  REST API (WP REST)         Admin UI (WP-Admin)              │
@@ -87,8 +87,8 @@ Das PDF License Manager Plugin ist ein eigenst&auml;ndiges WordPress-Plugin, das
 | Komponente | Domain | Beschreibung |
 |------------|--------|-------------|
 | Online-Shop | `pdfviewer.drossmedia.de` | WordPress + Stripe (bestehend) |
-| License Dashboard | `dashboard.pdfviewer.drossmedia.de` | Separate WordPress-Installation |
-| API Base URL | `dashboard.pdfviewer.drossmedia.de/wp-json/plm/v1/` | &Ouml;ffentliche REST API |
+| License Dashboard | `pdfviewer.drossmedia.de` | Separate WordPress-Installation |
+| API Base URL | `pdfviewer.drossmedia.de/wp-json/plm/v1/` | &Ouml;ffentliche REST API |
 
 ---
 
@@ -104,7 +104,7 @@ Das PDF License Manager Plugin ist ein eigenst&auml;ndiges WordPress-Plugin, das
 
 ### Schritt 1: WordPress installieren
 
-Frische WordPress-Installation auf `dashboard.pdfviewer.drossmedia.de` aufsetzen.
+Frische WordPress-Installation auf `pdfviewer.drossmedia.de` aufsetzen.
 
 ### Schritt 2: Plugin hochladen
 
@@ -260,7 +260,7 @@ Das Plugin erstellt 6 Custom Tables mit dem WordPress-Prefix (`wp_plm_*`):
 
 ## REST API Endpunkte
 
-**Base URL:** `https://dashboard.pdfviewer.drossmedia.de/wp-json/plm/v1/`
+**Base URL:** `https://pdfviewer.drossmedia.de/wp-json/plm/v1/`
 
 Alle &ouml;ffentlichen Endpunkte sind ohne Authentifizierung zug&auml;nglich (f&uuml;r Plugin-Kommunikation).
 
