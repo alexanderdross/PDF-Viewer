@@ -63,3 +63,12 @@ services:
       - '@datetime.time'
       - '@current_user'
       - '@logger.channel.pdf_embed_seo'
+
+  # License validator service (premium).
+  pdf_embed_seo_premium.license_validator:
+    class: Drupal\pdf_embed_seo_premium\Service\LicenseValidator
+    arguments:
+      - '@config.factory'
+      - '@state'
+      - '@http_client'
+      - '@logger.channel.pdf_embed_seo'

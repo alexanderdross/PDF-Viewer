@@ -195,8 +195,10 @@ class PLM_Stripe {
 			'type'               => $mapping->license_type,
 		) );
 
-		// TODO: Send license key email to customer_email via wp_mail().
-		error_log( sprintf( '[PLM Stripe] License created: %s for %s', $license_key, $customer_email ) );
+		// Send license key email to customer.
+		self::send_license_email( $customer_email, $license_key, $mapping, $expires_at );
+
+		error_log( sprintf( '[PLM Stripe] License created and emailed: %s for %s', PLM_License::mask_key( $license_key ), $customer_email ) );
 	}
 
 	/**
@@ -314,6 +316,74 @@ class PLM_Stripe {
 			'stripe_subscription_id' => $subscription_id,
 			'amount'                 => $invoice->amount_due ?? 0,
 		) );
+	}
+
+	/**
+	 * Send license key email to customer after purchase.
+	 *
+	 * @param string      $email       Customer email address.
+	 * @param string      $license_key The generated license key.
+	 * @param object      $mapping     Product mapping object.
+	 * @param string|null $expires_at  Expiration date or null for lifetime.
+	 */
+	private static function send_license_email( string $email, string $license_key, object $mapping, ?string $expires_at ): void {
+		if ( empty( $email ) ) {
+			error_log( '[PLM Stripe] Cannot send license email: no customer email.' );
+			return;
+		}
+
+		$type_label = ucfirst( str_replace( '_', ' ', $mapping->license_type ) );
+		$plan_label = ucfirst( $mapping->plan );
+		$site_limit = 0 === (int) $mapping->site_limit ? 'Unlimited' : (string) $mapping->site_limit;
+		$expiry_display = $expires_at ? date( 'F j, Y', strtotime( $expires_at ) ) : 'Lifetime';
+
+		$subject = sprintf(
+			/* translators: %s: license type (e.g. "Premium", "Pro Plus") */
+			__( 'Your %s License Key - PDF Embed & SEO Optimize', 'pdf-license-manager' ),
+			$type_label
+		);
+
+		$message = sprintf(
+			"Thank you for purchasing PDF Embed & SEO Optimize %s!\n\n" .
+			"Here is your license key:\n\n" .
+			"    %s\n\n" .
+			"License Details:\n" .
+			"  Plan: %s\n" .
+			"  Type: %s\n" .
+			"  Sites: %s\n" .
+			"  Valid until: %s\n\n" .
+			"Activation Instructions:\n\n" .
+			"  WordPress:\n" .
+			"    1. Go to PDF Documents > License (or Pro+ License)\n" .
+			"    2. Paste your license key and click Save\n\n" .
+			"  Drupal:\n" .
+			"    1. Go to Configuration > PDF Embed SEO > Premium Settings\n" .
+			"    2. Paste your license key and click Activate License\n\n" .
+			"  React / Next.js:\n" .
+			"    1. Add PDF_LICENSE_KEY to your .env file\n" .
+			"    2. Use the useLicense() hook or server-side validation\n\n" .
+			"Documentation: https://pdfviewer.drossmedia.de/documentation/\n" .
+			"Support: https://pdfviewer.drossmedia.de/support/\n\n" .
+			"Thank you for your purchase!\n" .
+			"- The Dross:Media Team\n",
+			$type_label,
+			$license_key,
+			$plan_label,
+			$type_label,
+			$site_limit,
+			$expiry_display
+		);
+
+		$headers = array(
+			'Content-Type: text/plain; charset=UTF-8',
+			'From: PDF Embed & SEO Optimize <noreply@pdfviewer.drossmedia.de>',
+		);
+
+		$sent = wp_mail( $email, $subject, $message, $headers );
+
+		if ( ! $sent ) {
+			error_log( sprintf( '[PLM Stripe] Failed to send license email to %s', $email ) );
+		}
 	}
 
 	/**

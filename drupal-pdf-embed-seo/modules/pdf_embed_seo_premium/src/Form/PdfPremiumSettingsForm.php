@@ -234,8 +234,8 @@ class PdfPremiumSettingsForm extends ConfigFormBase {
   /**
    * Activate license handler.
    *
-   * Validates the license key against supported patterns.
-   * Supports both WordPress-style (PDF$) and Drupal-style (PDF-) license keys.
+   * Validates the license key via the remote License Dashboard API
+   * and activates this site. Falls back to local validation on network failure.
    */
   public function activateLicense(array &$form, FormStateInterface $form_state) {
     $license_key = $form_state->getValue('license_key');
@@ -255,7 +255,33 @@ class PdfPremiumSettingsForm extends ConfigFormBase {
       return;
     }
 
-    // Test/Development license keys for unlimited validity (WordPress-compatible).
+    // Use the LicenseValidator service for remote activation.
+    if (\Drupal::hasService('pdf_embed_seo_premium.license_validator')) {
+      /** @var \Drupal\pdf_embed_seo_premium\Service\LicenseValidator $validator */
+      $validator = \Drupal::service('pdf_embed_seo_premium.license_validator');
+      $result = $validator->activate($license_key);
+
+      if ($result['success']) {
+        $this->messenger()->addStatus($this->t('License activated successfully! Premium features are now enabled.'));
+      }
+      else {
+        $this->messenger()->addError($this->t('Invalid license key. Please check your license key and try again.'));
+      }
+      return;
+    }
+
+    // Fallback: local validation if service is not available.
+    $this->activateLicenseLocally($license_key);
+  }
+
+  /**
+   * Local-only license activation (fallback when service unavailable).
+   *
+   * @param string $license_key
+   *   The license key.
+   */
+  protected function activateLicenseLocally(string $license_key): void {
+    // Test/Development license keys for unlimited validity.
     $test_key_patterns = [
       '/^PDF\$UNLIMITED#[A-Z0-9]{4}@[A-Z0-9]{4}![A-Z0-9]{4}$/i',
       '/^PDF\$DEV#[A-Z0-9]{4}-[A-Z0-9]{4}@[A-Z0-9]{4}![A-Z0-9]{4}$/i',
@@ -273,21 +299,8 @@ class PdfPremiumSettingsForm extends ConfigFormBase {
       }
     }
 
-    // Standard WordPress-style license key validation.
+    // Standard license key validation.
     if (preg_match('/^PDF\$PRO#[A-Z0-9]{4}-[A-Z0-9]{4}@[A-Z0-9]{4}-[A-Z0-9]{4}![A-Z0-9]{4}$/i', $license_key)) {
-      $expires = date('Y-m-d H:i:s', strtotime('+1 year'));
-      $this->config('pdf_embed_seo_premium.settings')
-        ->set('license_key', $license_key)
-        ->set('license_status', 'valid')
-        ->set('license_expires', $expires)
-        ->save();
-      $this->messenger()->addStatus($this->t('License activated successfully! Premium features are now enabled.'));
-      return;
-    }
-
-    // Drupal-style license key validation (backwards compatible).
-    // Accepts keys starting with 'PDF-' and 32+ characters.
-    if (strlen($license_key) >= 32 && strpos($license_key, 'PDF-') === 0) {
       $expires = date('Y-m-d H:i:s', strtotime('+1 year'));
       $this->config('pdf_embed_seo_premium.settings')
         ->set('license_key', $license_key)
@@ -308,13 +321,23 @@ class PdfPremiumSettingsForm extends ConfigFormBase {
 
   /**
    * Deactivate license handler.
+   *
+   * Deactivates the license both remotely and locally.
    */
   public function deactivateLicense(array &$form, FormStateInterface $form_state) {
-    $this->config('pdf_embed_seo_premium.settings')
-      ->set('license_key', '')
-      ->set('license_status', 'inactive')
-      ->set('license_expires', NULL)
-      ->save();
+    // Use the LicenseValidator service for remote deactivation.
+    if (\Drupal::hasService('pdf_embed_seo_premium.license_validator')) {
+      /** @var \Drupal\pdf_embed_seo_premium\Service\LicenseValidator $validator */
+      $validator = \Drupal::service('pdf_embed_seo_premium.license_validator');
+      $validator->deactivate();
+    }
+    else {
+      $this->config('pdf_embed_seo_premium.settings')
+        ->set('license_key', '')
+        ->set('license_status', 'inactive')
+        ->set('license_expires', NULL)
+        ->save();
+    }
 
     $this->messenger()->addStatus($this->t('License deactivated. Premium features have been disabled.'));
   }

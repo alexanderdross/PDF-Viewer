@@ -174,6 +174,13 @@ final class PDF_Embed_SEO_Premium {
 	}
 
 	/**
+	 * License API base URL for remote validation.
+	 *
+	 * @var string
+	 */
+	const LICENSE_API_URL = 'https://pdfviewer.drossmedia.de/wp-json/plm/v1';
+
+	/**
 	 * Initialize hooks.
 	 *
 	 * @return void
@@ -185,6 +192,18 @@ final class PDF_Embed_SEO_Premium {
 
 		// Archive redirect (premium feature).
 		add_action( 'template_redirect', array( $this, 'maybe_redirect_archive' ) );
+
+		// License heartbeat cron.
+		add_action( 'pdf_embed_seo_license_check', array( $this, 'heartbeat_check' ) );
+		if ( ! wp_next_scheduled( 'pdf_embed_seo_license_check' ) ) {
+			wp_schedule_event( time(), 'daily', 'pdf_embed_seo_license_check' );
+		}
+
+		// Deactivate license when plugin is deactivated.
+		$plugin_file = defined( 'PDF_EMBED_SEO_PLUGIN_BASENAME' ) ? PDF_EMBED_SEO_PLUGIN_BASENAME : '';
+		if ( $plugin_file ) {
+			register_deactivation_hook( WP_PLUGIN_DIR . '/' . $plugin_file, array( __CLASS__, 'deactivate_license_on_plugin_deactivate' ) );
+		}
 
 		// Always initialize admin for license page (regardless of license status).
 		if ( is_admin() ) {
@@ -244,15 +263,24 @@ final class PDF_Embed_SEO_Premium {
 	}
 
 	/**
-	 * Process license key validation.
+	 * Process license key validation via remote API with local fallback.
 	 *
 	 * @param string $license_key The license key to validate.
 	 * @return void
 	 */
 	private function validate_license( $license_key ) {
+		$old_key = get_option( 'pdf_embed_seo_premium_license_key', '' );
+
 		if ( empty( $license_key ) ) {
+			// If there was a previous key, deactivate it remotely.
+			if ( ! empty( $old_key ) ) {
+				$this->deactivate_remote( $old_key );
+			}
 			update_option( 'pdf_embed_seo_premium_license_status', 'inactive' );
 			delete_option( 'pdf_embed_seo_premium_license_expires' );
+			delete_option( 'pdf_embed_seo_premium_license_type' );
+			delete_option( 'pdf_embed_seo_premium_license_plan' );
+			delete_option( 'pdf_embed_seo_premium_last_check' );
 			return;
 		}
 
@@ -263,6 +291,55 @@ final class PDF_Embed_SEO_Premium {
 			return;
 		}
 
+		// Attempt remote validation against License Dashboard API.
+		$response = wp_remote_post( self::LICENSE_API_URL . '/license/validate', array(
+			'timeout' => 15,
+			'body'    => array(
+				'license_key' => $license_key,
+				'platform'    => 'wordpress',
+			),
+		) );
+
+		if ( ! is_wp_error( $response ) && 200 === wp_remote_retrieve_response_code( $response ) ) {
+			$data = json_decode( wp_remote_retrieve_body( $response ), true );
+
+			if ( ! empty( $data['valid'] ) ) {
+				update_option( 'pdf_embed_seo_premium_license_status', 'valid' );
+				if ( ! empty( $data['expires_at'] ) ) {
+					update_option( 'pdf_embed_seo_premium_license_expires', gmdate( 'Y-m-d', strtotime( $data['expires_at'] ) ) );
+				} else {
+					delete_option( 'pdf_embed_seo_premium_license_expires' );
+				}
+				update_option( 'pdf_embed_seo_premium_license_type', $data['type'] ?? 'premium' );
+				update_option( 'pdf_embed_seo_premium_license_plan', $data['plan'] ?? 'starter' );
+				update_option( 'pdf_embed_seo_premium_last_check', time() );
+
+				// Activate this site with the license.
+				$this->activate_remote( $license_key );
+				return;
+			}
+
+			// API responded but key is not valid.
+			update_option( 'pdf_embed_seo_premium_license_status', $data['status'] ?? 'invalid' );
+			if ( ! empty( $data['expires_at'] ) ) {
+				update_option( 'pdf_embed_seo_premium_license_expires', gmdate( 'Y-m-d', strtotime( $data['expires_at'] ) ) );
+			} else {
+				delete_option( 'pdf_embed_seo_premium_license_expires' );
+			}
+			return;
+		}
+
+		// Remote validation failed (network error) — fall back to local regex.
+		$this->validate_license_locally( $license_key );
+	}
+
+	/**
+	 * Local-only license validation (fallback when API is unreachable).
+	 *
+	 * @param string $license_key The license key to validate.
+	 * @return void
+	 */
+	private function validate_license_locally( $license_key ) {
 		// Test/Development license keys for unlimited validity.
 		$test_key_patterns = array(
 			'/^PDF\$UNLIMITED#[A-Z0-9]{4}@[A-Z0-9]{4}![A-Z0-9]{4}$/i',
@@ -287,6 +364,122 @@ final class PDF_Embed_SEO_Premium {
 		// Invalid key format.
 		update_option( 'pdf_embed_seo_premium_license_status', 'invalid' );
 		delete_option( 'pdf_embed_seo_premium_license_expires' );
+	}
+
+	/**
+	 * Activate this site with the License Dashboard.
+	 *
+	 * @param string $license_key The license key.
+	 * @return void
+	 */
+	private function activate_remote( $license_key ) {
+		wp_remote_post( self::LICENSE_API_URL . '/license/activate', array(
+			'timeout' => 15,
+			'body'    => array(
+				'license_key'    => $license_key,
+				'site_url'       => home_url(),
+				'platform'       => 'wordpress',
+				'plugin_version' => defined( 'PDF_EMBED_SEO_VERSION' ) ? PDF_EMBED_SEO_VERSION : self::VERSION,
+				'php_version'    => phpversion(),
+				'cms_version'    => get_bloginfo( 'version' ),
+			),
+		) );
+	}
+
+	/**
+	 * Deactivate this site from the License Dashboard.
+	 *
+	 * @param string $license_key The license key.
+	 * @return void
+	 */
+	private function deactivate_remote( $license_key ) {
+		wp_remote_post( self::LICENSE_API_URL . '/license/deactivate', array(
+			'timeout' => 10,
+			'body'    => array(
+				'license_key' => $license_key,
+				'site_url'    => home_url(),
+			),
+		) );
+	}
+
+	/**
+	 * Daily heartbeat check against the License Dashboard API.
+	 *
+	 * Verifies the license is still valid and updates local status.
+	 * On network failure, the current status is preserved (fail open).
+	 *
+	 * @return void
+	 */
+	public function heartbeat_check() {
+		$license_key = get_option( 'pdf_embed_seo_premium_license_key', '' );
+		if ( empty( $license_key ) ) {
+			return;
+		}
+
+		$response = wp_remote_post( self::LICENSE_API_URL . '/license/check', array(
+			'timeout' => 15,
+			'body'    => array(
+				'license_key'    => $license_key,
+				'site_url'       => home_url(),
+				'plugin_version' => defined( 'PDF_EMBED_SEO_VERSION' ) ? PDF_EMBED_SEO_VERSION : self::VERSION,
+				'platform'       => 'wordpress',
+			),
+		) );
+
+		if ( is_wp_error( $response ) ) {
+			return; // Fail gracefully, retry next day.
+		}
+
+		$code = wp_remote_retrieve_response_code( $response );
+		if ( 200 !== $code ) {
+			return; // API error, retry next day.
+		}
+
+		$data = json_decode( wp_remote_retrieve_body( $response ), true );
+		if ( ! is_array( $data ) ) {
+			return;
+		}
+
+		update_option( 'pdf_embed_seo_premium_last_check', time() );
+
+		if ( isset( $data['valid'] ) ) {
+			$status = $data['valid'] ? 'valid' : ( $data['status'] ?? 'expired' );
+			update_option( 'pdf_embed_seo_premium_license_status', $status );
+
+			if ( ! empty( $data['expires_at'] ) ) {
+				update_option( 'pdf_embed_seo_premium_license_expires', gmdate( 'Y-m-d', strtotime( $data['expires_at'] ) ) );
+			}
+
+			// Track available updates.
+			if ( ! empty( $data['update_available'] ) && ! empty( $data['latest_version'] ) ) {
+				update_option( 'pdf_embed_seo_premium_update_available', $data['latest_version'] );
+			} else {
+				delete_option( 'pdf_embed_seo_premium_update_available' );
+			}
+		}
+	}
+
+	/**
+	 * Deactivate license when the plugin is deactivated.
+	 *
+	 * @return void
+	 */
+	public static function deactivate_license_on_plugin_deactivate() {
+		$license_key = get_option( 'pdf_embed_seo_premium_license_key', '' );
+		if ( empty( $license_key ) ) {
+			return;
+		}
+
+		wp_remote_post( self::LICENSE_API_URL . '/license/deactivate', array(
+			'timeout' => 10,
+			'body'    => array(
+				'license_key' => $license_key,
+				'site_url'    => home_url(),
+			),
+		) );
+
+		// Clear the heartbeat cron.
+		wp_clear_scheduled_hook( 'pdf_embed_seo_license_check' );
 	}
 
 	/**
@@ -351,6 +544,16 @@ final class PDF_Embed_SEO_Premium {
 					/* translators: %s: link to purchase page */
 					esc_html__( 'Don\'t have a license key? %s', 'pdf-embed-seo-optimize' ),
 					'<a href="https://pdfviewer.drossmedia.de" target="_blank">' . esc_html__( 'Purchase a license', 'pdf-embed-seo-optimize' ) . '</a>'
+				);
+				?>
+			</p>
+
+			<p class="description" style="margin-top: 20px; color: #666;">
+				<?php
+				printf(
+					/* translators: %s: link to privacy policy */
+					esc_html__( 'This plugin communicates with pdfviewer.drossmedia.de for license validation. Your site URL, plugin version, and license key are transmitted securely over HTTPS. %s', 'pdf-embed-seo-optimize' ),
+					'<a href="https://pdfviewer.drossmedia.de/privacy/" target="_blank">' . esc_html__( 'Privacy Policy', 'pdf-embed-seo-optimize' ) . '</a>'
 				);
 				?>
 			</p>
