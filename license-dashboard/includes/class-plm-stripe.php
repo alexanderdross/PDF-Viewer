@@ -6,7 +6,7 @@
  *   define( 'PLM_STRIPE_WEBHOOK_SECRET', 'whsec_...' );
  *
  * Stripe SDK is not required — webhook signature verification is done manually.
- * Webhook URL: https://dashboard.pdfviewer.drossmedia.de/wp-json/plm/v1/webhook/stripe
+ * Webhook URL: https://pdfviewer.drossmedia.de/wp-json/plm/v1/webhook/stripe
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
