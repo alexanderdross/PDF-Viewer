@@ -5,8 +5,20 @@
  * Configure in wp-config.php:
  *   define( 'PLM_STRIPE_WEBHOOK_SECRET', 'whsec_...' );
  *
+ * Or use encrypted settings:
+ *   PLM_Encryption::update_option( 'plm_stripe_webhook_secret', 'whsec_...' );
+ *
  * Stripe SDK is not required — webhook signature verification is done manually.
  * Webhook URL: https://pdfviewer.drossmedia.de/wp-json/plm/v1/webhook/stripe
+ *
+ * Events handled:
+ *   checkout.session.completed      — Create new license
+ *   invoice.paid                    — Extend existing license (renewal)
+ *   customer.subscription.deleted   — Log cancellation
+ *   customer.subscription.updated   — Update tier/plan on upgrade/downgrade
+ *   invoice.payment_failed          — Log payment failure
+ *   charge.refunded                 — Revoke license on refund
+ *   charge.dispute.created          — Revoke license on dispute
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -29,6 +41,17 @@ class PLM_Stripe {
 	}
 
 	/**
+	 * Get the Stripe webhook secret (supports wp-config constant or encrypted option).
+	 */
+	private static function get_webhook_secret(): string {
+		if ( defined( 'PLM_STRIPE_WEBHOOK_SECRET' ) && ! empty( PLM_STRIPE_WEBHOOK_SECRET ) ) {
+			return PLM_STRIPE_WEBHOOK_SECRET;
+		}
+
+		return PLM_Encryption::get_option( 'plm_stripe_webhook_secret', '' );
+	}
+
+	/**
 	 * Handle incoming Stripe webhook.
 	 */
 	public static function handle_webhook( WP_REST_Request $request ): WP_REST_Response {
@@ -43,7 +66,7 @@ class PLM_Stripe {
 		}
 
 		// Verify signature.
-		$secret = defined( 'PLM_STRIPE_WEBHOOK_SECRET' ) ? PLM_STRIPE_WEBHOOK_SECRET : '';
+		$secret = self::get_webhook_secret();
 		if ( empty( $secret ) ) {
 			return new WP_REST_Response( array(
 				'error'   => 'not_configured',
@@ -105,8 +128,20 @@ class PLM_Stripe {
 					self::handle_subscription_deleted( $event->data->object, $event_row_id );
 					break;
 
+				case 'customer.subscription.updated':
+					self::handle_subscription_updated( $event->data->object, $event_row_id );
+					break;
+
 				case 'invoice.payment_failed':
 					self::handle_payment_failed( $event->data->object, $event_row_id );
+					break;
+
+				case 'charge.refunded':
+					self::handle_charge_refunded( $event->data->object, $event_row_id );
+					break;
+
+				case 'charge.dispute.created':
+					self::handle_dispute_created( $event->data->object, $event_row_id );
 					break;
 			}
 
@@ -195,8 +230,10 @@ class PLM_Stripe {
 			'type'               => $mapping->license_type,
 		) );
 
-		// TODO: Send license key email to customer_email via wp_mail().
-		error_log( sprintf( '[PLM Stripe] License created: %s for %s', $license_key, $customer_email ) );
+		// Send license key email to customer via template system.
+		PLM_Email::send_purchase( $customer_email, $license_key, $mapping, $expires_at );
+
+		error_log( sprintf( '[PLM Stripe] License created and emailed: %s for %s', PLM_License::mask_key( $license_key ), $customer_email ) );
 	}
 
 	/**
@@ -250,6 +287,11 @@ class PLM_Stripe {
 			'new_expiry' => $new_expiry,
 			'source'     => 'stripe',
 		) );
+
+		// Send renewal confirmation email.
+		if ( ! empty( $license->customer_email ) ) {
+			PLM_Email::send_renewal( $license, $new_expiry );
+		}
 	}
 
 	/**
@@ -280,6 +322,81 @@ class PLM_Stripe {
 		PLM_License::audit_log( (int) $license->id, 'subscription.cancelled', array(
 			'stripe_subscription_id' => $subscription_id,
 		) );
+	}
+
+	/**
+	 * Handle customer.subscription.updated — update tier/plan on upgrade/downgrade.
+	 */
+	private static function handle_subscription_updated( object $subscription, int $event_row_id ): void {
+		global $wpdb;
+
+		$subscription_id = $subscription->id ?? '';
+		$table           = PLM_Database::table( 'licenses' );
+
+		$license = $wpdb->get_row(
+			$wpdb->prepare( "SELECT * FROM {$table} WHERE stripe_subscription_id = %s", $subscription_id )
+		);
+
+		if ( ! $license ) {
+			return;
+		}
+
+		// Check if the plan/product changed via items.
+		$items = $subscription->items->data ?? array();
+		if ( ! empty( $items ) ) {
+			$new_product_id = $items[0]->price->product ?? '';
+			$new_price_id   = $items[0]->price->id ?? '';
+
+			if ( ! empty( $new_product_id ) ) {
+				$table_map = PLM_Database::table( 'stripe_product_map' );
+				$mapping   = $wpdb->get_row(
+					$wpdb->prepare( "SELECT * FROM {$table_map} WHERE stripe_product_id = %s", $new_product_id )
+				);
+
+				if ( $mapping ) {
+					$old_type = $license->license_type;
+					$old_plan = $license->plan;
+
+					$wpdb->update(
+						$table,
+						array(
+							'license_type' => $mapping->license_type,
+							'plan'         => $mapping->plan,
+							'site_limit'   => (int) $mapping->site_limit,
+						),
+						array( 'id' => $license->id ),
+						array( '%s', '%s', '%d' ),
+						array( '%d' )
+					);
+
+					PLM_License::audit_log( (int) $license->id, 'license.tier_changed', array(
+						'old_type'       => $old_type,
+						'old_plan'       => $old_plan,
+						'new_type'       => $mapping->license_type,
+						'new_plan'       => $mapping->plan,
+						'new_site_limit' => (int) $mapping->site_limit,
+						'source'         => 'stripe',
+					) );
+
+					error_log( sprintf(
+						'[PLM Stripe] License #%d tier changed: %s/%s → %s/%s',
+						$license->id,
+						$old_type,
+						$old_plan,
+						$mapping->license_type,
+						$mapping->plan
+					) );
+				}
+			}
+		}
+
+		$wpdb->update(
+			PLM_Database::table( 'stripe_events' ),
+			array( 'license_id' => $license->id ),
+			array( 'id' => $event_row_id ),
+			array( '%d' ),
+			array( '%d' )
+		);
 	}
 
 	/**
@@ -314,6 +431,136 @@ class PLM_Stripe {
 			'stripe_subscription_id' => $subscription_id,
 			'amount'                 => $invoice->amount_due ?? 0,
 		) );
+	}
+
+	/**
+	 * Handle charge.refunded — revoke the associated license.
+	 */
+	private static function handle_charge_refunded( object $charge, int $event_row_id ): void {
+		global $wpdb;
+
+		$customer_id = $charge->customer ?? '';
+		if ( empty( $customer_id ) ) {
+			return;
+		}
+
+		$table   = PLM_Database::table( 'licenses' );
+		$license = $wpdb->get_row(
+			$wpdb->prepare( "SELECT * FROM {$table} WHERE stripe_customer_id = %s AND status != 'revoked' ORDER BY created_at DESC LIMIT 1", $customer_id )
+		);
+
+		if ( ! $license ) {
+			return;
+		}
+
+		// Only revoke if fully refunded.
+		$amount_refunded = $charge->amount_refunded ?? 0;
+		$amount_total    = $charge->amount ?? 0;
+		$is_full_refund  = $amount_total > 0 && $amount_refunded >= $amount_total;
+
+		if ( $is_full_refund ) {
+			$wpdb->update(
+				$table,
+				array( 'status' => 'revoked' ),
+				array( 'id' => $license->id ),
+				array( '%s' ),
+				array( '%d' )
+			);
+		}
+
+		$wpdb->update(
+			PLM_Database::table( 'stripe_events' ),
+			array( 'license_id' => $license->id ),
+			array( 'id' => $event_row_id ),
+			array( '%d' ),
+			array( '%d' )
+		);
+
+		PLM_License::audit_log( (int) $license->id, 'charge.refunded', array(
+			'stripe_customer_id' => $customer_id,
+			'amount_refunded'    => $amount_refunded,
+			'amount_total'       => $amount_total,
+			'full_refund'        => $is_full_refund,
+			'revoked'            => $is_full_refund,
+		) );
+
+		// Send revocation email for full refunds.
+		if ( $is_full_refund && ! empty( $license->customer_email ) ) {
+			PLM_Email::send_revocation( $license, 'Payment was fully refunded.' );
+		}
+
+		error_log( sprintf(
+			'[PLM Stripe] Charge refunded for license #%d (%s/%d). %s',
+			$license->id,
+			$amount_refunded,
+			$amount_total,
+			$is_full_refund ? 'License revoked.' : 'Partial refund — license not revoked.'
+		) );
+	}
+
+	/**
+	 * Handle charge.dispute.created — revoke the associated license immediately.
+	 */
+	private static function handle_dispute_created( object $dispute, int $event_row_id ): void {
+		global $wpdb;
+
+		$charge_id = $dispute->charge ?? '';
+		if ( empty( $charge_id ) ) {
+			return;
+		}
+
+		// Get customer from the dispute's payment_intent or charge metadata.
+		$customer_id = '';
+		if ( isset( $dispute->customer ) ) {
+			$customer_id = $dispute->customer;
+		}
+
+		// Try to find license by customer_id.
+		$table   = PLM_Database::table( 'licenses' );
+		$license = null;
+
+		if ( ! empty( $customer_id ) ) {
+			$license = $wpdb->get_row(
+				$wpdb->prepare( "SELECT * FROM {$table} WHERE stripe_customer_id = %s AND status != 'revoked' ORDER BY created_at DESC LIMIT 1", $customer_id )
+			);
+		}
+
+		if ( ! $license ) {
+			error_log( sprintf( '[PLM Stripe] Dispute created but no matching license found for charge %s', $charge_id ) );
+			return;
+		}
+
+		// Immediately revoke on dispute.
+		$wpdb->update(
+			$table,
+			array( 'status' => 'revoked' ),
+			array( 'id' => $license->id ),
+			array( '%s' ),
+			array( '%d' )
+		);
+
+		$wpdb->update(
+			PLM_Database::table( 'stripe_events' ),
+			array( 'license_id' => $license->id ),
+			array( 'id' => $event_row_id ),
+			array( '%d' ),
+			array( '%d' )
+		);
+
+		PLM_License::audit_log( (int) $license->id, 'charge.disputed', array(
+			'stripe_customer_id' => $customer_id,
+			'charge_id'          => $charge_id,
+			'amount'             => $dispute->amount ?? 0,
+			'reason'             => $dispute->reason ?? 'unknown',
+		) );
+
+		// Send revocation email.
+		if ( ! empty( $license->customer_email ) ) {
+			$reason = sprintf( 'Payment dispute filed (reason: %s).', $dispute->reason ?? 'unknown' );
+			PLM_Email::send_revocation( $license, $reason );
+		}
+
+		error_log( sprintf( '[PLM Stripe] License #%d revoked due to payment dispute.', $license->id ) );
 	}
 
 	/**

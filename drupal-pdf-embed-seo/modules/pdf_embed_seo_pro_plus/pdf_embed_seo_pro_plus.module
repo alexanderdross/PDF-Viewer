@@ -86,6 +86,21 @@ function pdf_embed_seo_is_pro_plus() {
 }
 
 /**
+ * Implements hook_cron().
+ */
+function pdf_embed_seo_pro_plus_cron() {
+  // License heartbeat check (every 24 hours).
+  if (\Drupal::hasService('pdf_embed_seo_pro_plus.license_validator')) {
+    $last_check = \Drupal::state()->get('pdf_embed_seo_pro_plus.last_license_check', 0);
+    if (time() - $last_check >= 86400) {
+      /** @var \Drupal\pdf_embed_seo_pro_plus\Service\LicenseValidator $validator */
+      $validator = \Drupal::service('pdf_embed_seo_pro_plus.license_validator');
+      $validator->heartbeatCheck();
+    }
+  }
+}
+
+/**
  * Get Pro+ settings.
  *
  * @return array

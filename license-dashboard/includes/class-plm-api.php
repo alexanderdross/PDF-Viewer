@@ -19,28 +19,62 @@ class PLM_API {
 	private const NAMESPACE = 'plm/v1';
 
 	/**
-	 * Rate limit storage (transients).
+	 * Rate limit check using database table (replaces transients).
 	 */
 	private static function check_rate_limit( string $identifier, string $type ): bool {
+		global $wpdb;
+
 		$limits = array(
-			'api'      => array( 'max' => 60, 'window' => 60 ),        // 60/min per IP.
-			'activate' => array( 'max' => 10, 'window' => 3600 ),      // 10/hour per key.
-			'check'    => array( 'max' => 1000, 'window' => 86400 ),   // 1000/day per key.
+			'api'      => array( 'max' => PLM_RATE_LIMIT_API_PER_MINUTE, 'window' => 60 ),
+			'activate' => array( 'max' => PLM_RATE_LIMIT_ACTIVATE_PER_HOUR, 'window' => 3600 ),
+			'check'    => array( 'max' => PLM_RATE_LIMIT_CHECK_PER_DAY, 'window' => 86400 ),
 		);
 
 		if ( ! isset( $limits[ $type ] ) ) {
 			return true;
 		}
 
-		$config     = $limits[ $type ];
-		$key        = 'plm_rl_' . md5( $type . ':' . $identifier );
-		$count      = (int) get_transient( $key );
+		$config = $limits[ $type ];
+		$table  = PLM_Database::table( 'rate_limits' );
+		$hashed = md5( $type . ':' . $identifier );
+		$now    = current_time( 'mysql', true );
 
-		if ( $count >= $config['max'] ) {
-			return false;
+		// Try to get existing record.
+		$record = $wpdb->get_row( $wpdb->prepare(
+			"SELECT * FROM {$table} WHERE identifier = %s AND limit_type = %s AND expires_at > %s",
+			$hashed,
+			$type,
+			$now
+		) );
+
+		if ( $record ) {
+			if ( (int) $record->request_count >= $config['max'] ) {
+				return false;
+			}
+
+			$wpdb->update(
+				$table,
+				array( 'request_count' => (int) $record->request_count + 1 ),
+				array( 'id' => $record->id ),
+				array( '%d' ),
+				array( '%d' )
+			);
+			return true;
 		}
 
-		set_transient( $key, $count + 1, $config['window'] );
+		// Create new window.
+		$expires_at = gmdate( 'Y-m-d H:i:s', time() + $config['window'] );
+		$wpdb->replace(
+			$table,
+			array(
+				'identifier'    => $hashed,
+				'limit_type'    => $type,
+				'request_count' => 1,
+				'window_start'  => $now,
+				'expires_at'    => $expires_at,
+			),
+			array( '%s', '%s', '%d', '%s', '%s' )
+		);
 		return true;
 	}
 
@@ -91,8 +125,9 @@ class PLM_API {
 			'status'    => $db_ok ? 'ok' : 'error',
 			'version'   => PLM_VERSION,
 			'database'  => $db_ok ? 'connected' : 'disconnected',
+			'geoip'     => PLM_GeoIP::is_available() ? 'available' : 'unavailable',
 			'timestamp' => gmdate( 'c' ),
-		), $db_ok ? 200 : 503 );
+		) );
 	}
 
 	/**
@@ -167,6 +202,7 @@ class PLM_API {
 		$php_version    = sanitize_text_field( $request->get_param( 'php_version' ) ?? '' );
 		$cms_version    = sanitize_text_field( $request->get_param( 'cms_version' ) ?? '' );
 		$node_version   = sanitize_text_field( $request->get_param( 'node_version' ) ?? '' );
+		$fingerprint    = sanitize_text_field( $request->get_param( 'fingerprint' ) ?? '' );
 
 		if ( empty( $license_key ) || empty( $site_url ) || empty( $platform ) || empty( $plugin_version ) ) {
 			return new WP_REST_Response( array(
@@ -179,6 +215,14 @@ class PLM_API {
 			return new WP_REST_Response( array(
 				'error'   => 'invalid_platform',
 				'message' => 'Platform must be wordpress, drupal, or react.',
+			), 400 );
+		}
+
+		// Validate fingerprint format if provided (must be 64-char hex SHA-256).
+		if ( ! empty( $fingerprint ) && ! preg_match( '/^[a-f0-9]{64}$/', $fingerprint ) ) {
+			return new WP_REST_Response( array(
+				'error'   => 'invalid_fingerprint',
+				'message' => 'Fingerprint must be a 64-character lowercase hex string (SHA-256).',
 			), 400 );
 		}
 
@@ -219,18 +263,21 @@ class PLM_API {
 
 		if ( $existing ) {
 			// Update existing installation.
+			$update_data = array(
+				'plugin_version'  => $plugin_version,
+				'php_version'     => $php_version ?: null,
+				'cms_version'     => $cms_version ?: null,
+				'node_version'    => $node_version ?: null,
+				'last_checked_at' => current_time( 'mysql', true ),
+			);
+			if ( ! empty( $fingerprint ) ) {
+				$update_data['fingerprint'] = $fingerprint;
+			}
+
 			$wpdb->update(
 				$table_inst,
-				array(
-					'plugin_version'  => $plugin_version,
-					'php_version'     => $php_version ?: null,
-					'cms_version'     => $cms_version ?: null,
-					'node_version'    => $node_version ?: null,
-					'last_checked_at' => current_time( 'mysql', true ),
-				),
-				array( 'id' => $existing->id ),
-				array( '%s', '%s', '%s', '%s', '%s' ),
-				array( '%d' )
+				$update_data,
+				array( 'id' => $existing->id )
 			);
 
 			return new WP_REST_Response( array(
@@ -276,9 +323,10 @@ class PLM_API {
 				'php_version'    => $php_version ?: null,
 				'cms_version'    => $cms_version ?: null,
 				'node_version'   => $node_version ?: null,
+				'fingerprint'    => $fingerprint ?: null,
 				'is_local'       => $is_local ? 1 : 0,
 			),
-			array( '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%d' )
+			array( '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d' )
 		);
 		$installation_id = $wpdb->insert_id;
 
@@ -304,6 +352,7 @@ class PLM_API {
 			'site_url'       => $normalized_url,
 			'platform'       => $platform,
 			'plugin_version' => $plugin_version,
+			'fingerprint'    => $fingerprint ?: null,
 			'is_local'       => $is_local,
 		) );
 
@@ -411,6 +460,7 @@ class PLM_API {
 		$site_url       = esc_url_raw( $request->get_param( 'site_url' ) ?? '' );
 		$plugin_version = sanitize_text_field( $request->get_param( 'plugin_version' ) ?? '' );
 		$platform       = sanitize_text_field( $request->get_param( 'platform' ) ?? '' );
+		$fingerprint    = sanitize_text_field( $request->get_param( 'fingerprint' ) ?? '' );
 
 		if ( empty( $license_key ) || empty( $site_url ) || empty( $plugin_version ) ) {
 			return new WP_REST_Response( array(
@@ -449,15 +499,18 @@ class PLM_API {
 		);
 
 		if ( $installation ) {
+			$update_data = array(
+				'last_checked_at' => current_time( 'mysql', true ),
+				'plugin_version'  => $plugin_version,
+			);
+			if ( ! empty( $fingerprint ) && preg_match( '/^[a-f0-9]{64}$/', $fingerprint ) ) {
+				$update_data['fingerprint'] = $fingerprint;
+			}
+
 			$wpdb->update(
 				$table_inst,
-				array(
-					'last_checked_at' => current_time( 'mysql', true ),
-					'plugin_version'  => $plugin_version,
-				),
-				array( 'id' => $installation->id ),
-				array( '%s', '%s' ),
-				array( '%d' )
+				$update_data,
+				array( 'id' => $installation->id )
 			);
 
 			// Refresh geo data if older than 30 days.
