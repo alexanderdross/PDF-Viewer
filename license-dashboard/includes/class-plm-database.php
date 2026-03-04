@@ -147,6 +147,34 @@ class PLM_Database {
 
 		dbDelta( $sql_product_map );
 
+		// Rate limits table (replaces transients-based rate limiting).
+		$table_rate_limits = $wpdb->prefix . 'plm_rate_limits';
+		$sql_rate_limits   = "CREATE TABLE {$table_rate_limits} (
+			id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+			identifier VARCHAR(255) NOT NULL,
+			limit_type VARCHAR(50) NOT NULL,
+			request_count INT UNSIGNED NOT NULL DEFAULT 1,
+			window_start DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			expires_at DATETIME NOT NULL,
+			PRIMARY KEY (id),
+			UNIQUE KEY identifier_type (identifier, limit_type),
+			KEY expires_at (expires_at)
+		) {$charset_collate};";
+
+		dbDelta( $sql_rate_limits );
+
+		// Add fingerprint column to installations table if it doesn't exist.
+		$table_inst = $wpdb->prefix . 'plm_installations';
+		$col_exists = $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = 'fingerprint'",
+			DB_NAME,
+			$table_inst
+		) );
+		if ( ! $col_exists ) {
+			$wpdb->query( "ALTER TABLE {$table_inst} ADD COLUMN fingerprint VARCHAR(64) DEFAULT NULL AFTER node_version" );
+			$wpdb->query( "ALTER TABLE {$table_inst} ADD KEY fingerprint (fingerprint)" );
+		}
+
 		update_option( 'plm_db_version', PLM_VERSION );
 	}
 
