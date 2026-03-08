@@ -1,0 +1,24 @@
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: *
+Allow: /
+
+# Sitemaps (hosting domain)
+Sitemap: https://pdfviewer2026.drossmedia.de/sitemap.xml
+Sitemap: https://pdfviewer2026.drossmedia.de/pdf/sitemap.xml
+
+# Sitemaps (vanity domain — also accessible via hosting domain)
+Sitemap: https://pdfviewermodule.com/vanity-sitemap.xml
+Sitemap: https://pdfviewermodule.com/pdf/vanity-sitemap.xml
+Sitemap: https://pdfviewer.drossmedia.de/vanity-sitemap.xml
+Sitemap: https://pdfviewer.drossmedia.de/pdf/vanity-sitemap.xml

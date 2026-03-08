@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <defs>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1a5a8a"/>
+      <stop offset="100%" style="stop-color:#0d4a6f"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Browser chrome -->
+  <rect width="1200" height="800" fill="#f5f5f5"/>
+
+  <!-- Browser header -->
+  <rect width="1200" height="60" fill="#e8e8e8"/>
+  <circle cx="25" cy="30" r="8" fill="#ff5f57"/>
+  <circle cx="50" cy="30" r="8" fill="#ffbd2e"/>
+  <circle cx="75" cy="30" r="8" fill="#28ca42"/>
+
+  <!-- URL bar -->
+  <rect x="150" y="15" width="900" height="30" rx="6" fill="#ffffff"/>
+  <text x="170" y="35" font-family="system-ui, sans-serif" font-size="12" fill="#666">https://example.com/documents/annual-report</text>
+
+  <!-- Page content area -->
+  <rect x="0" y="60" width="1200" height="740" fill="#ffffff"/>
+
+  <!-- Site header -->
+  <rect x="0" y="60" width="1200" height="70" fill="url(#headerGrad)"/>
+  <text x="40" y="102" font-family="system-ui, sans-serif" font-size="18" font-weight="bold" fill="#ffffff">PDF Embed &amp; SEO Optimize</text>
+  <text x="1000" y="102" font-family="system-ui, sans-serif" font-size="14" fill="#ffffff" opacity="0.8">Home | Docs | Pro</text>
+
+  <!-- Breadcrumb -->
+  <text x="40" y="160" font-family="system-ui, sans-serif" font-size="12" fill="#666">Home / Documents / Annual Report 2024</text>
+
+  <!-- Page title -->
+  <text x="40" y="210" font-family="system-ui, sans-serif" font-size="32" font-weight="bold" fill="#1a1a1a">Annual Report 2024</text>
+
+  <!-- PDF Viewer container -->
+  <rect x="40" y="240" width="1120" height="500" rx="8" fill="#f8f8f8" stroke="#e0e0e0" stroke-width="2"/>
+
+  <!-- PDF Viewer toolbar -->
+  <rect x="40" y="240" width="1120" height="50" rx="8" fill="#2d2d2d"/>
+  <rect x="48" y="290" width="1104" height="2" fill="#2d2d2d"/>
+
+  <!-- Toolbar buttons -->
+  <rect x="60" y="252" width="80" height="26" rx="4" fill="#444"/>
+  <text x="100" y="270" font-family="system-ui, sans-serif" font-size="11" fill="#fff" text-anchor="middle">1 / 24</text>
+
+  <rect x="160" y="252" width="30" height="26" rx="4" fill="#444"/>
+  <text x="175" y="270" font-family="system-ui, sans-serif" font-size="14" fill="#fff" text-anchor="middle">-</text>
+
+  <rect x="200" y="252" width="30" height="26" rx="4" fill="#444"/>
+  <text x="215" y="270" font-family="system-ui, sans-serif" font-size="14" fill="#fff" text-anchor="middle">+</text>
+
+  <rect x="1020" y="252" width="60" height="26" rx="4" fill="#e86c2c"/>
+  <text x="1050" y="270" font-family="system-ui, sans-serif" font-size="11" fill="#fff" text-anchor="middle">Download</text>
+
+  <rect x="1090" y="252" width="50" height="26" rx="4" fill="#444"/>
+  <text x="1115" y="270" font-family="system-ui, sans-serif" font-size="11" fill="#fff" text-anchor="middle">Print</text>
+
+  <!-- PDF content area -->
+  <rect x="140" y="310" width="920" height="410" fill="#ffffff" stroke="#ddd"/>
+
+  <!-- PDF page mockup -->
+  <text x="600" y="380" font-family="Georgia, serif" font-size="28" font-weight="bold" fill="#1a1a1a" text-anchor="middle">Annual Report 2024</text>
+  <text x="600" y="420" font-family="Georgia, serif" font-size="16" fill="#666" text-anchor="middle">Company Name Inc.</text>
+
+  <!-- Placeholder lines for PDF content -->
+  <rect x="200" y="480" width="600" height="12" rx="2" fill="#e0e0e0"/>
+  <rect x="200" y="505" width="550" height="12" rx="2" fill="#e0e0e0"/>
+  <rect x="200" y="530" width="580" height="12" rx="2" fill="#e0e0e0"/>
+  <rect x="200" y="555" width="400" height="12" rx="2" fill="#e0e0e0"/>
+
+  <rect x="200" y="600" width="620" height="12" rx="2" fill="#e0e0e0"/>
+  <rect x="200" y="625" width="580" height="12" rx="2" fill="#e0e0e0"/>
+  <rect x="200" y="650" width="500" height="12" rx="2" fill="#e0e0e0"/>
+
+  <!-- Screenshot label -->
+  <rect x="0" y="760" width="1200" height="40" fill="#1a5a8a"/>
+  <text x="600" y="785" font-family="system-ui, sans-serif" font-size="14" fill="#ffffff" text-anchor="middle">Screenshot 1: In-page PDF viewer with responsive design and toolbar controls</text>
+</svg>
