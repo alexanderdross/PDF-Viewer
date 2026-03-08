@@ -262,6 +262,17 @@ if (!defined('PDFVIEWER_VANITY_DOMAIN')) {
     define('PDFVIEWER_VANITY_DOMAIN', 'https://pdfviewermodule.com');
 }
 
+// Stub WordPress Walker_Nav_Menu base class required by theme's custom walker.
+if (!class_exists('Walker_Nav_Menu')) {
+    class Walker_Nav_Menu {
+        public function walk($elements, $max_depth, ...$args) { return ''; }
+        public function start_lvl(&$output, $depth = 0, $args = null) {}
+        public function end_lvl(&$output, $depth = 0, $args = null) {}
+        public function start_el(&$output, $data_object, $depth = 0, $args = null, $current_object_id = 0) {}
+        public function end_el(&$output, $data_object, $depth = 0, $args = null) {}
+    }
+}
+
 // Autoload test classes
 spl_autoload_register(function ($class) {
     $prefix = 'PDFViewer\\Tests\\';

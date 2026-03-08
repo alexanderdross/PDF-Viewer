@@ -181,7 +181,10 @@ class PDF_Embed_SEO_Shortcodes {
 	}
 
 	/**
-	 * Enqueue viewer scripts for shortcode.
+	 * Enqueue viewer scripts for shortcode usage.
+	 *
+	 * Delegates to the Frontend class to avoid duplicating enqueue logic.
+	 * Ensures scripts are loaded even when shortcode is used outside PDF pages.
 	 *
 	 * @param int $post_id The post ID.
 	 * @return void
@@ -202,16 +205,13 @@ class PDF_Embed_SEO_Shortcodes {
 			true
 		);
 
-		// Set the worker source from local assets.
 		wp_add_inline_script(
 			'pdfjs',
 			'pdfjsLib.GlobalWorkerOptions.workerSrc = "' . esc_js( PDF_EMBED_SEO_PLUGIN_URL . 'assets/pdfjs/pdf.worker.min.js' ) . '";'
 		);
 
-		// Enqueue dashicons on frontend (required for toolbar button icons).
 		wp_enqueue_style( 'dashicons' );
 
-		// Viewer styles.
 		wp_enqueue_style(
 			'pdf-embed-seo-optimize-viewer',
 			PDF_EMBED_SEO_PLUGIN_URL . 'public/css/viewer-styles.css',
@@ -219,7 +219,6 @@ class PDF_Embed_SEO_Shortcodes {
 			PDF_EMBED_SEO_VERSION
 		);
 
-		// Viewer scripts.
 		wp_enqueue_script(
 			'pdf-embed-seo-optimize-viewer',
 			PDF_EMBED_SEO_PLUGIN_URL . 'public/js/viewer-scripts.js',

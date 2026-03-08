@@ -491,7 +491,7 @@ add_filter('template_include', 'pdfviewer_override_pdf_grid_template', 99);
  * processes the request and sets a 404 status.
  */
 function pdfviewer_serve_vanity_sitemaps() {
-    $request_uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
+    $request_uri = trim(wp_parse_url(sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])), PHP_URL_PATH), '/');
 
     $sitemap_map = array(
         'vanity-sitemap.xml'     => PDFVIEWER_THEME_DIR . '/sitemaps/vanity-sitemap.xml',
@@ -615,11 +615,10 @@ function pdfviewer_admin_notice_missing_pages() {
         }
     }
 
-    if (!empty($missing) && isset($_GET['page']) && $_GET['page'] !== 'pdfviewer-setup') {
-        $setup_url = admin_url('themes.php?page=pdfviewer-setup');
+    if (!empty($missing) && isset($_GET['page']) && sanitize_text_field(wp_unslash($_GET['page'])) !== 'pdfviewer-setup') {
         echo '<div class="notice notice-warning is-dismissible">';
         echo '<p><strong>PDF Embed & SEO Theme:</strong> Some required pages are missing. ';
-        echo '<a href="' . esc_url(admin_url('admin.php?action=pdfviewer_create_pages')) . '">Click here to create them automatically</a>.</p>';
+        echo '<a href="' . esc_url(wp_nonce_url(admin_url('admin.php?action=pdfviewer_create_pages'), 'pdfviewer_create_pages_nonce')) . '">Click here to create them automatically</a>.</p>';
         echo '</div>';
     }
 }
@@ -630,11 +629,16 @@ add_action('admin_notices', 'pdfviewer_admin_notice_missing_pages');
  */
 function pdfviewer_admin_create_pages() {
     if (!current_user_can('edit_pages')) {
-        wp_die('Unauthorized');
+        wp_die(esc_html__('Unauthorized', 'pdfviewer'));
+    }
+
+    // Verify nonce to prevent CSRF.
+    if (!isset($_GET['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'pdfviewer_create_pages_nonce')) {
+        wp_die(esc_html__('Security check failed.', 'pdfviewer'));
     }
 
     pdfviewer_create_required_pages();
-    wp_redirect(admin_url('edit.php?post_type=page&pdfviewer_pages_created=1'));
+    wp_safe_redirect(admin_url('edit.php?post_type=page&pdfviewer_pages_created=1'));
     exit;
 }
 add_action('admin_action_pdfviewer_create_pages', 'pdfviewer_admin_create_pages');

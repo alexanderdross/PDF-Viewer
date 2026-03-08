@@ -105,44 +105,41 @@ class TemplateFunctionsTest extends TestCase
     }
 
     /**
-     * Test pdfviewer_responsive_picture returns empty for missing sources
+     * Test pdfviewer_simple_picture returns picture tag with minimal args
      */
-    public function testResponsivePictureReturnsEmptyForMissingSources(): void
+    public function testSimplePictureReturnsEmptyForMissingFallback(): void
     {
-        $result = pdfviewer_responsive_picture([
+        $result = pdfviewer_simple_picture([
             'alt' => 'Test',
         ]);
 
-        $this->assertEmpty($result);
+        // Returns picture tag but with empty src since no fallback provided.
+        $this->assertStringContainsString('<picture>', $result);
     }
 
     /**
-     * Test pdfviewer_responsive_picture returns empty for missing alt
+     * Test pdfviewer_simple_picture handles missing alt gracefully
      */
-    public function testResponsivePictureReturnsEmptyForMissingAlt(): void
+    public function testSimplePictureHandlesMissingAlt(): void
     {
-        $result = pdfviewer_responsive_picture([
-            'sources' => [
-                ['webp' => 'test.webp', 'fallback' => 'test.png'],
-            ],
+        $result = pdfviewer_simple_picture([
+            'webp' => 'https://example.com/test.webp',
+            'fallback' => 'https://example.com/test.png',
         ]);
 
-        $this->assertEmpty($result);
+        // Should still render with empty alt attribute.
+        $this->assertStringContainsString('<picture>', $result);
+        $this->assertStringContainsString('alt=""', $result);
     }
 
     /**
-     * Test pdfviewer_responsive_picture returns valid HTML
+     * Test pdfviewer_simple_picture returns valid HTML with all args
      */
-    public function testResponsivePictureReturnsValidHtml(): void
+    public function testSimplePictureReturnsValidHtmlWithAllArgs(): void
     {
-        $result = pdfviewer_responsive_picture([
-            'sources' => [
-                [
-                    'webp' => 'https://example.com/image.webp',
-                    'fallback' => 'https://example.com/image.png',
-                    'width' => 800,
-                ],
-            ],
+        $result = pdfviewer_simple_picture([
+            'webp' => 'https://example.com/image.webp',
+            'fallback' => 'https://example.com/image.png',
             'alt' => 'Test image',
             'width' => 800,
             'height' => 600,

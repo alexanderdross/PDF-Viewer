@@ -280,7 +280,7 @@ class PDF_Embed_SEO_Admin {
 
 		// Save PDF file ID.
 		if ( isset( $_POST['pdf_file_id'] ) ) {
-			$file_id = absint( $_POST['pdf_file_id'] );
+			$file_id = absint( wp_unslash( $_POST['pdf_file_id'] ) );
 			update_post_meta( $post_id, '_pdf_file_id', $file_id );
 
 			// Also update the URL.
