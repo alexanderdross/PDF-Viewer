@@ -130,10 +130,140 @@ export function getDaysUntilExpiry(expiresAt: string | undefined): number | null
   return diffDays;
 }
 
+/**
+ * License API base URL for remote validation.
+ */
+const LICENSE_API_URL = 'https://pdfviewer.drossmedia.de/wp-json/plm/v1';
+
+/**
+ * Remote license validation response.
+ */
+export interface RemoteLicenseResponse {
+  valid: boolean;
+  status: string;
+  type: string;
+  plan: string;
+  expires_at: string | null;
+  days_remaining: number | null;
+  site_limit: number;
+  active_sites: number;
+  message: string;
+}
+
+/**
+ * Validate a license key remotely against the License Dashboard API.
+ * Should be called server-side (e.g., Next.js API route) to avoid exposing keys.
+ */
+export async function validateLicenseRemote(
+  licenseKey: string,
+  apiUrl: string = LICENSE_API_URL
+): Promise<RemoteLicenseResponse> {
+  const response = await fetch(`${apiUrl}/license/validate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      license_key: licenseKey,
+      platform: 'react',
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`License validation failed: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+/**
+ * Activate a license on the License Dashboard API.
+ * Should be called server-side.
+ */
+export async function activateLicenseRemote(
+  licenseKey: string,
+  siteUrl: string,
+  pluginVersion: string = '1.3.0',
+  apiUrl: string = LICENSE_API_URL
+): Promise<Record<string, unknown>> {
+  const response = await fetch(`${apiUrl}/license/activate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      license_key: licenseKey,
+      site_url: siteUrl,
+      platform: 'react',
+      plugin_version: pluginVersion,
+      node_version: typeof process !== 'undefined' ? process.version : 'unknown',
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`License activation failed: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+/**
+ * Deactivate a license on the License Dashboard API.
+ * Should be called server-side.
+ */
+export async function deactivateLicenseRemote(
+  licenseKey: string,
+  siteUrl: string,
+  apiUrl: string = LICENSE_API_URL
+): Promise<Record<string, unknown>> {
+  const response = await fetch(`${apiUrl}/license/deactivate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      license_key: licenseKey,
+      site_url: siteUrl,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`License deactivation failed: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+/**
+ * Send a heartbeat check to the License Dashboard API.
+ * Should be called server-side, typically from a cron job or API route.
+ */
+export async function heartbeatCheck(
+  licenseKey: string,
+  siteUrl: string,
+  pluginVersion: string = '1.3.0',
+  apiUrl: string = LICENSE_API_URL
+): Promise<RemoteLicenseResponse> {
+  const response = await fetch(`${apiUrl}/license/check`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      license_key: licenseKey,
+      site_url: siteUrl,
+      plugin_version: pluginVersion,
+      platform: 'react',
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`License heartbeat failed: ${response.status}`);
+  }
+
+  return response.json();
+}
+
 export default {
   validateProPlusLicense,
   maskLicenseKey,
   isLicenseExpired,
   isInGracePeriod,
   getDaysUntilExpiry,
+  validateLicenseRemote,
+  activateLicenseRemote,
+  deactivateLicenseRemote,
+  heartbeatCheck,
 };

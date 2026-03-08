@@ -260,6 +260,16 @@ function pdf_embed_seo_premium_settings_form_submit(&$form, &$form_state) {
  * Implements hook_cron().
  */
 function pdf_embed_seo_premium_cron() {
+  // License heartbeat check (every 24 hours).
+  if (\Drupal::hasService('pdf_embed_seo_premium.license_validator')) {
+    $last_check = \Drupal::state()->get('pdf_embed_seo_premium.last_license_check', 0);
+    if (time() - $last_check >= 86400) {
+      /** @var \Drupal\pdf_embed_seo_premium\Service\LicenseValidator $validator */
+      $validator = \Drupal::service('pdf_embed_seo_premium.license_validator');
+      $validator->heartbeatCheck();
+    }
+  }
+
   // Clean up expired access tokens.
   if (\Drupal::hasService('pdf_embed_seo.access_token_storage')) {
     /** @var \Drupal\pdf_embed_seo_premium\Service\AccessTokenStorage $token_storage */

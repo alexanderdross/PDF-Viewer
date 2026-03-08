@@ -33,4 +33,4 @@ services:
 
   pdf_embed_seo_pro_plus.license_validator:
     class: Drupal\pdf_embed_seo_pro_plus\Service\LicenseValidator
-    arguments: ['@config.factory', '@state']
+    arguments: ['@config.factory', '@state', '@http_client', '@logger.channel.default']

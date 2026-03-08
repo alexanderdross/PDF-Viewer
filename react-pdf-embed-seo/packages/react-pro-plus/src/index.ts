@@ -31,6 +31,7 @@ export { useWebhooks } from './hooks/useWebhooks';
 export { useWhiteLabel } from './hooks/useWhiteLabel';
 export { useTwoFactorAuth } from './hooks/useTwoFactorAuth';
 export { useProPlusLicense } from './hooks/useProPlusLicense';
+export { useLicense } from './hooks/useLicense';
 
 // Types
 export type {
@@ -58,6 +59,17 @@ export type {
 export { ProPlusProvider, useProPlusContext } from './context/ProPlusContext';
 
 // Utilities
-export { validateProPlusLicense } from './utils/license';
+export {
+  validateProPlusLicense,
+  validateLicenseRemote,
+  activateLicenseRemote,
+  deactivateLicenseRemote,
+  heartbeatCheck,
+  maskLicenseKey,
+  isLicenseExpired,
+  isInGracePeriod,
+  getDaysUntilExpiry,
+} from './utils/license';
+export type { RemoteLicenseResponse } from './utils/license';
 export { generateWebhookSignature, verifyWebhookSignature } from './utils/webhook';
 export { anonymizeIp } from './utils/compliance';
