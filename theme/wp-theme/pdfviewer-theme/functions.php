@@ -3,14 +3,14 @@
  * PDF Embed & SEO Optimize Theme Functions
  *
  * @package PDFViewer
- * @version 2.2.94
+ * @version 2.2.95
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-define('PDFVIEWER_THEME_VERSION', '2.2.94');
+define('PDFVIEWER_THEME_VERSION', '2.2.95');
 define('PDFVIEWER_THEME_DIR', get_template_directory());
 define('PDFVIEWER_THEME_URI', get_template_directory_uri());
 
