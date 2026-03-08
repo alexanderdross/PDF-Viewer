@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <defs>
+    <linearGradient id="headerGrad3" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1a5a8a"/>
+      <stop offset="100%" style="stop-color:#0d4a6f"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Browser chrome -->
+  <rect width="1200" height="800" fill="#f5f5f5"/>
+  <rect width="1200" height="60" fill="#e8e8e8"/>
+  <circle cx="25" cy="30" r="8" fill="#ff5f57"/>
+  <circle cx="50" cy="30" r="8" fill="#ffbd2e"/>
+  <circle cx="75" cy="30" r="8" fill="#28ca42"/>
+  <rect x="150" y="15" width="900" height="30" rx="6" fill="#ffffff"/>
+  <text x="170" y="35" font-family="system-ui, sans-serif" font-size="12" fill="#666">https://example.com/pdf-grid/</text>
+
+  <!-- Page content -->
+  <rect x="0" y="60" width="1200" height="740" fill="#f8f9fa"/>
+
+  <!-- Site header -->
+  <rect x="0" y="60" width="1200" height="70" fill="url(#headerGrad3)"/>
+  <text x="40" y="102" font-family="system-ui, sans-serif" font-size="18" font-weight="bold" fill="#ffffff">PDF Embed &amp; SEO Optimize</text>
+
+  <!-- Page title -->
+  <text x="40" y="180" font-family="system-ui, sans-serif" font-size="28" font-weight="bold" fill="#1a1a1a">PDF Gallery</text>
+
+  <!-- View toggle -->
+  <rect x="1040" y="160" width="50" height="30" rx="4" fill="#e8e8e8"/>
+  <text x="1065" y="180" font-family="system-ui, sans-serif" font-size="11" fill="#666" text-anchor="middle">List</text>
+  <rect x="1100" y="160" width="50" height="30" rx="4" fill="#1a5a8a"/>
+  <text x="1125" y="180" font-family="system-ui, sans-serif" font-size="11" fill="#fff" text-anchor="middle">Grid</text>
+
+  <!-- Grid items row 1 -->
+  <!-- Card 1 -->
+  <rect x="40" y="220" width="270" height="240" rx="12" fill="#ffffff" stroke="#e0e0e0"/>
+  <rect x="40" y="220" width="270" height="140" rx="12" fill="#f0f0f0"/>
+  <rect x="48" y="360" width="120" height="4" rx="2" fill="#e0e0e0"/>
+  <text x="60" y="295" font-family="system-ui, sans-serif" font-size="48" fill="#e86c2c" opacity="0.3">PDF</text>
+  <text x="60" y="395" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#1a1a1a">Annual Report 2024</text>
+  <text x="60" y="415" font-family="system-ui, sans-serif" font-size="11" fill="#666">24 pages • 2.4 MB</text>
+  <rect x="60" y="430" width="80" height="24" rx="4" fill="#1a5a8a"/>
+  <text x="100" y="446" font-family="system-ui, sans-serif" font-size="10" fill="#fff" text-anchor="middle">View PDF</text>
+
+  <!-- Card 2 -->
+  <rect x="330" y="220" width="270" height="240" rx="12" fill="#ffffff" stroke="#e0e0e0"/>
+  <rect x="330" y="220" width="270" height="140" rx="12" fill="#f0f0f0"/>
+  <rect x="338" y="360" width="120" height="4" rx="2" fill="#e0e0e0"/>
+  <text x="350" y="295" font-family="system-ui, sans-serif" font-size="48" fill="#e86c2c" opacity="0.3">PDF</text>
+  <text x="350" y="395" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#1a1a1a">Product Catalog</text>
+  <text x="350" y="415" font-family="system-ui, sans-serif" font-size="11" fill="#666">48 pages • 8.1 MB</text>
+  <rect x="350" y="430" width="80" height="24" rx="4" fill="#1a5a8a"/>
+  <text x="390" y="446" font-family="system-ui, sans-serif" font-size="10" fill="#fff" text-anchor="middle">View PDF</text>
+
+  <!-- Card 3 -->
+  <rect x="620" y="220" width="270" height="240" rx="12" fill="#ffffff" stroke="#e0e0e0"/>
+  <rect x="620" y="220" width="270" height="140" rx="12" fill="#f0f0f0"/>
+  <rect x="628" y="360" width="120" height="4" rx="2" fill="#e0e0e0"/>
+  <text x="640" y="295" font-family="system-ui, sans-serif" font-size="48" fill="#e86c2c" opacity="0.3">PDF</text>
+  <text x="640" y="395" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#1a1a1a">User Manual v3.0</text>
+  <text x="640" y="415" font-family="system-ui, sans-serif" font-size="11" fill="#666">156 pages • 12.3 MB</text>
+  <rect x="640" y="430" width="80" height="24" rx="4" fill="#1a5a8a"/>
+  <text x="680" y="446" font-family="system-ui, sans-serif" font-size="10" fill="#fff" text-anchor="middle">View PDF</text>
+
+  <!-- Card 4 -->
+  <rect x="910" y="220" width="270" height="240" rx="12" fill="#ffffff" stroke="#e0e0e0"/>
+  <rect x="910" y="220" width="270" height="140" rx="12" fill="#f0f0f0"/>
+  <rect x="918" y="360" width="120" height="4" rx="2" fill="#e0e0e0"/>
+  <text x="930" y="295" font-family="system-ui, sans-serif" font-size="48" fill="#e86c2c" opacity="0.3">PDF</text>
+  <text x="930" y="395" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#1a1a1a">Privacy Policy</text>
+  <text x="930" y="415" font-family="system-ui, sans-serif" font-size="11" fill="#666">8 pages • 0.5 MB</text>
+  <rect x="930" y="430" width="80" height="24" rx="4" fill="#1a5a8a"/>
+  <text x="970" y="446" font-family="system-ui, sans-serif" font-size="10" fill="#fff" text-anchor="middle">View PDF</text>
+
+  <!-- Grid items row 2 -->
+  <!-- Card 5 -->
+  <rect x="40" y="480" width="270" height="240" rx="12" fill="#ffffff" stroke="#e0e0e0"/>
+  <rect x="40" y="480" width="270" height="140" rx="12" fill="#f0f0f0"/>
+  <text x="60" y="555" font-family="system-ui, sans-serif" font-size="48" fill="#e86c2c" opacity="0.3">PDF</text>
+  <text x="60" y="655" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#1a1a1a">Terms of Service</text>
+  <text x="60" y="675" font-family="system-ui, sans-serif" font-size="11" fill="#666">12 pages • 0.8 MB</text>
+  <rect x="60" y="690" width="80" height="24" rx="4" fill="#1a5a8a"/>
+  <text x="100" y="706" font-family="system-ui, sans-serif" font-size="10" fill="#fff" text-anchor="middle">View PDF</text>
+
+  <!-- Card 6 -->
+  <rect x="330" y="480" width="270" height="240" rx="12" fill="#ffffff" stroke="#e0e0e0"/>
+  <rect x="330" y="480" width="270" height="140" rx="12" fill="#f0f0f0"/>
+  <text x="350" y="555" font-family="system-ui, sans-serif" font-size="48" fill="#e86c2c" opacity="0.3">PDF</text>
+  <text x="350" y="655" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#1a1a1a">Technical Specs</text>
+  <text x="350" y="675" font-family="system-ui, sans-serif" font-size="11" fill="#666">32 pages • 4.2 MB</text>
+  <rect x="350" y="690" width="80" height="24" rx="4" fill="#1a5a8a"/>
+  <text x="390" y="706" font-family="system-ui, sans-serif" font-size="10" fill="#fff" text-anchor="middle">View PDF</text>
+
+  <!-- Screenshot label -->
+  <rect x="0" y="760" width="1200" height="40" fill="#1a5a8a"/>
+  <text x="600" y="785" font-family="system-ui, sans-serif" font-size="14" fill="#ffffff" text-anchor="middle">Screenshot 3: PDF archive grid view with thumbnail previews</text>
+</svg>

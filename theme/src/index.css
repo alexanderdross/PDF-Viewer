@@ -1,0 +1,234 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* PDF Viewer Pro Design System
+   Theme: Dross:Media brand colors - Clean, professional, trustworthy
+   Primary: Teal/Blue #1a75b5
+   Fonts: Outfit (headings), Inter (body) - self-hosted via @fontsource
+*/
+
+@layer base {
+  :root {
+    --background: 220 15% 95%;
+    --foreground: 220 20% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 15%;
+
+    /* Primary - darker for better contrast on light backgrounds */
+    --primary: 200 75% 30%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 15% 90%;
+    --secondary-foreground: 220 20% 15%;
+
+    /* Muted - darker foreground for better contrast */
+    --muted: 220 15% 92%;
+    --muted-foreground: 220 15% 30%;
+
+    /* Accent - darkened to 33% lightness for WCAG AA contrast compliance */
+    --accent: 24 90% 33%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Destructive - darker for better contrast on light backgrounds */
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 15% 85%;
+    --input: 220 15% 85%;
+    --ring: 200 75% 30%;
+
+    --radius: 0.5rem;
+
+    /* Custom tokens */
+    --gradient-hero: linear-gradient(135deg, hsl(200 75% 30%) 0%, hsl(200 75% 40%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(24 90% 45%) 0%, hsl(38 92% 50%) 100%);
+    --gradient-dark: linear-gradient(180deg, hsl(220 20% 12%) 0%, hsl(220 20% 18%) 100%);
+    --gradient-glass: linear-gradient(135deg, hsla(0, 0%, 100%, 0.95) 0%, hsla(0, 0%, 100%, 0.85) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(0 0% 98%) 100%);
+    
+    --shadow-soft: 0 4px 6px -1px hsla(220, 20%, 20%, 0.08), 0 2px 4px -2px hsla(220, 20%, 20%, 0.06);
+    --shadow-medium: 0 10px 15px -3px hsla(220, 20%, 20%, 0.1), 0 4px 6px -4px hsla(220, 20%, 20%, 0.08);
+    --shadow-large: 0 25px 50px -12px hsla(220, 20%, 20%, 0.2);
+    --shadow-glow: 0 0 40px hsla(200, 75%, 30%, 0.25);
+    --shadow-accent-glow: 0 0 40px hsla(24, 90%, 45%, 0.25);
+    --shadow-card: 0 4px 20px -4px hsla(220, 20%, 20%, 0.1);
+
+  }
+
+  .dark {
+    --background: 220 20% 10%;
+    --foreground: 220 15% 95%;
+
+    --card: 220 20% 14%;
+    --card-foreground: 220 15% 95%;
+
+    --popover: 220 20% 14%;
+    --popover-foreground: 220 15% 95%;
+
+    --primary: 200 75% 55%;
+    --primary-foreground: 220 20% 10%;
+
+    --secondary: 220 15% 20%;
+    --secondary-foreground: 220 15% 95%;
+
+    --muted: 220 15% 20%;
+    --muted-foreground: 220 10% 70%;
+
+    --accent: 24 90% 60%;
+    --accent-foreground: 220 20% 10%;
+
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 15% 25%;
+    --input: 220 15% 25%;
+    --ring: 200 75% 55%;
+
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    /* Remove tap highlight on mobile for cleaner interactions */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* Prevent horizontal scroll on mobile */
+    overflow-x: hidden;
+    /* Support iOS safe areas */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+    /* Prevent text size adjustment on orientation change */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* Smooth scrolling on touch devices */
+    -webkit-overflow-scrolling: touch;
+    /* Prevent overscroll bounce on iOS */
+    overscroll-behavior-y: none;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', system-ui, sans-serif;
+  }
+
+  code, pre {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+
+  /* Ensure all interactive elements have minimum touch target */
+  button, a, input, select, textarea, [role="button"] {
+    min-height: 44px;
+  }
+
+  /* Allow inline badges/links to be smaller */
+  .inline-flex, .inline, span > a, li a {
+    min-height: auto;
+  }
+}
+
+@layer utilities {
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+
+  .gradient-accent {
+    background: var(--gradient-accent);
+  }
+
+  .gradient-dark {
+    background: var(--gradient-dark);
+  }
+
+  .gradient-card {
+    background: var(--gradient-card);
+  }
+
+  .glass {
+    background: var(--gradient-glass);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid hsl(var(--border));
+  }
+
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+
+  .shadow-medium {
+    box-shadow: var(--shadow-medium);
+  }
+
+  .shadow-large {
+    box-shadow: var(--shadow-large);
+  }
+
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .shadow-accent-glow {
+    box-shadow: var(--shadow-accent-glow);
+  }
+
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+
+  .text-gradient {
+    background: var(--gradient-hero);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Breadcrumb horizontal scroll */
+  .scrollbar-breadcrumb {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .scrollbar-breadcrumb::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Mobile-specific optimizations */
+@media (max-width: 640px) {
+  /* Ensure readable text on small screens */
+  body {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  /* Prevent zoom on input focus (iOS) */
+  input, select, textarea {
+    font-size: 16px;
+  }
+
+  /* Better touch scrolling for code blocks */
+  pre, code {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
