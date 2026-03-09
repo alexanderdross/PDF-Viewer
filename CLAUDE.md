@@ -91,7 +91,6 @@ PDF-Viewer/
 ├── DRUPAL-DOCUMENTATION-UPDATES.md      # Drupal technical documentation
 ├── DRUPAL-PREMIUM-FEATURES.md           # Drupal premium features overview
 ├── REACT-MODULE-PLAN.md                 # React module implementation plan
-├── WEBSITE-UPDATE-GUIDE.md              # Website documentation update guide
 │
 ├── theme/                               # Marketing website
 │   └── wp-theme/pdfviewer-theme/        # WordPress theme (Tailwind CSS + vanilla JS)
@@ -129,12 +128,8 @@ PDF-Viewer/
 │   ├── includes/                        # PHP classes (7 files)
 │   └── admin/                           # Admin views, CSS, JS
 │
-├── dist/                                # Pre-built distribution ZIPs
-├── releases/                            # Release artifacts
-├── tests/qa/                            # QA/UAT test plans and reports
-├── docs/                                # API and technical documentation
-├── pages/                               # Product page content
-└── website-markup/                      # HTML markup templates
+├── dist/                                # Pre-built distribution ZIPs (latest versions only)
+└── tests/qa/                            # QA/UAT test plans and reports
 ```
 
 ---
@@ -1213,11 +1208,11 @@ cd react-pdf-embed-seo && pnpm build       # Build all packages
 
 | Package | Version | Contents |
 |---------|---------|----------|
-| `pdf-embed-seo-complete-v1.3.0.zip` | 1.3.0 | Complete (WP+Drupal+React) Pro+ |
-| `pdf-embed-seo-pro-plus-v1.3.0.zip` | 1.3.0 | Pro+ Enterprise only |
-| `pdf-embed-seo-complete-v1.2.11.zip` | 1.2.11 | Complete (WP+Drupal+React) |
-| `pdf-embed-seo-all-modules-v1.2.11.zip` | 1.2.11 | WordPress Free+Premium |
-| `drupal-pdf-embed-seo-v1.2.13.zip` | 1.2.13 | Drupal module only |
+| `pdf-embed-seo-optimize-v1.3.0.zip` | 1.3.0 | WordPress plugin (Free + Premium + Pro+, license-gated) |
+| `drupal-pdf-embed-seo-v1.2.13.zip` | 1.2.13 | Drupal module (Free + Premium + Pro+) |
+| `react-pdf-embed-seo-v1.2.10.zip` | 1.2.10 | React/Next.js packages |
+| `pdfviewer-theme.zip` | 2.2.94 | Marketing website WordPress theme |
+| `pdf-license-manager-v1.0.1.zip` | 1.0.1 | License management WordPress plugin |
 
 ### Premium Purchase
 
