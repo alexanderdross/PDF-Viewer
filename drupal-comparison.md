@@ -145,12 +145,20 @@ The original module used `\Drupal::` static service calls extensively, violating
 |------|---------------------|
 | `PdfApiController.php` | `\Drupal::service()`, `\Drupal::moduleHandler()`, `\Drupal::database()`, `\Drupal::time()`, `\Drupal::logger()` |
 | `PdfDataController.php` | `\Drupal::service('file_system')`, `\Drupal::database()`, `\Drupal::request()`, `\Drupal::time()`, `\Drupal::logger()` |
-| `PdfArchiveController.php` | Cached `moduleExists()` result |
-| `PdfViewController.php` | Various `\Drupal::` calls |
-| `PdfAnalyticsController.php` | `\Drupal::service()`, `\Drupal::request()` |
-| `PdfDocumentForm.php` | Static calls |
-| `PdfEmbedSeoSettingsForm.php` | Static calls |
-| `PdfPasswordForm.php` | Static calls |
+| `PdfArchiveController.php` | `\Drupal::request()` |
+| `PdfViewController.php` | `\Drupal::service('extension.list.module')`, `\Drupal::request()` |
+| `PdfAnalyticsController.php` | `\Drupal::service()` |
+| `PdfDocumentForm.php` | `\Drupal::moduleHandler()`, `\Drupal::service('password')` |
+| `PdfEmbedSeoSettingsForm.php` | `\Drupal::moduleHandler()`, `\Drupal::service('file_url_generator')` |
+| `PdfPasswordForm.php` | `\Drupal::entityTypeManager()`, `\Drupal::service('password')`, `\Drupal::request()` |
+| `PdfDocumentListBuilder.php` | `\Drupal::service('date.formatter')` |
+| `PdfViewerBlock.php` | `\Drupal::config()` |
+| `PdfViewerFormatter.php` | `\Drupal::config()`, `\Drupal::service('file_url_generator')`, `\Drupal::service('extension.list.module')` |
+| `PdfDocument.php` (MediaSource) | `\Drupal::service('extension.list.module')`, `\Drupal::hasService()` |
+| `PdfAnalyticsResource.php` | `\Drupal::currentUser()`, `\Drupal::request()`, `\Drupal::time()` |
+| `PdfDataResource.php` | `\Drupal::service('file_system')`, `\Drupal::request()` |
+| `PdfDocumentResource.php` | `\Drupal::config()`, `\Drupal::moduleHandler()`, `\Drupal::service('file_url_generator')` |
+| `PdfProgressResource.php` | `\Drupal::service('user.data')`, `\Drupal::service('tempstore.private')`, `\Drupal::request()` |
 
 ### Files with DI fixes (premium module):
 
@@ -193,6 +201,10 @@ Added `instanceof` checks before accessing entity methods (prevents crashes when
 | File | Check added |
 |------|------------|
 | `PdfApiController.php` | `$document instanceof PdfDocumentInterface` |
+| `PdfArchiveController.php` | `$document instanceof PdfDocumentInterface` |
+| `PdfAnalyticsController.php` | `$document instanceof PdfDocumentInterface`, `UserInterface` |
+| `PdfPasswordForm.php` | `$pdf_document instanceof PdfDocumentInterface` |
+| `PdfViewerBlock.php` | `$pdf_document instanceof PdfDocumentInterface` |
 | `PdfSitemapController.php` | `$document instanceof PdfDocumentInterface` |
 | `PdfBulkOperations.php` | `$document instanceof PdfDocumentInterface` |
 | `PdfPremiumApiController.php` | `$term instanceof TermInterface` (categories/tags) |
@@ -200,22 +212,43 @@ Added `instanceof` checks before accessing entity methods (prevents crashes when
 | `VersionManager.php` | `$file instanceof FileInterface` |
 | `TwoFactorAuth.php` | `$user instanceof UserInterface`, `$document instanceof PdfDocumentInterface` |
 
+### Null-Safe Session Handling (5 files)
+
+Added `$request->hasSession()` checks before accessing sessions:
+
+- `PdfViewController.php`
+- `PdfDataController.php`
+- `PdfPasswordForm.php`
+- `PdfDataResource.php`
+- `PdfProgressResource.php`
+
 ### TimeInterface Deprecation Fix
 
 | File | Change |
 |------|--------|
-| `PdfAnalyticsTracker.php` (premium) | `Drupal\Core\Datetime\TimeInterface` → `Drupal\Component\Datetime\TimeInterface` |
+| `PdfAnalyticsTracker.php` (core) | `Drupal\Core\Datetime\TimeInterface` -> `Drupal\Component\Datetime\TimeInterface` |
+| `PdfAnalyticsTracker.php` (premium) | Same namespace fix |
 | `PdfProgressTracker.php` (premium) | Same namespace fix |
 
 ---
 
-## Comparison Fix in AnnotationManager (Pro+)
+## Architectural Changes
 
-| Original | Fixed |
-|---|---|
-| `$annotation['user_id'] !== (string) $this->currentUser->id()` | `$annotation['user_id'] != $this->currentUser->id()` |
+### Removed Remote License Validation (Premium + Pro+)
 
-The original strict comparison with string cast was fragile — the DB returns string IDs while `AccountProxy::id()` returns int. Loose `!=` comparison handles both types correctly. This prevented legitimate owners from editing/deleting their own annotations.
+The original module contained a `LicenseValidator` service in the premium module that made HTTP requests to the central license dashboard API (`pdfviewer.drossmedia.de`). This was removed:
+
+- **Deleted:** `modules/pdf_embed_seo_premium/src/Service/LicenseValidator.php` (439 lines)
+- **Simplified:** `modules/pdf_embed_seo_pro_plus/src/Service/LicenseValidator.php` (removed HTTP client, remote validation, heartbeat)
+- **Removed:** Cron hooks for daily heartbeat in both premium and pro+ `.module` files
+- **Simplified:** `PdfPremiumSettingsForm.php` license activation now uses local-only validation
+
+License validation is now purely local (pattern-matching on key format + expiration check).
+
+### Removed Thumbnail Auto-Generation from Form Save
+
+- `PdfDocumentForm.php` — Removed automatic thumbnail generation on `SAVED_NEW`
+- `PdfDocument.php` (MediaSource) — Removed dynamic thumbnail generation from `getThumbnailUri()`
 
 ---
 
@@ -279,42 +312,45 @@ All 7 JavaScript files reformatted from 2-space to 4-space indentation to match 
 - `pdf_embed_seo.routing.yml` — Removed CSRF from GET route + added 3 API routes
 - `pdf_embed_seo.links.task.yml` — **New file** (admin tabs)
 - `phpcs.xml` — **New file**
-- `phpstan.neon` — **New file** (updated)
+- `phpstan.neon` — **New file**
 - `src/Controller/PdfApiController.php` — DI overhaul + 4 new methods
-- `src/Controller/PdfArchiveController.php` — Cached moduleExists()
+- `src/Controller/PdfArchiveController.php` — DI + null safety
 - `src/Controller/PdfDataController.php` — Full DI overhaul
-- `src/Controller/PdfViewController.php` — DI fixes
-- `src/Controller/PdfAnalyticsController.php` — DI fixes
+- `src/Controller/PdfViewController.php` — DI + session safety
+- `src/Controller/PdfAnalyticsController.php` — DI + type safety
 - `src/Entity/PdfDocument.php` — Formatting
 - `src/Field/ComputedViewCount.php` — Formatting
-- `src/Form/PdfDocumentForm.php` — DI fixes
-- `src/Form/PdfEmbedSeoSettingsForm.php` — DI fixes
-- `src/Form/PdfPasswordForm.php` — DI fixes
+- `src/Form/PdfDocumentForm.php` — DI + removed auto-thumbnail
+- `src/Form/PdfEmbedSeoSettingsForm.php` — DI
+- `src/Form/PdfPasswordForm.php` — DI + session safety
 - `src/PdfDocumentAccessControlHandler.php` — Formatting
-- `src/PdfDocumentListBuilder.php` — Formatting
-- `src/Plugin/Block/PdfViewerBlock.php` — Formatting
-- `src/Plugin/Field/FieldFormatter/PdfViewerFormatter.php` — Formatting
-- `src/Plugin/media/Source/PdfDocument.php` — Formatting
-- `src/Plugin/rest/resource/*.php` — Formatting
-- `src/Service/PdfAnalyticsTracker.php` — Formatting
+- `src/PdfDocumentListBuilder.php` — DI
+- `src/Plugin/Block/PdfViewerBlock.php` — DI + type safety
+- `src/Plugin/Field/FieldFormatter/PdfViewerFormatter.php` — DI (ContainerFactoryPluginInterface)
+- `src/Plugin/media/Source/PdfDocument.php` — DI + removed dynamic thumbnail
+- `src/Plugin/rest/resource/*.php` — DI + type safety (4 files)
+- `src/Service/PdfAnalyticsTracker.php` — TimeInterface namespace fix
 - `src/Service/PdfThumbnailGenerator.php` — Formatting
-- `templates/*.html.twig` — `%var` → `@var` fix + `.id.value` fix
+- `templates/*.html.twig` — `%var` -> `@var` fix + `.id.value` fix (4 files)
 - `CHANGELOG.md` — v1.2.12 + v1.2.13 entries
-- `tests/` — Formatting fixes
+- `tests/` — Formatting (5 files)
 
 ### Premium Module (18 files)
 - `pdf_embed_seo_premium.install` — `unserialize()` security fix
+- `pdf_embed_seo_premium.module` — Removed cron heartbeat
 - `pdf_embed_seo_premium.services.yml` — Added DI arguments
 - `src/Controller/*.php` — DI overhaul (3 files)
-- `src/Form/PdfPremiumSettingsForm.php` — Return types
-- `src/Service/*.php` — DI overhaul, missing methods, bug fixes (8 files)
+- `src/Form/PdfPremiumSettingsForm.php` — Simplified license activation
+- `src/Service/LicenseValidator.php` — **Deleted** (remote validation removed)
+- `src/Service/*.php` — DI overhaul, missing methods, bug fixes (7 files)
 - `tests/` — Formatting (3 files)
 
 ### Pro+ Module (14 files)
-- `pdf_embed_seo_pro_plus.module` — Function rename
+- `pdf_embed_seo_pro_plus.module` — Function rename + removed cron
 - `pdf_embed_seo_pro_plus.services.yml` — Added DI arguments
+- `src/Controller/` — **New empty directory**
 - `src/Service/*.php` — DI overhaul, bug fixes (9 files)
 - `tests/` — Formatting (5 files)
 
 ### JavaScript (7 files)
-- All reformatted (2-space → 4-space indent), no functional changes
+- All reformatted (2-space -> 4-space indent), no functional changes
