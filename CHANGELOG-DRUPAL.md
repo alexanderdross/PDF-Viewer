@@ -10,6 +10,42 @@ For the complete unified changelog, see [CHANGELOG.md](https://github.com/alexan
 
 ---
 
+## [1.2.13] - 2026-02-17
+
+### Code Quality & Static Analysis
+- **PHPStan level 5 compliance** — Resolved 526 static analysis errors across all three module tiers
+- **PHPCS Drupal standards compliance** — Fixed 20,000+ coding standard violations
+- **Added `phpstan.neon`** configuration for module-level static analysis
+
+### Dependency Injection
+- **Replaced all `\Drupal::` static calls** in service classes, controllers, forms, plugins, and blocks with proper constructor dependency injection (40+ files)
+- **Fixed `ConfigFormBase` constructor** — Added required `TypedConfigManagerInterface` for Drupal 11 compatibility
+
+### Type Safety
+- **Entity type narrowing** — Added `instanceof PdfDocumentInterface` checks across 15+ files
+- **Fixed `TimeInterface` namespace** — Corrected from `Drupal\Core\Datetime` to `Drupal\Component\Datetime` in 4 service files
+- **Added missing service methods** — `getTotalDownloads()`, `getDocumentAnalytics()`, `trackDownload()` on premium `PdfAnalyticsTracker`
+- **Fixed `Merge::key()` API** — Corrected to `Merge::keys()` (plural) in `TwoFactorAuth`
+
+### Security
+- **Secured `unserialize()` call** — Added `['allowed_classes' => FALSE]` in premium install file
+
+---
+
+## [1.2.12] - 2026-02-17
+
+### Bug Fixes
+- **Twig FieldItemList crash** — Fixed `pdf_document.id` → `pdf_document.id.value` in `pdf-viewer.html.twig`
+- **PDF viewer 403 error** — Removed `_csrf_token: 'TRUE'` from `pdf_embed_seo.pdf_data` GET route
+- **Broken HTML in archive cards** — Changed `%variable` → `@variable` in `t()` calls across 3 Twig templates
+- **REST API 500 error** — Fixed `formatDocument()` referencing non-existent `slug` base field
+
+### New Features
+- **REST API document endpoints** — Added `GET /documents`, `GET /documents/{id}`, `GET /documents/{id}/data` as controller routes
+- **Admin content tab** — Added `pdf_embed_seo.links.task.yml` for PDF Documents tab on Admin > Content
+
+---
+
 ## [1.2.11] - 2026-02-10
 
 ### Added

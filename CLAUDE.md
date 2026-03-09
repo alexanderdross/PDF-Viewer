@@ -2,7 +2,7 @@
 
 A comprehensive PDF management solution available for WordPress, Drupal, and React/Next.js that uses Mozilla's PDF.js library to securely display PDFs with SEO optimization. This repository also contains the marketing website (WordPress theme) and a centralized license management system.
 
-**Current Version:** 1.3.0 (Pro+ Enterprise), 1.2.11 (Free & Premium)
+**Current Version:** 1.3.0 (Pro+ Enterprise), 1.2.13 (Drupal Free & Premium), 1.2.11 (WordPress & React Free & Premium)
 **Platforms:** WordPress (Free, Premium & Pro+), Drupal 10/11 (Free, Premium & Pro+), React/Next.js
 **License:** GPL v2 or later (WordPress/Drupal), MIT (React Free), Commercial (React Pro/Pro+)
 **Website:** https://pdfviewer.drossmedia.de
@@ -53,8 +53,8 @@ This monorepo contains **five major components**:
 | WP Free | `pdf-embed-seo-optimize/` | WordPress 5.8+ | 1.2.10 | Core PDF viewer, SEO, REST API |
 | WP Premium | `pdf-embed-seo-optimize/premium/` | WordPress 5.8+ | 1.2.10 | Analytics, passwords, progress, sitemap |
 | WP Pro+ | `pdf-embed-seo-optimize/pro-plus/` | WordPress 5.8+ | 1.3.0 | Advanced analytics, annotations, versioning, webhooks, 2FA, compliance |
-| Drupal Free | `drupal-pdf-embed-seo/` | Drupal 10/11 | 1.2.11 | Core PDF viewer, SEO, REST API |
-| Drupal Premium | `drupal-pdf-embed-seo/modules/pdf_embed_seo_premium/` | Drupal 10/11 | 1.2.11 | Analytics, passwords, progress, sitemap |
+| Drupal Free | `drupal-pdf-embed-seo/` | Drupal 10/11 | 1.2.13 | Core PDF viewer, SEO, REST API |
+| Drupal Premium | `drupal-pdf-embed-seo/modules/pdf_embed_seo_premium/` | Drupal 10/11 | 1.2.13 | Analytics, passwords, progress, sitemap |
 | Drupal Pro+ | `drupal-pdf-embed-seo/modules/pdf_embed_seo_pro_plus/` | Drupal 10/11 | 1.3.0 | Advanced analytics, annotations, versioning, webhooks, 2FA, compliance |
 | React Free | `react-pdf-embed-seo/packages/react/` | React 18+/Next.js 13+ | 1.2.10 | Components, hooks, SEO, API client |
 | React Pro | `react-pdf-embed-seo/packages/react-premium/` | React 18+/Next.js 13+ | 1.2.10 | Analytics, passwords, progress, search |
@@ -366,7 +366,7 @@ Configurable via Settings page (`/wp-admin/edit.php?post_type=pdf_document&page=
 ### Overview
 
 **Location:** `drupal-pdf-embed-seo/`
-**Version:** 1.2.11 (Free/Premium), 1.3.0 (Pro+)
+**Version:** 1.2.13 (Free/Premium), 1.3.0 (Pro+)
 **Requires:** Drupal 10 or 11, PHP 8.1+
 **Dependencies:** node, file, taxonomy, path, path_alias, media
 
@@ -1115,7 +1115,7 @@ define( 'PLM_STRIPE_WEBHOOK_SECRET', 'whsec_...' );  // wp-config.php
 5. **Output Escaping** - All outputs escaped
 6. **Password Hashing** - bcrypt hashing (Premium)
 
-### Drupal-Specific (v1.2.11)
+### Drupal-Specific (v1.2.13)
 
 7. **CSRF Token** on all POST API endpoints
 8. **Rate Limiting** - 5 password attempts per 5 minutes, 15-minute block
@@ -1217,7 +1217,7 @@ cd react-pdf-embed-seo && pnpm build       # Build all packages
 | `pdf-embed-seo-pro-plus-v1.3.0.zip` | 1.3.0 | Pro+ Enterprise only |
 | `pdf-embed-seo-complete-v1.2.11.zip` | 1.2.11 | Complete (WP+Drupal+React) |
 | `pdf-embed-seo-all-modules-v1.2.11.zip` | 1.2.11 | WordPress Free+Premium |
-| `drupal-pdf-embed-seo-v1.2.11.zip` | 1.2.11 | Drupal module only |
+| `drupal-pdf-embed-seo-v1.2.13.zip` | 1.2.13 | Drupal module only |
 
 ### Premium Purchase
 
@@ -1228,7 +1228,8 @@ cd react-pdf-embed-seo && pnpm build       # Build all packages
 ## Changelog Summary
 
 ### Current Versions
-- **Free/Premium:** v1.2.11 (2026-02-10)
+- **Drupal Free/Premium:** v1.2.13 (2026-02-17)
+- **WP/React Free/Premium:** v1.2.11 (2026-02-10)
 - **Pro+ Enterprise:** v1.3.0 (2026-02-11)
 - **License Manager:** v1.0.1
 
@@ -1237,6 +1238,8 @@ cd react-pdf-embed-seo && pnpm build       # Build all packages
 | Version | Highlights |
 |---------|-----------|
 | **1.3.0** | Pro+ Enterprise: advanced analytics, annotations, versioning, webhooks, 2FA, compliance |
+| **1.2.13** | Drupal: PHPStan level 5 + PHPCS compliance, DI overhaul (40+ static calls removed), type safety fixes |
+| **1.2.12** | Drupal: Critical bug fixes — Twig FieldItemList crash, 403 CSRF on GET route, broken HTML attributes, REST API 500, admin tab |
 | **1.2.11** | Drupal: CSRF protection, rate limiting, session cache, computed view count, Media Library, token storage migration |
 | **1.2.10** | iOS print support, comprehensive print CSS across all platforms |
 | **1.2.9** | Drupal: performance fixes (no entity saves on views, cache optimization), IP anonymization |

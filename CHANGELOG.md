@@ -8,6 +8,33 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.2.13] - 2026-02-17 (Drupal)
+
+### Code Quality
+- PHPStan level 5 compliance (526 errors resolved)
+- PHPCS Drupal standards compliance (20,000+ violations fixed)
+- Replaced all `\Drupal::` static calls with proper dependency injection (40+ files)
+
+### Bug Fixes
+- Fixed `TimeInterface` namespace (Core → Component) in 4 service files
+- Added missing premium analytics methods (`getTotalDownloads`, `getDocumentAnalytics`, `trackDownload`)
+- Fixed `Merge::key()` → `Merge::keys()` in TwoFactorAuth
+- Secured `unserialize()` with `['allowed_classes' => FALSE]`
+
+## [1.2.12] - 2026-02-17 (Drupal)
+
+### Critical Bug Fixes
+- **Twig crash**: Fixed `pdf_document.id` → `pdf_document.id.value` (FieldItemList not printable)
+- **403 on PDF viewer**: Removed CSRF token from GET `pdf_data` route
+- **Broken HTML attributes**: Changed `%variable` → `@variable` in Twig `t()` calls (3 templates)
+- **REST API 500**: Fixed `formatDocument()` referencing non-existent `slug` field
+
+### New Features
+- REST API document endpoints (`GET /documents`, `/documents/{id}`, `/documents/{id}/data`)
+- Admin content tab for PDF Documents
+
+---
+
 ## [1.2.11] - 2026-02-10
 
 ### Added (Drupal)
