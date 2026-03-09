@@ -187,7 +187,8 @@ class RateLimiterTest extends UnitTestCase {
    */
   public function testWindowExpiry() {
     $window_seconds = 300;
-    $first_attempt = time() - 400; // 400 seconds ago.
+    // 400 seconds ago.
+    $first_attempt = time() - 400;
     $window_start = time() - $window_seconds;
 
     // First attempt is outside the window.
@@ -219,11 +220,13 @@ class RateLimiterTest extends UnitTestCase {
    * @covers ::cleanup
    */
   public function testCleanupOldRecords() {
-    $older_than = 86400; // 24 hours.
+    // 24 hours.
+    $older_than = 86400;
     $threshold = time() - $older_than;
 
     // Records older than threshold should be deleted.
-    $record_time = time() - 100000; // ~27 hours old.
+    // ~27 hours old.
+    $record_time = time() - 100000;
     $should_delete = $record_time < $threshold;
 
     $this->assertTrue($should_delete);
@@ -235,11 +238,13 @@ class RateLimiterTest extends UnitTestCase {
    * @covers ::cleanup
    */
   public function testCleanupKeepsRecentRecords() {
-    $older_than = 86400; // 24 hours.
+    // 24 hours.
+    $older_than = 86400;
     $threshold = time() - $older_than;
 
     // Recent records should be kept.
-    $record_time = time() - 3600; // 1 hour old.
+    // 1 hour old.
+    $record_time = time() - 3600;
     $should_delete = $record_time < $threshold;
 
     $this->assertFalse($should_delete);

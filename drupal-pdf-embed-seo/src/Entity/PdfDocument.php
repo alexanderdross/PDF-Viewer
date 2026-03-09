@@ -103,15 +103,19 @@ class PdfDocument extends ContentEntityBase implements PdfDocumentInterface {
       ->setRequired(TRUE)
       ->setTranslatable(TRUE)
       ->setSetting('max_length', 255)
-      ->setDisplayOptions('form', [
-        'type' => 'string_textfield',
-        'weight' => -10,
-      ])
-      ->setDisplayOptions('view', [
-        'label' => 'hidden',
-        'type' => 'string',
-        'weight' => -10,
-      ])
+      ->setDisplayOptions(
+              'form', [
+                'type' => 'string_textfield',
+                'weight' => -10,
+              ]
+          )
+      ->setDisplayOptions(
+              'view', [
+                'label' => 'hidden',
+                'type' => 'string',
+                'weight' => -10,
+              ]
+          )
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
@@ -119,15 +123,19 @@ class PdfDocument extends ContentEntityBase implements PdfDocumentInterface {
       ->setLabel(t('Description'))
       ->setDescription(t('A description of the PDF document.'))
       ->setTranslatable(TRUE)
-      ->setDisplayOptions('form', [
-        'type' => 'text_textarea',
-        'weight' => -5,
-      ])
-      ->setDisplayOptions('view', [
-        'label' => 'above',
-        'type' => 'text_default',
-        'weight' => -5,
-      ])
+      ->setDisplayOptions(
+              'form', [
+                'type' => 'text_textarea',
+                'weight' => -5,
+              ]
+          )
+      ->setDisplayOptions(
+              'view', [
+                'label' => 'above',
+                'type' => 'text_default',
+                'weight' => -5,
+              ]
+          )
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
@@ -138,10 +146,12 @@ class PdfDocument extends ContentEntityBase implements PdfDocumentInterface {
       ->setSetting('file_extensions', 'pdf')
       ->setSetting('file_directory', 'pdf_documents')
       ->setSetting('max_filesize', '50 MB')
-      ->setDisplayOptions('form', [
-        'type' => 'file_generic',
-        'weight' => 0,
-      ])
+      ->setDisplayOptions(
+              'form', [
+                'type' => 'file_generic',
+                'weight' => 0,
+              ]
+          )
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
@@ -151,18 +161,22 @@ class PdfDocument extends ContentEntityBase implements PdfDocumentInterface {
       ->setSetting('file_directory', 'pdf_thumbnails')
       ->setSetting('alt_field', FALSE)
       ->setSetting('title_field', FALSE)
-      ->setDisplayOptions('form', [
-        'type' => 'image_image',
-        'weight' => 5,
-      ])
-      ->setDisplayOptions('view', [
-        'label' => 'hidden',
-        'type' => 'image',
-        'weight' => 0,
-        'settings' => [
-          'image_style' => 'medium',
-        ],
-      ])
+      ->setDisplayOptions(
+              'form', [
+                'type' => 'image_image',
+                'weight' => 5,
+              ]
+          )
+      ->setDisplayOptions(
+              'view', [
+                'label' => 'hidden',
+                'type' => 'image',
+                'weight' => 0,
+                'settings' => [
+                  'image_style' => 'medium',
+                ],
+              ]
+          )
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
@@ -170,26 +184,30 @@ class PdfDocument extends ContentEntityBase implements PdfDocumentInterface {
       ->setLabel(t('Allow Download'))
       ->setDescription(t('Allow users to download this PDF.'))
       ->setDefaultValue(FALSE)
-      ->setDisplayOptions('form', [
-        'type' => 'boolean_checkbox',
-        'weight' => 10,
-        'settings' => [
-          'display_label' => TRUE,
-        ],
-      ])
+      ->setDisplayOptions(
+              'form', [
+                'type' => 'boolean_checkbox',
+                'weight' => 10,
+                'settings' => [
+                  'display_label' => TRUE,
+                ],
+              ]
+          )
       ->setDisplayConfigurable('form', TRUE);
 
     $fields['allow_print'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Allow Print'))
       ->setDescription(t('Allow users to print this PDF.'))
       ->setDefaultValue(FALSE)
-      ->setDisplayOptions('form', [
-        'type' => 'boolean_checkbox',
-        'weight' => 11,
-        'settings' => [
-          'display_label' => TRUE,
-        ],
-      ])
+      ->setDisplayOptions(
+              'form', [
+                'type' => 'boolean_checkbox',
+                'weight' => 11,
+                'settings' => [
+                  'display_label' => TRUE,
+                ],
+              ]
+          )
       ->setDisplayConfigurable('form', TRUE);
 
     // View count is now a computed field that reads from the analytics table.
@@ -200,11 +218,13 @@ class PdfDocument extends ContentEntityBase implements PdfDocumentInterface {
       ->setDefaultValue(0)
       ->setComputed(TRUE)
       ->setClass('\Drupal\pdf_embed_seo\Field\ComputedViewCount')
-      ->setDisplayOptions('view', [
-        'label' => 'inline',
-        'type' => 'number_integer',
-        'weight' => 20,
-      ])
+      ->setDisplayOptions(
+              'view', [
+                'label' => 'inline',
+                'type' => 'number_integer',
+                'weight' => 20,
+              ]
+          )
       ->setDisplayConfigurable('view', TRUE);
 
     // Premium fields.
@@ -212,68 +232,80 @@ class PdfDocument extends ContentEntityBase implements PdfDocumentInterface {
       ->setLabel(t('Password'))
       ->setDescription(t('Optional password to protect this PDF (Premium feature).'))
       ->setSetting('max_length', 255)
-      ->setDisplayOptions('form', [
-        'type' => 'string_textfield',
-        'weight' => 15,
-      ])
+      ->setDisplayOptions(
+              'form', [
+                'type' => 'string_textfield',
+                'weight' => 15,
+              ]
+          )
       ->setDisplayConfigurable('form', TRUE);
 
     $fields['status'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Published'))
       ->setDescription(t('Whether the PDF document is published.'))
       ->setDefaultValue(TRUE)
-      ->setDisplayOptions('form', [
-        'type' => 'boolean_checkbox',
-        'weight' => 100,
-        'settings' => [
-          'display_label' => TRUE,
-        ],
-      ])
+      ->setDisplayOptions(
+              'form', [
+                'type' => 'boolean_checkbox',
+                'weight' => 100,
+                'settings' => [
+                  'display_label' => TRUE,
+                ],
+              ]
+          )
       ->setDisplayConfigurable('form', TRUE);
 
     $fields['uid']
       ->setLabel(t('Author'))
       ->setDescription(t('The user who created the PDF document.'))
-      ->setDisplayOptions('form', [
-        'type' => 'entity_reference_autocomplete',
-        'weight' => 50,
-        'settings' => [
-          'match_operator' => 'CONTAINS',
-          'size' => 60,
-          'placeholder' => '',
-        ],
-      ])
+      ->setDisplayOptions(
+              'form', [
+                'type' => 'entity_reference_autocomplete',
+                'weight' => 50,
+                'settings' => [
+                  'match_operator' => 'CONTAINS',
+                  'size' => 60,
+                  'placeholder' => '',
+                ],
+              ]
+          )
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Created'))
       ->setDescription(t('The time when the PDF document was created.'))
-      ->setDisplayOptions('view', [
-        'label' => 'inline',
-        'type' => 'timestamp',
-        'weight' => 30,
-      ])
+      ->setDisplayOptions(
+              'view', [
+                'label' => 'inline',
+                'type' => 'timestamp',
+                'weight' => 30,
+              ]
+          )
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'))
       ->setDescription(t('The time when the PDF document was last edited.'))
-      ->setDisplayOptions('view', [
-        'label' => 'inline',
-        'type' => 'timestamp',
-        'weight' => 31,
-      ])
+      ->setDisplayOptions(
+              'view', [
+                'label' => 'inline',
+                'type' => 'timestamp',
+                'weight' => 31,
+              ]
+          )
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['path'] = BaseFieldDefinition::create('path')
       ->setLabel(t('URL alias'))
       ->setDescription(t('The PDF document URL alias.'))
       ->setTranslatable(TRUE)
-      ->setDisplayOptions('form', [
-        'type' => 'path',
-        'weight' => 60,
-      ])
+      ->setDisplayOptions(
+              'form', [
+                'type' => 'path',
+                'weight' => 60,
+              ]
+          )
       ->setDisplayConfigurable('form', TRUE)
       ->setComputed(TRUE);
 

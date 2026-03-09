@@ -98,9 +98,11 @@ class VersionManagerTest extends UnitTestCase {
     }
 
     // Sort by date descending.
-    usort($versions, function ($a, $b) {
-      return $b['created'] - $a['created'];
-    });
+    usort(
+          $versions, function ($a, $b) {
+              return $b['created'] - $a['created'];
+          }
+      );
 
     $kept_versions = array_slice($versions, 0, $max_versions);
 

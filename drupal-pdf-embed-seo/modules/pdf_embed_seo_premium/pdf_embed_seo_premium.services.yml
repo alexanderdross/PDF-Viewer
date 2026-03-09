@@ -8,6 +8,7 @@ services:
       - '@request_stack'
       - '@datetime.time'
       - '@config.factory'
+      - '@logger.factory'
 
   # PDF progress tracker service (premium).
   pdf_embed_seo.progress_tracker:
@@ -17,6 +18,7 @@ services:
       - '@current_user'
       - '@request_stack'
       - '@datetime.time'
+      - '@logger.factory'
 
   # PDF schema enhancer service (premium).
   pdf_embed_seo.schema_enhancer:
@@ -29,6 +31,7 @@ services:
     class: Drupal\pdf_embed_seo_premium\Service\PdfAccessManager
     arguments:
       - '@current_user'
+      - '@entity_type.manager'
 
   # PDF viewer enhancer service (premium).
   pdf_embed_seo.viewer_enhancer:

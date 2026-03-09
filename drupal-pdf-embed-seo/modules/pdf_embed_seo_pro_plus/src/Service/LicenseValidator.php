@@ -65,17 +65,17 @@ class LicenseValidator {
       return self::STATUS_INACTIVE;
     }
 
-    // Validate Pro+ license format: PDF$PRO+#XXXX-XXXX@XXXX-XXXX!XXXX
+    // Validate Pro+ license format: PDF$PRO+#XXXX-XXXX@XXXX-XXXX!XXXX.
     if (preg_match('/^PDF\$PRO\+#[A-Z0-9]{4}-[A-Z0-9]{4}@[A-Z0-9]{4}-[A-Z0-9]{4}![A-Z0-9]{4}$/i', $license_key)) {
       return $this->checkExpiration();
     }
 
-    // Unlimited/test license: PDF$UNLIMITED#XXXX@XXXX!XXXX
+    // Unlimited/test license: PDF$UNLIMITED#XXXX@XXXX!XXXX.
     if (preg_match('/^PDF\$UNLIMITED#[A-Z0-9]{4}@[A-Z0-9]{4}![A-Z0-9]{4}$/i', $license_key)) {
       return self::STATUS_VALID;
     }
 
-    // Development license: PDF$DEV#XXXX-XXXX@XXXX!XXXX
+    // Development license: PDF$DEV#XXXX-XXXX@XXXX!XXXX.
     if (preg_match('/^PDF\$DEV#[A-Z0-9]{4}-[A-Z0-9]{4}@[A-Z0-9]{4}![A-Z0-9]{4}$/i', $license_key)) {
       return self::STATUS_VALID;
     }
@@ -153,14 +153,14 @@ class LicenseValidator {
       ];
     }
 
-    // Store the license key
+    // Store the license key.
     $config = $this->configFactory->getEditable('pdf_embed_seo_pro_plus.settings');
     $config->set('license_key', $license_key);
     $config->set('license_status', $status);
     $config->set('license_activated', date('Y-m-d H:i:s'));
     $config->save();
 
-    // Update state for quick checks
+    // Update state for quick checks.
     $this->state->set('pdf_embed_seo_pro_plus.license_valid', TRUE);
 
     return [

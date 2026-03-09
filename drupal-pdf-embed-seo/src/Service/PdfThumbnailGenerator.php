@@ -57,7 +57,7 @@ class PdfThumbnailGenerator {
     FileSystemInterface $file_system,
     EntityTypeManagerInterface $entity_type_manager,
     LoggerChannelFactoryInterface $logger_factory,
-    ConfigFactoryInterface $config_factory
+    ConfigFactoryInterface $config_factory,
   ) {
     $this->fileSystem = $file_system;
     $this->entityTypeManager = $entity_type_manager;
@@ -148,19 +148,21 @@ class PdfThumbnailGenerator {
 
     // Convert first page of PDF to PNG.
     $command = sprintf(
-      'convert -density 150 %s[0] -resize %dx%d -background white -flatten %s 2>&1',
-      escapeshellarg($pdf_path),
-      $width,
-      $height,
-      escapeshellarg($output_path)
-    );
+          'convert -density 150 %s[0] -resize %dx%d -background white -flatten %s 2>&1',
+          escapeshellarg($pdf_path),
+          $width,
+          $height,
+          escapeshellarg($output_path)
+      );
 
     exec($command, $output, $return_var);
 
     if ($return_var !== 0) {
-      $this->logger->error('ImageMagick conversion failed: @output', [
-        '@output' => implode("\n", $output),
-      ]);
+      $this->logger->error(
+            'ImageMagick conversion failed: @output', [
+              '@output' => implode("\n", $output),
+            ]
+        );
       throw new \Exception('ImageMagick conversion failed.');
     }
 
@@ -188,19 +190,21 @@ class PdfThumbnailGenerator {
 
     // Convert first page of PDF to PNG using Ghostscript.
     $command = sprintf(
-      'gs -dSAFER -dBATCH -dNOPAUSE -dFirstPage=1 -dLastPage=1 -sDEVICE=pngalpha -r150 -dPDFFitPage -g%dx%d -sOutputFile=%s %s 2>&1',
-      $width * 2,
-      $height * 2,
-      escapeshellarg($output_path),
-      escapeshellarg($pdf_path)
-    );
+          'gs -dSAFER -dBATCH -dNOPAUSE -dFirstPage=1 -dLastPage=1 -sDEVICE=pngalpha -r150 -dPDFFitPage -g%dx%d -sOutputFile=%s %s 2>&1',
+          $width * 2,
+          $height * 2,
+          escapeshellarg($output_path),
+          escapeshellarg($pdf_path)
+      );
 
     exec($command, $output, $return_var);
 
     if ($return_var !== 0) {
-      $this->logger->error('Ghostscript conversion failed: @output', [
-        '@output' => implode("\n", $output),
-      ]);
+      $this->logger->error(
+            'Ghostscript conversion failed: @output', [
+              '@output' => implode("\n", $output),
+            ]
+        );
       throw new \Exception('Ghostscript conversion failed.');
     }
 
@@ -239,10 +243,12 @@ class PdfThumbnailGenerator {
 
     // Create file entity.
     $file_storage = $this->entityTypeManager->getStorage('file');
-    $file = $file_storage->create([
-      'uri' => $uri,
-      'status' => 1,
-    ]);
+    $file = $file_storage->create(
+          [
+            'uri' => $uri,
+            'status' => 1,
+          ]
+      );
     $file->save();
 
     // Attach to PDF document.

@@ -2,15 +2,19 @@
 
 namespace Drupal\pdf_embed_seo\Plugin\rest\resource;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\Core\TempStore\PrivateTempStoreFactory;
+use Drupal\rest\ModifiedResourceResponse;
 use Drupal\rest\Plugin\ResourceBase;
 use Drupal\rest\ResourceResponse;
-use Drupal\rest\ModifiedResourceResponse;
+use Drupal\user\UserDataInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Drupal\pdf_embed_seo\Entity\PdfDocumentInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Provides a REST resource for PDF reading progress (Premium).
@@ -26,21 +30,28 @@ use Symfony\Component\HttpFoundation\Request;
 class PdfProgressResource extends ResourceBase {
 
   /**
-   * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
-
-  /**
-   * The current user.
-   *
-   * @var \Drupal\Core\Session\AccountProxyInterface
-   */
-  protected $currentUser;
-
-  /**
    * Constructs a PdfProgressResource object.
+   *
+   * @param array $configuration
+   *   A configuration array.
+   * @param string $plugin_id
+   *   The plugin ID.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param array $serializer_formats
+   *   The available serialization formats.
+   * @param \Psr\Log\LoggerInterface $logger
+   *   A logger instance.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   The entity type manager.
+   * @param \Drupal\Core\Session\AccountProxyInterface $currentUser
+   *   The current user.
+   * @param \Drupal\user\UserDataInterface $userData
+   *   The user data service.
+   * @param \Drupal\Core\TempStore\PrivateTempStoreFactory $tempStoreFactory
+   *   The private temp store factory.
+   * @param \Symfony\Component\HttpFoundation\RequestStack $requestStack
+   *   The request stack.
    */
   public function __construct(
     array $configuration,
@@ -48,27 +59,31 @@ class PdfProgressResource extends ResourceBase {
     $plugin_definition,
     array $serializer_formats,
     LoggerInterface $logger,
-    EntityTypeManagerInterface $entity_type_manager,
-    AccountProxyInterface $current_user
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected AccountProxyInterface $currentUser,
+    protected UserDataInterface $userData,
+    protected PrivateTempStoreFactory $tempStoreFactory,
+    protected RequestStack $requestStack,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $serializer_formats, $logger);
-    $this->entityTypeManager = $entity_type_manager;
-    $this->currentUser = $current_user;
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->getParameter('serializer.formats'),
-      $container->get('logger.factory')->get('pdf_embed_seo'),
-      $container->get('entity_type.manager'),
-      $container->get('current_user')
-    );
+          $configuration,
+          $plugin_id,
+          $plugin_definition,
+          $container->getParameter('serializer.formats'),
+          $container->get('logger.factory')->get('pdf_embed_seo'),
+          $container->get('entity_type.manager'),
+          $container->get('current_user'),
+          $container->get('user.data'),
+          $container->get('tempstore.private'),
+          $container->get('request_stack'),
+      );
   }
 
   /**
@@ -80,21 +95,18 @@ class PdfProgressResource extends ResourceBase {
    * @return \Drupal\rest\ResourceResponse
    *   The response containing reading progress.
    */
-  public function get($id) {
-    $document = $this->loadDocument($id);
+  public function get(int $id): ResourceResponse {
+    $this->loadDocument($id);
     $user_id = $this->getUserIdentifier();
     $progress_key = 'pdf_progress_' . $id . '_' . $user_id;
 
     $progress = NULL;
 
-    // Check user data for logged in users.
     if ($this->currentUser->isAuthenticated()) {
-      $user_data = \Drupal::service('user.data');
-      $progress = $user_data->get('pdf_embed_seo', $this->currentUser->id(), $progress_key);
+      $progress = $this->userData->get('pdf_embed_seo', $this->currentUser->id(), $progress_key);
     }
     else {
-      // Use tempstore for anonymous users.
-      $tempstore = \Drupal::service('tempstore.private')->get('pdf_embed_seo');
+      $tempstore = $this->tempStoreFactory->get('pdf_embed_seo');
       $progress = $tempstore->get($progress_key);
     }
 
@@ -106,14 +118,16 @@ class PdfProgressResource extends ResourceBase {
       ];
     }
 
-    $response = new ResourceResponse([
-      'document_id' => (int) $id,
-      'progress' => $progress,
-      'last_read' => $progress['timestamp'] ?? NULL,
-    ]);
+    $response = new ResourceResponse(
+          [
+            'document_id' => (int) $id,
+            'progress' => $progress,
+            'last_read' => $progress['timestamp'] ?? NULL,
+          ]
+      );
 
     // Don't cache progress data.
-    $response->addCacheableDependency((new \Drupal\Core\Cache\CacheableMetadata())->setCacheMaxAge(0));
+    $response->addCacheableDependency((new CacheableMetadata())->setCacheMaxAge(0));
     return $response;
   }
 
@@ -128,8 +142,8 @@ class PdfProgressResource extends ResourceBase {
    * @return \Drupal\rest\ModifiedResourceResponse
    *   The response.
    */
-  public function post($id, array $data) {
-    $document = $this->loadDocument($id);
+  public function post(int $id, array $data): ModifiedResourceResponse {
+    $this->loadDocument($id);
     $user_id = $this->getUserIdentifier();
     $progress_key = 'pdf_progress_' . $id . '_' . $user_id;
 
@@ -140,22 +154,21 @@ class PdfProgressResource extends ResourceBase {
       'timestamp' => date('c'),
     ];
 
-    // Save for logged in users.
     if ($this->currentUser->isAuthenticated()) {
-      $user_data = \Drupal::service('user.data');
-      $user_data->set('pdf_embed_seo', $this->currentUser->id(), $progress_key, $progress);
+      $this->userData->set('pdf_embed_seo', $this->currentUser->id(), $progress_key, $progress);
     }
     else {
-      // Use tempstore for anonymous users.
-      $tempstore = \Drupal::service('tempstore.private')->get('pdf_embed_seo');
+      $tempstore = $this->tempStoreFactory->get('pdf_embed_seo');
       $tempstore->set($progress_key, $progress);
     }
 
-    return new ModifiedResourceResponse([
-      'success' => TRUE,
-      'document_id' => (int) $id,
-      'progress' => $progress,
-    ], 200);
+    return new ModifiedResourceResponse(
+          [
+            'success' => TRUE,
+            'document_id' => (int) $id,
+            'progress' => $progress,
+          ], 200
+      );
   }
 
   /**
@@ -169,15 +182,15 @@ class PdfProgressResource extends ResourceBase {
    *
    * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
    */
-  protected function loadDocument($id) {
+  protected function loadDocument(int $id): PdfDocumentInterface {
     $storage = $this->entityTypeManager->getStorage('pdf_document');
-    $document = $storage->load($id);
+    $entity = $storage->load($id);
 
-    if (!$document) {
+    if (!$entity instanceof PdfDocumentInterface) {
       throw new NotFoundHttpException('PDF document not found.');
     }
 
-    return $document;
+    return $entity;
   }
 
   /**
@@ -186,14 +199,15 @@ class PdfProgressResource extends ResourceBase {
    * @return string
    *   The user identifier.
    */
-  protected function getUserIdentifier() {
+  protected function getUserIdentifier(): string {
     if ($this->currentUser->isAuthenticated()) {
       return 'user_' . $this->currentUser->id();
     }
 
     // For anonymous users, use session ID.
-    $session = \Drupal::request()->getSession();
-    return 'anon_' . $session->getId();
+    $request = $this->requestStack->getCurrentRequest();
+    $session = $request?->getSession();
+    return 'anon_' . ($session ? $session->getId() : 'unknown');
   }
 
 }

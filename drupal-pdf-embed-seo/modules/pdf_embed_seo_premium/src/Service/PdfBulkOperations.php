@@ -5,13 +5,17 @@ namespace Drupal\pdf_embed_seo_premium\Service;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\file\FileRepositoryInterface;
 use Drupal\pdf_embed_seo\Entity\PdfDocument;
+use Drupal\pdf_embed_seo\Entity\PdfDocumentInterface;
 
 /**
  * Service for bulk PDF operations.
  */
 class PdfBulkOperations {
+
+  use StringTranslationTrait;
 
   /**
    * The entity type manager.
@@ -57,7 +61,7 @@ class PdfBulkOperations {
     EntityTypeManagerInterface $entity_type_manager,
     AccountProxyInterface $current_user,
     FileSystemInterface $file_system,
-    ?FileRepositoryInterface $file_repository = NULL
+    ?FileRepositoryInterface $file_repository = NULL,
   ) {
     $this->entityTypeManager = $entity_type_manager;
     $this->currentUser = $current_user;
@@ -84,20 +88,20 @@ class PdfBulkOperations {
     ];
 
     if (!file_exists($csv_path)) {
-      $results['messages'][] = t('CSV file not found.');
+      $results['messages'][] = $this->t('CSV file not found.');
       return $results;
     }
 
     $handle = fopen($csv_path, 'r');
     if ($handle === FALSE) {
-      $results['messages'][] = t('Could not open CSV file.');
+      $results['messages'][] = $this->t('Could not open CSV file.');
       return $results;
     }
 
     // Read header row.
     $headers = fgetcsv($handle);
     if (!$headers) {
-      $results['messages'][] = t('CSV file is empty or invalid.');
+      $results['messages'][] = $this->t('CSV file is empty or invalid.');
       fclose($handle);
       return $results;
     }
@@ -119,7 +123,7 @@ class PdfBulkOperations {
       }
       catch (\Exception $e) {
         $results['failed']++;
-        $results['messages'][] = t('Error importing row: @error', ['@error' => $e->getMessage()]);
+        $results['messages'][] = $this->t('Error importing row: @error', ['@error' => $e->getMessage()]);
       }
     }
 
@@ -154,13 +158,8 @@ class PdfBulkOperations {
       'uid' => $this->currentUser->id(),
     ];
 
-    // Handle file path or URL.
-    if (!empty($data['file']) || !empty($data['file_path']) || !empty($data['pdf_url'])) {
-      $file_source = $data['file'] ?? $data['file_path'] ?? $data['pdf_url'];
-      // File handling would be implemented here.
-      // For now, skip file import in basic implementation.
-    }
-
+    // @todo Implement file import from path or URL.
+    // Handle file path or URL when available.
     // Optional fields.
     if (isset($data['allow_download'])) {
       $values['allow_download'] = (bool) $data['allow_download'];
@@ -196,6 +195,10 @@ class PdfBulkOperations {
     $documents = $storage->loadMultiple($document_ids);
 
     foreach ($documents as $document) {
+      if (!$document instanceof PdfDocumentInterface) {
+        $results['failed']++;
+        continue;
+      }
       try {
         foreach ($values as $field => $value) {
           if ($document->hasField($field)) {

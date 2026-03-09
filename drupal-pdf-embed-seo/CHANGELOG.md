@@ -2,6 +2,93 @@
 
 All notable changes to the Drupal module will be documented in this file.
 
+## [1.2.13] - 2026-02-17
+
+### Code Quality & Static Analysis
+
+- **PHPStan level 5 compliance**: Resolved 526 static analysis errors across all three module tiers (base, premium, pro_plus). Zero errors remaining.
+- **PHPCS Drupal standards compliance**: Fixed 20,000+ coding standard violations. Zero errors remaining (22 acceptable warnings).
+- **Added `phpstan.neon` configuration**: Module-level PHPStan config with proper core module scanning, Drupal-specific error suppression, and test exclusions.
+
+### Dependency Injection
+
+- **Replaced all `\Drupal::` static calls** in service classes, controllers, forms, plugins, and blocks with proper constructor dependency injection.
+- **Fixed constructor property promotion** conflicts with `ControllerBase`, `FormBase`, and `EntityForm` parent properties that lack native type declarations.
+- **Fixed `ConfigFormBase` constructor**: Added required `TypedConfigManagerInterface` parameter for Drupal 11 compatibility in `PdfEmbedSeoSettingsForm`.
+
+### Type Safety
+
+- **Entity type narrowing**: Added `instanceof PdfDocumentInterface` checks across 15+ files (REST resources, controllers, blocks, services) replacing unsafe null checks.
+- **Fixed `TimeInterface` namespace**: Corrected `Drupal\Core\Datetime\TimeInterface` to `Drupal\Component\Datetime\TimeInterface` in 4 service files.
+- **Added missing service methods**: `getTotalDownloads()`, `getDocumentAnalytics()`, `trackDownload()` on premium `PdfAnalyticsTracker`.
+- **Fixed `Merge::key()` API**: Corrected to `Merge::keys()` (plural) in `TwoFactorAuth`.
+- **Fixed `SimpleXMLElement::addAttribute()` type**: Cast page number to string in `AnnotationManager`.
+
+### Security
+
+- **Secured `unserialize()` call**: Added `['allowed_classes' => FALSE]` option in premium install file.
+
+### Formatting
+
+- **Drupal coding standards**: Converted all files from PSR-12 formatting (4-space indent, Allman braces) to Drupal standards (2-space indent, same-line braces).
+- **Fixed PHPDoc**: Corrected parameter order, added missing parameter descriptions, fixed comment capitalization.
+- **Fixed function naming**: Renamed `pdf_embed_seo_is_pro_plus()` to `pdf_embed_seo_pro_plus_is_valid()` to match module prefix requirement.
+
+### Files Changed
+
+**All Modules (70 files reformatted)**
+
+Key files with logic changes:
+- `phpstan.neon` — new PHPStan configuration
+- `src/Controller/PdfDataController.php` — DI, TimeInterface fix, property override fix
+- `src/Controller/PdfApiController.php` — DI, entity type narrowing
+- `src/Controller/PdfArchiveController.php` — entity type narrowing
+- `src/Controller/PdfAnalyticsController.php` — entity type narrowing, user type check
+- `src/Controller/PdfViewController.php` — DI, property override fix
+- `src/Form/PdfEmbedSeoSettingsForm.php` — TypedConfigManager DI, PHPDoc fix
+- `src/Form/PdfPasswordForm.php` — property override fix, entity type narrowing
+- `src/Form/PdfDocumentForm.php` — property override fix
+- `src/Plugin/Block/PdfViewerBlock.php` — entity type narrowing
+- `src/Plugin/rest/resource/*.php` — entity type narrowing (4 files)
+- `src/Service/PdfAnalyticsTracker.php` — TimeInterface fix
+- `modules/pdf_embed_seo_premium/src/Service/PdfAnalyticsTracker.php` — TimeInterface fix, 3 new methods
+- `modules/pdf_embed_seo_premium/src/Service/PdfProgressTracker.php` — TimeInterface fix
+- `modules/pdf_embed_seo_premium/src/Controller/PdfPremiumApiController.php` — property override fix, param order fix, entity type narrowing
+- `modules/pdf_embed_seo_premium/src/Controller/PdfSitemapController.php` — property override fix, entity type narrowing
+- `modules/pdf_embed_seo_premium/src/Service/PdfBulkOperations.php` — entity type narrowing
+- `modules/pdf_embed_seo_premium/src/Service/PdfViewerEnhancer.php` — fixed method signature
+- `modules/pdf_embed_seo_premium/pdf_embed_seo_premium.install` — secure unserialize
+- `modules/pdf_embed_seo_pro_plus/pdf_embed_seo_pro_plus.module` — function rename
+- `modules/pdf_embed_seo_pro_plus/src/Service/TwoFactorAuth.php` — Merge::keys fix, entity type narrowing
+- `modules/pdf_embed_seo_pro_plus/src/Service/AnnotationManager.php` — string cast fix
+- `modules/pdf_embed_seo_pro_plus/src/Service/VersionManager.php` — file type narrowing
+
+---
+
+## [1.2.12] - 2026-02-17
+
+### Bug Fixes
+- **Twig FieldItemList crash**: Fixed `Object of type FieldItemList cannot be printed` error on the single PDF view page. The `pdf-viewer.html.twig` template was using `pdf_document.id` instead of `pdf_document.id.value` for the `data-document-id` attribute.
+- **PDF viewer 403 error**: Removed `_csrf_token: 'TRUE'` from the `pdf_embed_seo.pdf_data` GET route. The CSRF token generated server-side didn't match during PDF.js fetch requests, causing a 403 for all users. CSRF protection is not needed on GET endpoints — the `_permission: 'view pdf document'` requirement provides sufficient access control.
+- **Broken HTML in archive cards and breadcrumbs**: Changed all `%variable` placeholders to `@variable` in `t()` calls across three Twig templates (`pdf-archive-item.html.twig`, `pdf-archive.html.twig`, `pdf-document.html.twig`). The `%` prefix wraps values in `<em class="placeholder">` tags, which produced broken escaped HTML inside `title` and `aria-label` attributes.
+- **REST API `/documents` endpoint returning 500**: The `formatDocument()` method referenced a non-existent `slug` base field (`Field slug is unknown`). The slug is now derived from the entity's path alias instead.
+
+### New Features
+- **REST API document endpoints**: Added `GET /documents`, `GET /documents/{id}`, and `GET /documents/{id}/data` as regular controller routes in `PdfApiController`. These were previously implemented as REST resource plugins (`PdfDocumentResource`) requiring the `rest` core module, which was not enabled. The new routes work without any additional module dependencies.
+  - `GET /api/pdf-embed-seo/v1/documents` — list all published documents with pagination (`page`, `limit`, `sort`, `direction` query parameters)
+  - `GET /api/pdf-embed-seo/v1/documents/{id}` — get a single document with detailed info including `data_url`
+  - `GET /api/pdf-embed-seo/v1/documents/{id}/data` — get the secure PDF file URL (requires `view pdf document` permission)
+- **Admin content tab**: Added `pdf_embed_seo.links.task.yml` with a "PDF Documents" local task tab on the Admin > Content page, making it visible alongside Content, Blocks, Media, and Files.
+
+### Files Changed
+- `templates/pdf-viewer.html.twig` — `pdf_document.id` → `pdf_document.id.value`
+- `templates/pdf-archive-item.html.twig` — all `%` placeholders → `@` placeholders
+- `templates/pdf-archive.html.twig` — `%site` → `@site`
+- `templates/pdf-document.html.twig` — `%site`, `%date` → `@site`, `@date`
+- `pdf_embed_seo.routing.yml` — removed CSRF from pdf_data route, added 3 API routes
+- `src/Controller/PdfApiController.php` — added `getDocuments()`, `getDocument()`, `getDocumentData()`, `formatDocument()`
+- `pdf_embed_seo.links.task.yml` — new file for local task tabs
+
 ## [1.2.11] - 2026-02-10
 
 ### Security

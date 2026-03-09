@@ -72,14 +72,16 @@ class PdfDocumentStorageTest extends KernelTestBase {
 
     $storage = $entity_type_manager->getStorage('pdf_document');
 
-    $document = $storage->create([
-      'title' => 'Test Document',
-      'description' => 'Test description',
-      'slug' => 'test-document',
-      'allow_download' => TRUE,
-      'allow_print' => TRUE,
-      'status' => TRUE,
-    ]);
+    $document = $storage->create(
+          [
+            'title' => 'Test Document',
+            'description' => 'Test description',
+            'slug' => 'test-document',
+            'allow_download' => TRUE,
+            'allow_print' => TRUE,
+            'status' => TRUE,
+          ]
+      );
 
     $this->assertEquals('Test Document', $document->get('title')->value);
   }
@@ -96,11 +98,13 @@ class PdfDocumentStorageTest extends KernelTestBase {
 
     $storage = $entity_type_manager->getStorage('pdf_document');
 
-    $document = $storage->create([
-      'title' => 'Save Test Document',
-      'slug' => 'save-test-document',
-      'status' => TRUE,
-    ]);
+    $document = $storage->create(
+          [
+            'title' => 'Save Test Document',
+            'slug' => 'save-test-document',
+            'status' => TRUE,
+          ]
+      );
     $document->save();
 
     $id = $document->id();
@@ -123,11 +127,13 @@ class PdfDocumentStorageTest extends KernelTestBase {
 
     $storage = $entity_type_manager->getStorage('pdf_document');
 
-    $document = $storage->create([
-      'title' => 'Original Title',
-      'slug' => 'original-title',
-      'status' => TRUE,
-    ]);
+    $document = $storage->create(
+          [
+            'title' => 'Original Title',
+            'slug' => 'original-title',
+            'status' => TRUE,
+          ]
+      );
     $document->save();
 
     // Update the document.
@@ -153,11 +159,13 @@ class PdfDocumentStorageTest extends KernelTestBase {
 
     $storage = $entity_type_manager->getStorage('pdf_document');
 
-    $document = $storage->create([
-      'title' => 'Delete Test',
-      'slug' => 'delete-test',
-      'status' => TRUE,
-    ]);
+    $document = $storage->create(
+          [
+            'title' => 'Delete Test',
+            'slug' => 'delete-test',
+            'status' => TRUE,
+          ]
+      );
     $document->save();
 
     $id = $document->id();
@@ -182,19 +190,23 @@ class PdfDocumentStorageTest extends KernelTestBase {
 
     // Create published documents.
     for ($i = 0; $i < 3; $i++) {
-      $storage->create([
-        'title' => 'Published ' . $i,
-        'slug' => 'published-' . $i,
-        'status' => TRUE,
-      ])->save();
+      $storage->create(
+            [
+              'title' => 'Published ' . $i,
+              'slug' => 'published-' . $i,
+              'status' => TRUE,
+            ]
+        )->save();
     }
 
     // Create unpublished document.
-    $storage->create([
-      'title' => 'Unpublished',
-      'slug' => 'unpublished',
-      'status' => FALSE,
-    ])->save();
+    $storage->create(
+          [
+            'title' => 'Unpublished',
+            'slug' => 'unpublished',
+            'status' => FALSE,
+          ]
+      )->save();
 
     // Query published only.
     $query = $storage->getQuery()
@@ -218,12 +230,14 @@ class PdfDocumentStorageTest extends KernelTestBase {
 
     $storage = $entity_type_manager->getStorage('pdf_document');
 
-    $document = $storage->create([
-      'title' => 'View Count Test',
-      'slug' => 'view-count-test',
-      'view_count' => 0,
-      'status' => TRUE,
-    ]);
+    $document = $storage->create(
+          [
+            'title' => 'View Count Test',
+            'slug' => 'view-count-test',
+            'view_count' => 0,
+            'status' => TRUE,
+          ]
+      );
     $document->save();
 
     // Increment view count.

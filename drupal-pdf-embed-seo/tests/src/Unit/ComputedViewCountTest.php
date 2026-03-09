@@ -50,14 +50,14 @@ class ComputedViewCountTest extends UnitTestCase {
 
     // Check for pdf_document_id first.
     $column_name = in_array('pdf_document_id', $columns_with_pdf_document_id)
-      ? 'pdf_document_id'
-      : 'pdf_id';
+        ? 'pdf_document_id'
+        : 'pdf_id';
     $this->assertEquals('pdf_document_id', $column_name);
 
     // Fallback to pdf_id.
     $column_name = in_array('pdf_document_id', $columns_with_pdf_id)
-      ? 'pdf_document_id'
-      : 'pdf_id';
+        ? 'pdf_document_id'
+        : 'pdf_id';
     $this->assertEquals('pdf_id', $column_name);
   }
 

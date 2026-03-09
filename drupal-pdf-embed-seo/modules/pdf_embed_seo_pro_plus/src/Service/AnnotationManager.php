@@ -4,7 +4,9 @@ namespace Drupal\pdf_embed_seo_pro_plus\Service;
 
 use Drupal\Component\Uuid\UuidInterface;
 use Drupal\Core\Database\Connection;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * PDF annotation management service for Pro+ Enterprise.
@@ -12,25 +14,11 @@ use Drupal\Core\Session\AccountProxyInterface;
 class AnnotationManager {
 
   /**
-   * Database connection.
+   * The logger.
    *
-   * @var \Drupal\Core\Database\Connection
+   * @var \Psr\Log\LoggerInterface
    */
-  protected $database;
-
-  /**
-   * Current user.
-   *
-   * @var \Drupal\Core\Session\AccountProxyInterface
-   */
-  protected $currentUser;
-
-  /**
-   * UUID generator.
-   *
-   * @var \Drupal\Component\Uuid\UuidInterface
-   */
-  protected $uuid;
+  protected LoggerInterface $logger;
 
   /**
    * Annotation types.
@@ -49,19 +37,20 @@ class AnnotationManager {
    *
    * @param \Drupal\Core\Database\Connection $database
    *   The database connection.
-   * @param \Drupal\Core\Session\AccountProxyInterface $current_user
+   * @param \Drupal\Core\Session\AccountProxyInterface $currentUser
    *   The current user.
    * @param \Drupal\Component\Uuid\UuidInterface $uuid
    *   The UUID generator.
+   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $loggerFactory
+   *   The logger factory.
    */
   public function __construct(
-    Connection $database,
-    AccountProxyInterface $current_user,
-    UuidInterface $uuid
+    protected Connection $database,
+    protected AccountProxyInterface $currentUser,
+    protected UuidInterface $uuid,
+    LoggerChannelFactoryInterface $loggerFactory,
   ) {
-    $this->database = $database;
-    $this->currentUser = $current_user;
-    $this->uuid = $uuid;
+    $this->logger = $loggerFactory->get('pdf_embed_seo_pro_plus');
   }
 
   /**
@@ -88,30 +77,34 @@ class AnnotationManager {
 
     try {
       $this->database->insert('pdf_annotations')
-        ->fields([
-          'uuid' => $annotation_uuid,
-          'document_id' => $document_id,
-          'user_id' => $this->currentUser->id(),
-          'page_number' => $page_number,
-          'annotation_type' => $type,
-          'content' => $data['content'] ?? '',
-          'position_x' => $data['position_x'] ?? 0,
-          'position_y' => $data['position_y'] ?? 0,
-          'width' => $data['width'] ?? 0,
-          'height' => $data['height'] ?? 0,
-          'color' => $data['color'] ?? '#ffff00',
-          'metadata' => json_encode($data['metadata'] ?? []),
-          'created_at' => date('Y-m-d H:i:s'),
-          'updated_at' => date('Y-m-d H:i:s'),
-        ])
+        ->fields(
+                [
+                  'uuid' => $annotation_uuid,
+                  'document_id' => $document_id,
+                  'user_id' => $this->currentUser->id(),
+                  'page_number' => $page_number,
+                  'annotation_type' => $type,
+                  'content' => $data['content'] ?? '',
+                  'position_x' => $data['position_x'] ?? 0,
+                  'position_y' => $data['position_y'] ?? 0,
+                  'width' => $data['width'] ?? 0,
+                  'height' => $data['height'] ?? 0,
+                  'color' => $data['color'] ?? '#ffff00',
+                  'metadata' => json_encode($data['metadata'] ?? []),
+                  'created_at' => date('Y-m-d H:i:s'),
+                  'updated_at' => date('Y-m-d H:i:s'),
+                ]
+            )
         ->execute();
 
       return $annotation_uuid;
     }
     catch (\Exception $e) {
-      \Drupal::logger('pdf_embed_seo_pro_plus')->error('Failed to create annotation: @message', [
-        '@message' => $e->getMessage(),
-      ]);
+      $this->logger->error(
+            'Failed to create annotation: @message', [
+              '@message' => $e->getMessage(),
+            ]
+        );
       return FALSE;
     }
   }
@@ -175,7 +168,7 @@ class AnnotationManager {
 
       $results = $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
 
-      // Decode metadata
+      // Decode metadata.
       foreach ($results as &$result) {
         if (!empty($result['metadata'])) {
           $result['metadata'] = json_decode($result['metadata'], TRUE);
@@ -206,8 +199,8 @@ class AnnotationManager {
       return FALSE;
     }
 
-    // Only owner or admin can update
-    if ($annotation['user_id'] !== (string) $this->currentUser->id() && !$this->currentUser->hasPermission('administer pdf_embed_seo')) {
+    // Only owner or admin can update.
+    if ($annotation['user_id'] != $this->currentUser->id() && !$this->currentUser->hasPermission('administer pdf_embed_seo')) {
       return FALSE;
     }
 
@@ -252,8 +245,8 @@ class AnnotationManager {
       return FALSE;
     }
 
-    // Only owner or admin can delete
-    if ($annotation['user_id'] !== (string) $this->currentUser->id() && !$this->currentUser->hasPermission('administer pdf_embed_seo')) {
+    // Only owner or admin can delete.
+    if ($annotation['user_id'] != $this->currentUser->id() && !$this->currentUser->hasPermission('administer pdf_embed_seo')) {
       return FALSE;
     }
 
@@ -373,15 +366,17 @@ class AnnotationManager {
     foreach ($annotations as $annotation) {
       $type = $annotation['annotation_type'];
       $annot = $annots->addChild($type);
-      $annot->addAttribute('page', $annotation['page_number'] - 1);
+      $annot->addAttribute('page', (string) ($annotation['page_number'] - 1));
       $annot->addAttribute('color', $annotation['color']);
-      $annot->addAttribute('rect', sprintf(
-        '%.2f,%.2f,%.2f,%.2f',
-        $annotation['position_x'],
-        $annotation['position_y'],
-        $annotation['position_x'] + $annotation['width'],
-        $annotation['position_y'] + $annotation['height']
-      ));
+      $annot->addAttribute(
+            'rect', sprintf(
+                '%.2f,%.2f,%.2f,%.2f',
+                $annotation['position_x'],
+                $annotation['position_y'],
+                $annotation['position_x'] + $annotation['width'],
+                $annotation['position_y'] + $annotation['height']
+            )
+        );
 
       if (!empty($annotation['content'])) {
         $annot->addChild('contents', htmlspecialchars($annotation['content']));

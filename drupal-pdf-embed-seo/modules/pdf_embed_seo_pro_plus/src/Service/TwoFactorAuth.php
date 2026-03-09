@@ -2,9 +2,17 @@
 
 namespace Drupal\pdf_embed_seo_pro_plus\Service;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Database\Connection;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Drupal\Core\Mail\MailManagerInterface;
 use Drupal\Core\Password\PasswordInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\pdf_embed_seo\Entity\PdfDocumentInterface;
+use Drupal\user\UserInterface;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Two-factor authentication service for Pro+ Enterprise.
@@ -12,56 +20,55 @@ use Drupal\Core\Session\AccountProxyInterface;
 class TwoFactorAuth {
 
   /**
-   * Database connection.
+   * The logger.
    *
-   * @var \Drupal\Core\Database\Connection
+   * @var \Psr\Log\LoggerInterface
    */
-  protected $database;
+  protected LoggerInterface $logger;
 
   /**
-   * Current user.
-   *
-   * @var \Drupal\Core\Session\AccountProxyInterface
-   */
-  protected $currentUser;
-
-  /**
-   * Password service.
-   *
-   * @var \Drupal\Core\Password\PasswordInterface
-   */
-  protected $password;
-
-  /**
-   * 2FA methods.
+   * The 2FA methods.
    */
   const METHOD_EMAIL = 'email';
   const METHOD_SMS = 'sms';
   const METHOD_TOTP = 'totp';
 
   /**
-   * Token expiration in seconds.
+   * Token expiration in seconds (10 minutes).
    */
-  const TOKEN_EXPIRATION = 600; // 10 minutes
+  const TOKEN_EXPIRATION = 600;
 
   /**
    * Constructs a TwoFactorAuth object.
    *
    * @param \Drupal\Core\Database\Connection $database
    *   The database connection.
-   * @param \Drupal\Core\Session\AccountProxyInterface $current_user
+   * @param \Drupal\Core\Session\AccountProxyInterface $currentUser
    *   The current user.
    * @param \Drupal\Core\Password\PasswordInterface $password
    *   The password service.
+   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $loggerFactory
+   *   The logger factory.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   The entity type manager.
+   * @param \Drupal\Core\Mail\MailManagerInterface $mailManager
+   *   The mail manager.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   *   The config factory.
+   * @param \Symfony\Component\HttpFoundation\RequestStack $requestStack
+   *   The request stack.
    */
   public function __construct(
-    Connection $database,
-    AccountProxyInterface $current_user,
-    PasswordInterface $password
+    protected Connection $database,
+    protected AccountProxyInterface $currentUser,
+    protected PasswordInterface $password,
+    LoggerChannelFactoryInterface $loggerFactory,
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected MailManagerInterface $mailManager,
+    protected ConfigFactoryInterface $configFactory,
+    protected RequestStack $requestStack,
   ) {
-    $this->database = $database;
-    $this->currentUser = $current_user;
-    $this->password = $password;
+    $this->logger = $loggerFactory->get('pdf_embed_seo_pro_plus');
   }
 
   /**
@@ -75,38 +82,38 @@ class TwoFactorAuth {
    * @return string|false
    *   The generated token or FALSE on failure.
    */
-  public function generateToken(int $user_id, string $method = self::METHOD_EMAIL) {
-    // Generate a 6-digit token
+  public function generateToken(int $user_id, string $method = self::METHOD_EMAIL): string|false {
     $token = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-
-    // Hash the token for storage
     $hashed_token = $this->password->hash($token);
 
     try {
-      // Invalidate any existing tokens
+      // Invalidate any existing tokens.
       $this->database->update('pdf_2fa_tokens')
         ->fields(['used_at' => date('Y-m-d H:i:s')])
         ->condition('user_id', $user_id)
         ->isNull('used_at')
         ->execute();
 
-      // Insert new token
+      // Insert new token.
       $this->database->insert('pdf_2fa_tokens')
-        ->fields([
-          'user_id' => $user_id,
-          'token' => $hashed_token,
-          'method' => $method,
-          'expires_at' => date('Y-m-d H:i:s', time() + self::TOKEN_EXPIRATION),
-          'created_at' => date('Y-m-d H:i:s'),
-        ])
+        ->fields(
+                [
+                  'user_id' => $user_id,
+                  'token' => $hashed_token,
+                  'method' => $method,
+                  'expires_at' => date('Y-m-d H:i:s', time() + self::TOKEN_EXPIRATION),
+                  'created_at' => date('Y-m-d H:i:s'),
+                ]
+            )
         ->execute();
 
       return $token;
     }
     catch (\Exception $e) {
-      \Drupal::logger('pdf_embed_seo_pro_plus')->error('Failed to generate 2FA token: @message', [
-        '@message' => $e->getMessage(),
-      ]);
+      $this->logger->error(
+            'Failed to generate 2FA token: @message',
+            ['@message' => $e->getMessage()],
+        );
       return FALSE;
     }
   }
@@ -124,7 +131,6 @@ class TwoFactorAuth {
    */
   public function verifyToken(int $user_id, string $token): bool {
     try {
-      // Get the latest unused token
       $query = $this->database->select('pdf_2fa_tokens', 't')
         ->fields('t', ['id', 'token', 'expires_at'])
         ->condition('user_id', $user_id)
@@ -139,21 +145,11 @@ class TwoFactorAuth {
         return FALSE;
       }
 
-      // Verify the token
       if ($this->password->check($token, $result['token'])) {
-        // Mark as used
         $this->database->update('pdf_2fa_tokens')
           ->fields(['used_at' => date('Y-m-d H:i:s')])
           ->condition('id', $result['id'])
           ->execute();
-
-        // Log successful 2FA
-        if (\Drupal::hasService('pdf_embed_seo_pro_plus.audit_logger')) {
-          \Drupal::service('pdf_embed_seo_pro_plus.audit_logger')->log('login_2fa', NULL, [
-            'user_id' => $user_id,
-            'success' => TRUE,
-          ]);
-        }
 
         return TRUE;
       }
@@ -181,30 +177,30 @@ class TwoFactorAuth {
     }
 
     try {
-      $user = \Drupal::entityTypeManager()->getStorage('user')->load($user_id);
-      if (!$user) {
+      $user = $this->entityTypeManager->getStorage('user')->load($user_id);
+      if (!$user instanceof UserInterface) {
         return FALSE;
       }
 
-      $mail_manager = \Drupal::service('plugin.manager.mail');
-      $result = $mail_manager->mail(
-        'pdf_embed_seo_pro_plus',
-        '2fa_token',
-        $user->getEmail(),
-        $user->getPreferredLangcode(),
-        [
-          'token' => $token,
-          'user' => $user,
-          'expires_in' => self::TOKEN_EXPIRATION / 60,
-        ]
-      );
+      $result = $this->mailManager->mail(
+            'pdf_embed_seo_pro_plus',
+            '2fa_token',
+            $user->getEmail(),
+            $user->getPreferredLangcode(),
+            [
+              'token' => $token,
+              'user' => $user,
+              'expires_in' => self::TOKEN_EXPIRATION / 60,
+            ],
+        );
 
       return (bool) $result['result'];
     }
     catch (\Exception $e) {
-      \Drupal::logger('pdf_embed_seo_pro_plus')->error('Failed to send 2FA email: @message', [
-        '@message' => $e->getMessage(),
-      ]);
+      $this->logger->error(
+            'Failed to send 2FA email: @message',
+            ['@message' => $e->getMessage()],
+        );
       return FALSE;
     }
   }
@@ -219,22 +215,20 @@ class TwoFactorAuth {
    *   TRUE if 2FA is required.
    */
   public function isRequiredForDocument(int $document_id): bool {
-    $config = \Drupal::config('pdf_embed_seo_pro_plus.settings');
+    $config = $this->configFactory->get('pdf_embed_seo_pro_plus.settings');
 
-    // Check global setting
     if (!$config->get('two_factor_enabled')) {
       return FALSE;
     }
 
-    // Check document-specific setting
     try {
-      $document = \Drupal::entityTypeManager()->getStorage('pdf_document')->load($document_id);
-      if ($document && $document->hasField('require_2fa')) {
+      $document = $this->entityTypeManager->getStorage('pdf_document')->load($document_id);
+      if ($document instanceof PdfDocumentInterface && $document->hasField('require_2fa')) {
         return (bool) $document->get('require_2fa')->value;
       }
     }
     catch (\Exception $e) {
-      // Ignore and use global setting
+      // Ignore and use global setting.
     }
 
     return (bool) $config->get('two_factor_required_all');
@@ -254,13 +248,14 @@ class TwoFactorAuth {
   public function hasPassedForDocument(int $user_id, int $document_id): bool {
     $session_key = "pdf_2fa_passed_{$document_id}";
 
-    // Check session
-    $session = \Drupal::request()->getSession();
-    if ($session && $session->has($session_key)) {
-      $passed_at = $session->get($session_key);
-      // Token valid for 24 hours
-      if (time() - $passed_at < 86400) {
-        return TRUE;
+    $request = $this->requestStack->getCurrentRequest();
+    if ($request && $request->hasSession()) {
+      $session = $request->getSession();
+      if ($session->has($session_key)) {
+        $passed_at = $session->get($session_key);
+        if (time() - $passed_at < 86400) {
+          return TRUE;
+        }
       }
     }
 
@@ -277,9 +272,9 @@ class TwoFactorAuth {
    */
   public function markPassedForDocument(int $user_id, int $document_id): void {
     $session_key = "pdf_2fa_passed_{$document_id}";
-    $session = \Drupal::request()->getSession();
-    if ($session) {
-      $session->set($session_key, time());
+    $request = $this->requestStack->getCurrentRequest();
+    if ($request && $request->hasSession()) {
+      $request->getSession()->set($session_key, time());
     }
   }
 
@@ -310,7 +305,6 @@ class TwoFactorAuth {
    *   Base32 encoded secret.
    */
   public function generateTotpSecret(int $user_id): string {
-    // Generate random bytes and encode as base32
     $secret = '';
     $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 
@@ -318,18 +312,19 @@ class TwoFactorAuth {
       $secret .= $chars[random_int(0, 31)];
     }
 
-    // Store the secret (encrypted in production)
     try {
       $this->database->merge('pdf_2fa_secrets')
-        ->key(['user_id' => $user_id])
-        ->fields([
-          'secret' => $secret,
-          'updated_at' => date('Y-m-d H:i:s'),
-        ])
+        ->keys(['user_id' => $user_id])
+        ->fields(
+                [
+                  'secret' => $secret,
+                  'updated_at' => date('Y-m-d H:i:s'),
+                ]
+            )
         ->execute();
     }
     catch (\Exception $e) {
-      // Table might not exist, ignore
+      // Table might not exist, ignore.
     }
 
     return $secret;
@@ -357,7 +352,7 @@ class TwoFactorAuth {
         return FALSE;
       }
 
-      // Verify TOTP (allow 1 time step drift)
+      // Verify TOTP (allow 1 time step drift).
       for ($drift = -1; $drift <= 1; $drift++) {
         $expected = $this->generateTotp($secret, $drift);
         if (hash_equals($expected, $code)) {
@@ -395,7 +390,7 @@ class TwoFactorAuth {
       ((ord($hash[$offset + 1]) & 0xFF) << 16) |
       ((ord($hash[$offset + 2]) & 0xFF) << 8) |
       (ord($hash[$offset + 3]) & 0xFF)
-    ) % 1000000;
+      ) % 1000000;
 
     return str_pad((string) $code, 6, '0', STR_PAD_LEFT);
   }

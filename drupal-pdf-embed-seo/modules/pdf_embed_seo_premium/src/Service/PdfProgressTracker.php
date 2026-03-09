@@ -3,7 +3,8 @@
 namespace Drupal\pdf_embed_seo_premium\Service;
 
 use Drupal\Core\Database\Connection;
-use Drupal\Core\Datetime\TimeInterface;
+use Drupal\Component\Datetime\TimeInterface;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\pdf_embed_seo\Entity\PdfDocumentInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -37,9 +38,16 @@ class PdfProgressTracker {
   /**
    * The time service.
    *
-   * @var \Drupal\Core\Datetime\TimeInterface
+   * @var \Drupal\Component\Datetime\TimeInterface
    */
   protected $time;
+
+  /**
+   * The logger factory.
+   *
+   * @var \Drupal\Core\Logger\LoggerChannelFactoryInterface
+   */
+  protected $loggerFactory;
 
   /**
    * The progress table name.
@@ -57,19 +65,23 @@ class PdfProgressTracker {
    *   The current user.
    * @param \Symfony\Component\HttpFoundation\RequestStack $request_stack
    *   The request stack.
-   * @param \Drupal\Core\Datetime\TimeInterface $time
+   * @param \Drupal\Component\Datetime\TimeInterface $time
    *   The time service.
+   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
+   *   The logger factory.
    */
   public function __construct(
     Connection $database,
     AccountProxyInterface $current_user,
     RequestStack $request_stack,
-    TimeInterface $time
+    TimeInterface $time,
+    LoggerChannelFactoryInterface $logger_factory,
   ) {
     $this->database = $database;
     $this->currentUser = $current_user;
     $this->requestStack = $request_stack;
     $this->time = $time;
+    $this->loggerFactory = $logger_factory;
   }
 
   /**
@@ -156,36 +168,42 @@ class PdfProgressTracker {
       if ($existing) {
         // Update existing record.
         $this->database->update($this->tableName)
-          ->fields([
-            'current_page' => $progress['page'],
-            'scroll_position' => $progress['scroll'],
-            'zoom_level' => $progress['zoom'],
-            'updated' => $timestamp,
-          ])
+          ->fields(
+                  [
+                    'current_page' => $progress['page'],
+                    'scroll_position' => $progress['scroll'],
+                    'zoom_level' => $progress['zoom'],
+                    'updated' => $timestamp,
+                  ]
+              )
           ->condition('id', $existing)
           ->execute();
       }
       else {
         // Insert new record.
         $this->database->insert($this->tableName)
-          ->fields([
-            'pdf_document_id' => $pdf_document->id(),
-            'user_id' => $user_id,
-            'session_id' => $user_id > 0 ? '' : $session_id,
-            'current_page' => $progress['page'],
-            'scroll_position' => $progress['scroll'],
-            'zoom_level' => $progress['zoom'],
-            'updated' => $timestamp,
-          ])
+          ->fields(
+                  [
+                    'pdf_document_id' => $pdf_document->id(),
+                    'user_id' => $user_id,
+                    'session_id' => $user_id > 0 ? '' : $session_id,
+                    'current_page' => $progress['page'],
+                    'scroll_position' => $progress['scroll'],
+                    'zoom_level' => $progress['zoom'],
+                    'updated' => $timestamp,
+                  ]
+              )
           ->execute();
       }
 
       $progress['last_read'] = date('c', $timestamp);
     }
     catch (\Exception $e) {
-      \Drupal::logger('pdf_embed_seo_premium')->warning('Failed to save progress: @message', [
-        '@message' => $e->getMessage(),
-      ]);
+      $this->loggerFactory->get('pdf_embed_seo_premium')->warning(
+            'Failed to save progress: @message', [
+              '@message' => $e->getMessage(),
+            ]
+        );
     }
 
     return $progress;

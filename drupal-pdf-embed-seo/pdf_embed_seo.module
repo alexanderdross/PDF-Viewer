@@ -5,6 +5,8 @@
  * Primary module hooks for PDF Embed & SEO Optimize module.
  */
 
+use Drupal\Core\Cache\Cache;
+use Drupal\Core\Render\Element;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
@@ -517,7 +519,7 @@ function template_preprocess_pdf_document(array &$variables) {
 
   // Helpful $content variable for templates.
   $variables['content'] = [];
-  foreach (\Drupal\Core\Render\Element::children($variables['elements']) as $key) {
+  foreach (Element::children($variables['elements']) as $key) {
     $variables['content'][$key] = $variables['elements'][$key];
   }
 
@@ -545,7 +547,7 @@ function template_preprocess_pdf_viewer(array &$variables) {
  */
 function pdf_embed_seo_pdf_document_insert(EntityInterface $entity) {
   // Invalidate archive page cache when a new document is created.
-  \Drupal\Core\Cache\Cache::invalidateTags(['pdf_document_list']);
+  Cache::invalidateTags(['pdf_document_list']);
 }
 
 /**
@@ -553,7 +555,7 @@ function pdf_embed_seo_pdf_document_insert(EntityInterface $entity) {
  */
 function pdf_embed_seo_pdf_document_update(EntityInterface $entity) {
   // Invalidate archive page cache when a document is updated.
-  \Drupal\Core\Cache\Cache::invalidateTags(['pdf_document_list']);
+  Cache::invalidateTags(['pdf_document_list']);
 }
 
 /**
@@ -561,7 +563,7 @@ function pdf_embed_seo_pdf_document_update(EntityInterface $entity) {
  */
 function pdf_embed_seo_pdf_document_delete(EntityInterface $entity) {
   // Invalidate archive page cache when a document is deleted.
-  \Drupal\Core\Cache\Cache::invalidateTags(['pdf_document_list']);
+  Cache::invalidateTags(['pdf_document_list']);
 }
 
 /**

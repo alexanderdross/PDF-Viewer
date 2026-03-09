@@ -87,15 +87,17 @@ class AccessTokenStorage {
 
     try {
       $this->database->insert('pdf_embed_seo_access_tokens')
-        ->fields([
-          'token' => $token,
-          'pdf_document_id' => $pdf_document_id,
-          'created_by' => $this->currentUser->id(),
-          'expires' => $expires,
-          'max_uses' => $max_uses,
-          'use_count' => 0,
-          'created' => $now,
-        ])
+        ->fields(
+                [
+                  'token' => $token,
+                  'pdf_document_id' => $pdf_document_id,
+                  'created_by' => $this->currentUser->id(),
+                  'expires' => $expires,
+                  'max_uses' => $max_uses,
+                  'use_count' => 0,
+                  'created' => $now,
+                ]
+            )
         ->execute();
 
       return [
@@ -110,9 +112,11 @@ class AccessTokenStorage {
       ];
     }
     catch (\Exception $e) {
-      $this->logger->error('Failed to create access token: @message', [
-        '@message' => $e->getMessage(),
-      ]);
+      $this->logger->error(
+            'Failed to create access token: @message', [
+              '@message' => $e->getMessage(),
+            ]
+        );
       return NULL;
     }
   }
@@ -280,9 +284,11 @@ class AccessTokenStorage {
     $total = $expired + $exhausted;
 
     if ($total > 0) {
-      $this->logger->info('Cleaned up @count expired/exhausted access tokens.', [
-        '@count' => $total,
-      ]);
+      $this->logger->info(
+            'Cleaned up @count expired/exhausted access tokens.', [
+              '@count' => $total,
+            ]
+        );
     }
 
     return $total;

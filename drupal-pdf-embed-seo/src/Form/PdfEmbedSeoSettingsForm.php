@@ -2,8 +2,14 @@
 
 namespace Drupal\pdf_embed_seo\Form;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\TypedConfigManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\file\Entity\File;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Configure PDF Embed & SEO settings.
@@ -11,23 +17,56 @@ use Drupal\Core\Form\FormStateInterface;
 class PdfEmbedSeoSettingsForm extends ConfigFormBase {
 
   /**
+   * Constructs a PdfEmbedSeoSettingsForm.
+   *
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory.
+   * @param \Drupal\Core\Config\TypedConfigManagerInterface $typedConfigManager
+   *   The typed config manager.
+   * @param \Drupal\Core\File\FileUrlGeneratorInterface $fileUrlGenerator
+   *   The file URL generator.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
+   *   The module handler.
+   */
+  public function __construct(
+    ConfigFactoryInterface $config_factory,
+    TypedConfigManagerInterface $typedConfigManager,
+    protected FileUrlGeneratorInterface $fileUrlGenerator,
+    protected ModuleHandlerInterface $moduleHandler,
+  ) {
+    parent::__construct($config_factory, $typedConfigManager);
+  }
+
+  /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public static function create(ContainerInterface $container): static {
+    return new static(
+          $container->get('config.factory'),
+          $container->get('config.typed'),
+          $container->get('file_url_generator'),
+          $container->get('module_handler'),
+      );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFormId(): string {
     return 'pdf_embed_seo_settings';
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function getEditableConfigNames() {
+  protected function getEditableConfigNames(): array {
     return ['pdf_embed_seo.settings'];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
+  public function buildForm(array $form, FormStateInterface $form_state): array {
     $config = $this->config('pdf_embed_seo.settings');
 
     // General settings.
@@ -280,13 +319,14 @@ class PdfEmbedSeoSettingsForm extends ConfigFormBase {
       '#upload_location' => 'public://pdf-embed-seo/',
       '#upload_validators' => [
         'file_validate_extensions' => ['ico png gif svg'],
-        'file_validate_size' => [1024 * 1024], // 1MB max.
+      // 1MB max.
+        'file_validate_size' => [1024 * 1024],
       ],
       '#default_value' => $config->get('favicon_fid') ? [$config->get('favicon_fid')] : NULL,
     ];
 
     // Premium settings (only show if premium is active).
-    if (\Drupal::moduleHandler()->moduleExists('pdf_embed_seo_premium')) {
+    if ($this->moduleHandler->moduleExists('pdf_embed_seo_premium')) {
       $form['premium'] = [
         '#type' => 'details',
         '#title' => $this->t('Premium Settings'),
@@ -326,12 +366,14 @@ class PdfEmbedSeoSettingsForm extends ConfigFormBase {
     $form['credit'] = [
       '#type' => 'markup',
       '#markup' => '<p class="pdf-embed-seo-credit" style="text-align: center; margin-top: 30px; color: #666; font-size: 13px;">' .
-        $this->t('made with <span style="color: #e25555;" aria-hidden="true">♥</span><span class="visually-hidden">love</span> by <a href="@url" target="_blank" rel="noopener noreferrer" aria-label="@aria_label" title="@title">Dross:Media</a>', [
-          '@url' => 'https://dross.net/media/',
-          '@aria_label' => $this->t('Visit Dross:Media website (opens in new tab)'),
-          '@title' => $this->t('Visit Dross:Media website'),
-        ]) .
-        '</p>',
+      $this->t(
+          'made with <span style="color: #e25555;" aria-hidden="true">♥</span><span class="visually-hidden">love</span> by <a href="@url" target="_blank" rel="noopener noreferrer" aria-label="@aria_label" title="@title">Dross:Media</a>', [
+            '@url' => 'https://dross.net/media/',
+            '@aria_label' => $this->t('Visit Dross:Media website (opens in new tab)'),
+            '@title' => $this->t('Visit Dross:Media website'),
+          ]
+      ) .
+      '</p>',
       '#weight' => 999,
     ];
 
@@ -341,7 +383,7 @@ class PdfEmbedSeoSettingsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
     $config = $this->config('pdf_embed_seo.settings');
 
     // General settings.
@@ -384,14 +426,14 @@ class PdfEmbedSeoSettingsForm extends ConfigFormBase {
 
     // If a file was uploaded, use its URL.
     if (!empty($favicon_upload)) {
-      $file = \Drupal\file\Entity\File::load(reset($favicon_upload));
+      $file = File::load(reset($favicon_upload));
       if ($file) {
         // Make the file permanent.
         $file->setPermanent();
         $file->save();
         // Use the uploaded file URL if no manual URL is provided.
         if (empty($favicon_url)) {
-          $favicon_url = \Drupal::service('file_url_generator')->generateAbsoluteString($file->getFileUri());
+          $favicon_url = $this->fileUrlGenerator->generateAbsoluteString($file->getFileUri());
         }
         $config->set('favicon_fid', $file->id());
       }
@@ -403,7 +445,7 @@ class PdfEmbedSeoSettingsForm extends ConfigFormBase {
     $config->set('favicon_url', $favicon_url);
 
     // Premium settings.
-    if (\Drupal::moduleHandler()->moduleExists('pdf_embed_seo_premium')) {
+    if ($this->moduleHandler->moduleExists('pdf_embed_seo_premium')) {
       $config->set('enable_analytics', $form_state->getValue('enable_analytics'));
       $config->set('enable_search', $form_state->getValue('enable_search'));
       $config->set('enable_bookmarks', $form_state->getValue('enable_bookmarks'));

@@ -40,8 +40,10 @@ class RateLimiter {
   protected $config = [
     'password_verify' => [
       'max_attempts' => 5,
-      'window_seconds' => 300, // 5 minutes
-      'block_seconds' => 900, // 15 minutes
+    // 5 minutes
+      'window_seconds' => 300,
+    // 15 minutes
+      'block_seconds' => 900,
     ],
     'default' => [
       'max_attempts' => 10,
@@ -124,11 +126,13 @@ class RateLimiter {
         ->condition('identifier', $identifier)
         ->execute();
 
-      $this->logger->warning('Rate limit exceeded for @action from @ip on target @target', [
-        '@action' => $action,
-        '@ip' => $ip_address,
-        '@target' => $target_id,
-      ]);
+      $this->logger->warning(
+            'Rate limit exceeded for @action from @ip on target @target', [
+              '@action' => $action,
+              '@ip' => $ip_address,
+              '@target' => $target_id,
+            ]
+        );
 
       return [
         'allowed' => FALSE,
@@ -179,15 +183,17 @@ class RateLimiter {
     if (!$record) {
       // Create new record.
       $this->database->insert('pdf_embed_seo_rate_limit')
-        ->fields([
-          'identifier' => $identifier,
-          'action' => $action,
-          'target_id' => $target_id,
-          'ip_address' => $ip_address,
-          'attempts' => 1,
-          'window_start' => $now,
-          'blocked_until' => 0,
-        ])
+        ->fields(
+                [
+                  'identifier' => $identifier,
+                  'action' => $action,
+                  'target_id' => $target_id,
+                  'ip_address' => $ip_address,
+                  'attempts' => 1,
+                  'window_start' => $now,
+                  'blocked_until' => 0,
+                ]
+            )
         ->execute();
       return;
     }
@@ -196,11 +202,13 @@ class RateLimiter {
     if ($record['window_start'] + $config['window_seconds'] < $now) {
       // Reset the window.
       $this->database->update('pdf_embed_seo_rate_limit')
-        ->fields([
-          'attempts' => 1,
-          'window_start' => $now,
-          'blocked_until' => 0,
-        ])
+        ->fields(
+                [
+                  'attempts' => 1,
+                  'window_start' => $now,
+                  'blocked_until' => 0,
+                ]
+            )
         ->condition('identifier', $identifier)
         ->execute();
       return;

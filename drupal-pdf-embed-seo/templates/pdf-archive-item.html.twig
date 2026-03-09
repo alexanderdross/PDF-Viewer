@@ -63,8 +63,8 @@
     <article itemscope itemtype="https://schema.org/DigitalDocument">
       <a href="{{ url }}"
          class="pdf-embed-seo-list-link"
-         title="{{ 'View %title PDF document'|t({'%title': pdf_title}) }}"
-         aria-label="{{ 'View %title PDF document, published on %date'|t({'%title': pdf_title, '%date': pdf_date}) }}"
+         title="{{ 'View @title PDF document'|t({'@title': pdf_title}) }}"
+         aria-label="{{ 'View @title PDF document, published on @date'|t({'@title': pdf_title, '@date': pdf_date}) }}"
          itemprop="url">
         <span class="pdf-embed-seo-list-icon" aria-hidden="true">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
@@ -79,7 +79,7 @@
           {{ pdf_date }}
         </time>
         {% if show_view_count and view_count > 0 %}
-          <span class="pdf-embed-seo-list-views" aria-label="{{ '%count views'|t({'%count': view_count|number_format}) }}">
+          <span class="pdf-embed-seo-list-views" aria-label="{{ '@count views'|t({'@count': view_count|number_format}) }}">
             ({{ view_count|number_format }}
             <span class="visually-hidden">{{ view_count == 1 ? 'view'|t : 'views'|t }}</span>)
           </span>
@@ -99,16 +99,16 @@
     {% if thumbnail %}
       <div class="pdf-embed-seo-card-thumbnail">
         <a href="{{ url }}"
-           title="{{ 'View %title'|t({'%title': pdf_title}) }}"
-           aria-label="{{ 'View %title PDF document'|t({'%title': pdf_title}) }}">
+           title="{{ 'View @title'|t({'@title': pdf_title}) }}"
+           aria-label="{{ 'View @title PDF document'|t({'@title': pdf_title}) }}">
           {{ thumbnail }}
         </a>
       </div>
     {% else %}
       <div class="pdf-embed-seo-card-thumbnail pdf-embed-seo-card-thumbnail-placeholder">
         <a href="{{ url }}"
-           title="{{ 'View %title'|t({'%title': pdf_title}) }}"
-           aria-label="{{ 'View %title PDF document'|t({'%title': pdf_title}) }}">
+           title="{{ 'View @title'|t({'@title': pdf_title}) }}"
+           aria-label="{{ 'View @title PDF document'|t({'@title': pdf_title}) }}">
           <span class="pdf-embed-seo-card-icon" aria-hidden="true">
             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2l5 5h-5V4zM8.5 13H10v4H8.5v-4zm3 0H13v4h-1.5v-4zm3 0H16v4h-1.5v-4z"/>
@@ -122,7 +122,7 @@
     <div class="pdf-embed-seo-card-content"{{ content_style_attr|raw }}>
       <h2 class="pdf-embed-seo-card-title">
         <a href="{{ url }}"
-           title="{{ 'View %title'|t({'%title': pdf_title}) }}"
+           title="{{ 'View @title'|t({'@title': pdf_title}) }}"
            itemprop="url">
           <span itemprop="name">{{ pdf_title }}</span>
         </a>
@@ -140,16 +140,16 @@
         </time>
 
         {% if show_view_count and view_count > 0 %}
-          <span class="pdf-embed-seo-card-views" aria-label="{{ '%count views'|t({'%count': view_count|number_format}) }}">
-            {{ '%count %label'|t({'%count': view_count|number_format, '%label': view_count == 1 ? 'view'|t : 'views'|t}) }}
+          <span class="pdf-embed-seo-card-views" aria-label="{{ '@count views'|t({'@count': view_count|number_format}) }}">
+            {{ '@count @label'|t({'@count': view_count|number_format, '@label': view_count == 1 ? 'view'|t : 'views'|t}) }}
           </span>
         {% endif %}
       </div>
 
       <a href="{{ url }}"
          class="pdf-embed-seo-card-link"
-         title="{{ 'View %title PDF document'|t({'%title': pdf_title}) }}"
-         aria-label="{{ 'View %title PDF document'|t({'%title': pdf_title}) }}">
+         title="{{ 'View @title PDF document'|t({'@title': pdf_title}) }}"
+         aria-label="{{ 'View @title PDF document'|t({'@title': pdf_title}) }}">
         {{ 'View PDF'|t }}
         <span class="visually-hidden">{{ pdf_title }}</span>
       </a>

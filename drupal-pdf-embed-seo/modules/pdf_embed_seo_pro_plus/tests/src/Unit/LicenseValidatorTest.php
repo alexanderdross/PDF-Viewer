@@ -18,8 +18,8 @@ class LicenseValidatorTest extends UnitTestCase {
     $valid_key = 'PDF$PRO+#ABCD-EFGH@IJKL-MNOP!QRST';
 
     $this->assertTrue(
-      (bool) preg_match('/^PDF\$PRO\+#[A-Z0-9]{4}-[A-Z0-9]{4}@[A-Z0-9]{4}-[A-Z0-9]{4}![A-Z0-9]{4}$/i', $valid_key)
-    );
+          (bool) preg_match('/^PDF\$PRO\+#[A-Z0-9]{4}-[A-Z0-9]{4}@[A-Z0-9]{4}-[A-Z0-9]{4}![A-Z0-9]{4}$/i', $valid_key)
+      );
   }
 
   /**
@@ -28,16 +28,18 @@ class LicenseValidatorTest extends UnitTestCase {
   public function testInvalidLicenseKeyFormats() {
     $invalid_keys = [
       'invalid-key',
-      'PDF$PRO#ABCD-EFGH@IJKL-MNOP!QRST', // Missing + for Pro+.
-      'PDFPRO+ABCDEFGH@IJKLMNOP!QRST', // Missing $ and #.
+      // Missing + for Pro+.
+      'PDF$PRO#ABCD-EFGH@IJKL-MNOP!QRST',
+      // Missing $ and #.
+      'PDFPRO+ABCDEFGH@IJKLMNOP!QRST',
       'short',
     ];
 
     foreach ($invalid_keys as $key) {
       $this->assertFalse(
-        (bool) preg_match('/^PDF\$PRO\+#[A-Z0-9]{4}-[A-Z0-9]{4}@[A-Z0-9]{4}-[A-Z0-9]{4}![A-Z0-9]{4}$/i', $key),
-        "Key should be invalid: {$key}"
-      );
+            (bool) preg_match('/^PDF\$PRO\+#[A-Z0-9]{4}-[A-Z0-9]{4}@[A-Z0-9]{4}-[A-Z0-9]{4}![A-Z0-9]{4}$/i', $key),
+            "Key should be invalid: {$key}"
+        );
     }
   }
 
@@ -48,8 +50,8 @@ class LicenseValidatorTest extends UnitTestCase {
     $unlimited_key = 'PDF$UNLIMITED#ABCD@EFGH!IJKL';
 
     $this->assertTrue(
-      (bool) preg_match('/^PDF\$UNLIMITED#[A-Z0-9]{4}@[A-Z0-9]{4}![A-Z0-9]{4}$/i', $unlimited_key)
-    );
+          (bool) preg_match('/^PDF\$UNLIMITED#[A-Z0-9]{4}@[A-Z0-9]{4}![A-Z0-9]{4}$/i', $unlimited_key)
+      );
   }
 
   /**
@@ -59,8 +61,8 @@ class LicenseValidatorTest extends UnitTestCase {
     $dev_key = 'PDF$DEV#ABCD-EFGH@IJKL!MNOP';
 
     $this->assertTrue(
-      (bool) preg_match('/^PDF\$DEV#[A-Z0-9]{4}-[A-Z0-9]{4}@[A-Z0-9]{4}![A-Z0-9]{4}$/i', $dev_key)
-    );
+          (bool) preg_match('/^PDF\$DEV#[A-Z0-9]{4}-[A-Z0-9]{4}@[A-Z0-9]{4}![A-Z0-9]{4}$/i', $dev_key)
+      );
   }
 
   /**
