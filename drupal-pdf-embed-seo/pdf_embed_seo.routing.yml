@@ -82,7 +82,6 @@ pdf_embed_seo.pdf_data:
     _controller: '\Drupal\pdf_embed_seo\Controller\PdfDataController::getData'
   requirements:
     _permission: 'view pdf document'
-    _csrf_token: 'TRUE'
   options:
     parameters:
       pdf_document:
@@ -101,6 +100,43 @@ pdf_embed_seo.api.settings:
   requirements:
     _access: 'TRUE'
   methods: [GET]
+
+# API: List all published PDF documents.
+pdf_embed_seo.api.documents:
+  path: '/api/pdf-embed-seo/v1/documents'
+  defaults:
+    _controller: '\Drupal\pdf_embed_seo\Controller\PdfApiController::getDocuments'
+  requirements:
+    _access: 'TRUE'
+  methods: [GET]
+
+# API: Get a single PDF document.
+pdf_embed_seo.api.document:
+  path: '/api/pdf-embed-seo/v1/documents/{pdf_document}'
+  defaults:
+    _controller: '\Drupal\pdf_embed_seo\Controller\PdfApiController::getDocument'
+  requirements:
+    _access: 'TRUE'
+    pdf_document: \d+
+  methods: [GET]
+  options:
+    parameters:
+      pdf_document:
+        type: entity:pdf_document
+
+# API: Get secure PDF data URL.
+pdf_embed_seo.api.document_data:
+  path: '/api/pdf-embed-seo/v1/documents/{pdf_document}/data'
+  defaults:
+    _controller: '\Drupal\pdf_embed_seo\Controller\PdfApiController::getDocumentData'
+  requirements:
+    _permission: 'view pdf document'
+    pdf_document: \d+
+  methods: [GET]
+  options:
+    parameters:
+      pdf_document:
+        type: entity:pdf_document
 
 # API: Track PDF view.
 pdf_embed_seo.api.track_view:

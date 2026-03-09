@@ -3,13 +3,15 @@
 namespace Drupal\pdf_embed_seo_premium\Service;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Url;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\pdf_embed_seo\Entity\PdfDocumentInterface;
 
 /**
  * Service for enhancing PDF schema with GEO/AEO/LLM optimization.
  */
 class PdfSchemaEnhancer {
+
+  use StringTranslationTrait;
 
   /**
    * The entity type manager.
@@ -51,7 +53,7 @@ class PdfSchemaEnhancer {
       if (!empty($points)) {
         $schema['mainEntity'] = [
           '@type' => 'ItemList',
-          'name' => t('Key Points'),
+          'name' => $this->t('Key Points'),
           'itemListElement' => [],
         ];
         foreach ($points as $index => $point) {

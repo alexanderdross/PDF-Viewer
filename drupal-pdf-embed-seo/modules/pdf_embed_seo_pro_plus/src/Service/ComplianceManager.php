@@ -4,7 +4,10 @@ namespace Drupal\pdf_embed_seo_pro_plus\Service;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Database\Connection;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * GDPR/HIPAA compliance management service for Pro+ Enterprise.
@@ -12,25 +15,11 @@ use Drupal\Core\Session\AccountProxyInterface;
 class ComplianceManager {
 
   /**
-   * Database connection.
+   * The logger.
    *
-   * @var \Drupal\Core\Database\Connection
+   * @var \Psr\Log\LoggerInterface
    */
-  protected $database;
-
-  /**
-   * Config factory.
-   *
-   * @var \Drupal\Core\Config\ConfigFactoryInterface
-   */
-  protected $configFactory;
-
-  /**
-   * Current user.
-   *
-   * @var \Drupal\Core\Session\AccountProxyInterface
-   */
-  protected $currentUser;
+  protected LoggerInterface $logger;
 
   /**
    * Compliance modes.
@@ -51,19 +40,23 @@ class ComplianceManager {
    *
    * @param \Drupal\Core\Database\Connection $database
    *   The database connection.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
    *   The config factory.
-   * @param \Drupal\Core\Session\AccountProxyInterface $current_user
+   * @param \Drupal\Core\Session\AccountProxyInterface $currentUser
    *   The current user.
+   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $loggerFactory
+   *   The logger factory.
+   * @param \Symfony\Component\HttpFoundation\RequestStack $requestStack
+   *   The request stack.
    */
   public function __construct(
-    Connection $database,
-    ConfigFactoryInterface $config_factory,
-    AccountProxyInterface $current_user
+    protected Connection $database,
+    protected ConfigFactoryInterface $configFactory,
+    protected AccountProxyInterface $currentUser,
+    LoggerChannelFactoryInterface $loggerFactory,
+    protected RequestStack $requestStack,
   ) {
-    $this->database = $database;
-    $this->configFactory = $config_factory;
-    $this->currentUser = $current_user;
+    $this->logger = $loggerFactory->get('pdf_embed_seo_pro_plus');
   }
 
   /**
@@ -99,37 +92,37 @@ class ComplianceManager {
     string $consent_type,
     bool $consented,
     ?string $session_id = NULL,
-    string $consent_text = ''
-  ) {
-    $request = \Drupal::request();
+    string $consent_text = '',
+  ): int|false {
+    $request = $this->requestStack->getCurrentRequest();
     $ip_address = $request ? $request->getClientIp() : '';
     $user_agent = $request ? substr($request->headers->get('User-Agent', ''), 0, 500) : '';
 
-    // Anonymize IP if GDPR mode is enabled
     if ($this->isModeEnabled(self::MODE_GDPR)) {
       $ip_address = $this->anonymizeIp($ip_address);
     }
 
     try {
-      $id = $this->database->insert('pdf_consents')
-        ->fields([
-          'user_id' => $this->currentUser->id() ?: NULL,
-          'session_id' => $session_id,
-          'consent_type' => $consent_type,
-          'consented' => $consented ? 1 : 0,
-          'ip_address' => $ip_address,
-          'user_agent' => $user_agent,
-          'consent_text' => $consent_text,
-          'created_at' => date('Y-m-d H:i:s'),
-        ])
+      return $this->database->insert('pdf_consents')
+        ->fields(
+                [
+                  'user_id' => $this->currentUser->id() ?: NULL,
+                  'session_id' => $session_id,
+                  'consent_type' => $consent_type,
+                  'consented' => $consented ? 1 : 0,
+                  'ip_address' => $ip_address,
+                  'user_agent' => $user_agent,
+                  'consent_text' => $consent_text,
+                  'created_at' => date('Y-m-d H:i:s'),
+                ]
+            )
         ->execute();
-
-      return $id;
     }
     catch (\Exception $e) {
-      \Drupal::logger('pdf_embed_seo_pro_plus')->error('Failed to record consent: @message', [
-        '@message' => $e->getMessage(),
-      ]);
+      $this->logger->error(
+            'Failed to record consent: @message',
+            ['@message' => $e->getMessage()],
+        );
       return FALSE;
     }
   }
@@ -265,13 +258,11 @@ class ComplianceManager {
     ];
 
     try {
-      // Consents
       $query = $this->database->select('pdf_consents', 'c')
         ->fields('c')
         ->condition('user_id', $user_id);
       $data['consents'] = $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
 
-      // Analytics (if exists)
       if ($this->database->schema()->tableExists('pdf_embed_seo_analytics')) {
         $query = $this->database->select('pdf_embed_seo_analytics', 'a')
           ->fields('a')
@@ -279,7 +270,6 @@ class ComplianceManager {
         $data['analytics'] = $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
       }
 
-      // Annotations
       if ($this->database->schema()->tableExists('pdf_annotations')) {
         $query = $this->database->select('pdf_annotations', 'an')
           ->fields('an')
@@ -287,7 +277,6 @@ class ComplianceManager {
         $data['annotations'] = $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
       }
 
-      // Audit log
       if ($this->database->schema()->tableExists('pdf_audit_log')) {
         $query = $this->database->select('pdf_audit_log', 'al')
           ->fields('al')
@@ -296,9 +285,10 @@ class ComplianceManager {
       }
     }
     catch (\Exception $e) {
-      \Drupal::logger('pdf_embed_seo_pro_plus')->error('Failed to export user data: @message', [
-        '@message' => $e->getMessage(),
-      ]);
+      $this->logger->error(
+            'Failed to export user data: @message',
+            ['@message' => $e->getMessage()],
+        );
     }
 
     return $data;
@@ -324,49 +314,40 @@ class ComplianceManager {
     ];
 
     try {
-      // Delete consents
       $results['consents_deleted'] = $this->database->delete('pdf_consents')
         ->condition('user_id', $user_id)
         ->execute();
 
-      // Delete analytics
       if ($this->database->schema()->tableExists('pdf_embed_seo_analytics')) {
         $results['analytics_deleted'] = $this->database->delete('pdf_embed_seo_analytics')
           ->condition('user_id', $user_id)
           ->execute();
       }
 
-      // Delete annotations
       if ($this->database->schema()->tableExists('pdf_annotations')) {
         $results['annotations_deleted'] = $this->database->delete('pdf_annotations')
           ->condition('user_id', $user_id)
           ->execute();
       }
 
-      // Anonymize audit log (keep for compliance but remove PII)
       if ($this->database->schema()->tableExists('pdf_audit_log')) {
         $results['audit_log_deleted'] = $this->database->update('pdf_audit_log')
-          ->fields([
-            'user_id' => NULL,
-            'ip_address' => 'DELETED',
-            'user_agent' => 'DELETED',
-          ])
+          ->fields(
+                  [
+                    'user_id' => NULL,
+                    'ip_address' => 'DELETED',
+                    'user_agent' => 'DELETED',
+                  ]
+              )
           ->condition('user_id', $user_id)
           ->execute();
       }
-
-      // Log the deletion
-      if (\Drupal::hasService('pdf_embed_seo_pro_plus.audit_logger')) {
-        \Drupal::service('pdf_embed_seo_pro_plus.audit_logger')->log('delete_data', NULL, [
-          'target_user_id' => $user_id,
-          'results' => $results,
-        ]);
-      }
     }
     catch (\Exception $e) {
-      \Drupal::logger('pdf_embed_seo_pro_plus')->error('Failed to delete user data: @message', [
-        '@message' => $e->getMessage(),
-      ]);
+      $this->logger->error(
+            'Failed to delete user data: @message',
+            ['@message' => $e->getMessage()],
+        );
     }
 
     return $results;
@@ -383,12 +364,10 @@ class ComplianceManager {
    */
   public function anonymizeIp(string $ip): string {
     if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-      // Zero out last octet
       return preg_replace('/\.\d+$/', '.0', $ip);
     }
 
     if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-      // Zero out last segment
       return preg_replace('/:[^:]+$/', ':0000', $ip);
     }
 
@@ -407,7 +386,7 @@ class ComplianceManager {
     return [
       'analytics_days' => $config->get('data_retention_days') ?? 365,
       'audit_log_days' => $config->get('audit_log_retention') ?? 730,
-      'consents_days' => $config->get('consent_retention') ?? 1825, // 5 years
+      'consents_days' => $config->get('consent_retention') ?? 1825,
       'heatmaps_days' => $config->get('heatmap_retention') ?? 90,
     ];
   }
@@ -422,7 +401,6 @@ class ComplianceManager {
     $policy = $this->getRetentionPolicy();
     $results = [];
 
-    // Cleanup analytics
     if ($this->database->schema()->tableExists('pdf_embed_seo_analytics')) {
       $cutoff = date('Y-m-d H:i:s', strtotime("-{$policy['analytics_days']} days"));
       $results['analytics'] = $this->database->delete('pdf_embed_seo_analytics')
@@ -430,7 +408,6 @@ class ComplianceManager {
         ->execute();
     }
 
-    // Cleanup heatmaps
     if ($this->database->schema()->tableExists('pdf_heatmaps')) {
       $cutoff = date('Y-m-d H:i:s', strtotime("-{$policy['heatmaps_days']} days"));
       $results['heatmaps'] = $this->database->delete('pdf_heatmaps')
@@ -438,7 +415,6 @@ class ComplianceManager {
         ->execute();
     }
 
-    // Cleanup audit log
     if ($this->database->schema()->tableExists('pdf_audit_log')) {
       $cutoff = date('Y-m-d H:i:s', strtotime("-{$policy['audit_log_days']} days"));
       $results['audit_log'] = $this->database->delete('pdf_audit_log')
@@ -468,7 +444,7 @@ class ComplianceManager {
         'description' => 'Complete audit trail of document access',
       ],
       'encryption' => [
-        'status' => TRUE, // Assuming HTTPS
+        'status' => TRUE,
         'description' => 'Data encrypted in transit',
       ],
       'access_termination' => [
@@ -508,7 +484,6 @@ class ComplianceManager {
         'data_retention' => $config->get('data_retention_days'),
       ];
 
-      // Get consent statistics
       try {
         $query = $this->database->select('pdf_consents', 'c');
         $query->addField('c', 'consent_type');

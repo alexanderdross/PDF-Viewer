@@ -4,6 +4,8 @@ namespace Drupal\pdf_embed_seo_pro_plus\Service;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Database\Connection;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Advanced analytics service for Pro+ Enterprise.
@@ -11,30 +13,28 @@ use Drupal\Core\Database\Connection;
 class AdvancedAnalytics {
 
   /**
-   * Database connection.
+   * The logger.
    *
-   * @var \Drupal\Core\Database\Connection
+   * @var \Psr\Log\LoggerInterface
    */
-  protected $database;
-
-  /**
-   * Config factory.
-   *
-   * @var \Drupal\Core\Config\ConfigFactoryInterface
-   */
-  protected $configFactory;
+  protected LoggerInterface $logger;
 
   /**
    * Constructs an AdvancedAnalytics object.
    *
    * @param \Drupal\Core\Database\Connection $database
    *   The database connection.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
    *   The config factory.
+   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $loggerFactory
+   *   The logger factory.
    */
-  public function __construct(Connection $database, ConfigFactoryInterface $config_factory) {
-    $this->database = $database;
-    $this->configFactory = $config_factory;
+  public function __construct(
+    protected Connection $database,
+    protected ConfigFactoryInterface $configFactory,
+    LoggerChannelFactoryInterface $loggerFactory,
+  ) {
+    $this->logger = $loggerFactory->get('pdf_embed_seo_pro_plus');
   }
 
   /**
@@ -62,26 +62,29 @@ class AdvancedAnalytics {
     float $y,
     string $type = 'view',
     int $duration_ms = 0,
-    ?string $session_id = NULL
+    ?string $session_id = NULL,
   ): void {
     try {
       $this->database->insert('pdf_heatmaps')
-        ->fields([
-          'document_id' => $document_id,
-          'page_number' => $page_number,
-          'x_position' => $x,
-          'y_position' => $y,
-          'interaction_type' => $type,
-          'duration_ms' => $duration_ms,
-          'session_id' => $session_id,
-          'created_at' => date('Y-m-d H:i:s'),
-        ])
+        ->fields(
+                [
+                  'document_id' => $document_id,
+                  'page_number' => $page_number,
+                  'x_position' => $x,
+                  'y_position' => $y,
+                  'interaction_type' => $type,
+                  'duration_ms' => $duration_ms,
+                  'session_id' => $session_id,
+                  'created_at' => date('Y-m-d H:i:s'),
+                ]
+            )
         ->execute();
     }
     catch (\Exception $e) {
-      \Drupal::logger('pdf_embed_seo_pro_plus')->error('Failed to track heatmap: @message', [
-        '@message' => $e->getMessage(),
-      ]);
+      $this->logger->error(
+            'Failed to track heatmap: @message',
+            ['@message' => $e->getMessage()],
+        );
     }
   }
 
@@ -113,7 +116,6 @@ class AdvancedAnalytics {
 
       $results = $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
 
-      // Group by page
       $grouped = [];
       foreach ($results as $row) {
         $page = $row['page_number'];
@@ -155,7 +157,6 @@ class AdvancedAnalytics {
       return [];
     }
 
-    // Create grid
     $grid = [];
     for ($y = 0; $y < $grid_size; $y++) {
       for ($x = 0; $x < $grid_size; $x++) {
@@ -163,7 +164,6 @@ class AdvancedAnalytics {
       }
     }
 
-    // Aggregate points
     foreach ($raw_data[$page_number] as $point) {
       $grid_x = min(floor($point['x'] * $grid_size), $grid_size - 1);
       $grid_y = min(floor($point['y'] * $grid_size), $grid_size - 1);
@@ -171,7 +171,6 @@ class AdvancedAnalytics {
       $grid[$key] += 1 + ($point['duration'] / 1000);
     }
 
-    // Normalize
     $max = max($grid) ?: 1;
     foreach ($grid as $key => $value) {
       $grid[$key] = $value / $max;
@@ -190,7 +189,8 @@ class AdvancedAnalytics {
    *   Engagement score (0-100).
    */
   public function getEngagementScore(int $document_id): float {
-    $config = $this->configFactory->get('pdf_embed_seo_pro_plus.settings');
+    $metrics = $this->getDocumentMetrics($document_id);
+
     $weights = [
       'views' => 1,
       'downloads' => 5,
@@ -199,8 +199,6 @@ class AdvancedAnalytics {
       'return_visits' => 3,
     ];
 
-    $metrics = $this->getDocumentMetrics($document_id);
-
     $score = 0;
     $score += ($metrics['views'] ?? 0) * $weights['views'];
     $score += ($metrics['downloads'] ?? 0) * $weights['downloads'];
@@ -208,7 +206,6 @@ class AdvancedAnalytics {
     $score += ($metrics['avg_pages_viewed'] ?? 0) * $weights['pages_viewed'];
     $score += ($metrics['return_visits'] ?? 0) * $weights['return_visits'];
 
-    // Normalize to 0-100
     return min(100, max(0, $score));
   }
 
@@ -227,7 +224,6 @@ class AdvancedAnalytics {
     $cutoff = date('Y-m-d H:i:s', strtotime("-{$days} days"));
 
     try {
-      // Get view count
       $views_query = $this->database->select('pdf_embed_seo_analytics', 'a');
       $views_query->addExpression('COUNT(*)', 'count');
       $views_query->condition('document_id', $document_id);
@@ -235,7 +231,6 @@ class AdvancedAnalytics {
       $views_query->condition('created_at', $cutoff, '>=');
       $views = (int) $views_query->execute()->fetchField();
 
-      // Get download count
       $downloads_query = $this->database->select('pdf_embed_seo_analytics', 'a');
       $downloads_query->addExpression('COUNT(*)', 'count');
       $downloads_query->condition('document_id', $document_id);
@@ -243,7 +238,6 @@ class AdvancedAnalytics {
       $downloads_query->condition('created_at', $cutoff, '>=');
       $downloads = (int) $downloads_query->execute()->fetchField();
 
-      // Get average time spent
       $time_query = $this->database->select('pdf_embed_seo_analytics', 'a');
       $time_query->addExpression('AVG(time_spent)', 'avg_time');
       $time_query->condition('document_id', $document_id);
@@ -251,14 +245,12 @@ class AdvancedAnalytics {
       $time_query->isNotNull('time_spent');
       $avg_time = (float) $time_query->execute()->fetchField();
 
-      // Get unique visitors
       $visitors_query = $this->database->select('pdf_embed_seo_analytics', 'a');
       $visitors_query->addExpression('COUNT(DISTINCT session_id)', 'count');
       $visitors_query->condition('document_id', $document_id);
       $visitors_query->condition('created_at', $cutoff, '>=');
       $unique_visitors = (int) $visitors_query->execute()->fetchField();
 
-      // Get return visits
       $return_query = $this->database->select('pdf_embed_seo_analytics', 'a');
       $return_query->addField('a', 'session_id');
       $return_query->addExpression('COUNT(*)', 'visit_count');
@@ -413,8 +405,8 @@ class AdvancedAnalytics {
 
     $date_format = match ($granularity) {
       'week' => '%Y-%u',
-      'month' => '%Y-%m',
-      default => '%Y-%m-%d',
+            'month' => '%Y-%m',
+            default => '%Y-%m-%d',
     };
 
     try {

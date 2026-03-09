@@ -56,9 +56,11 @@ class ComputedViewCount extends FieldItemList {
       }
       catch (\Exception $e) {
         // Log but don't fail.
-        \Drupal::logger('pdf_embed_seo')->warning('Failed to compute view count: @message', [
-          '@message' => $e->getMessage(),
-        ]);
+        \Drupal::logger('pdf_embed_seo')->warning(
+              'Failed to compute view count: @message', [
+                '@message' => $e->getMessage(),
+              ]
+          );
       }
     }
 

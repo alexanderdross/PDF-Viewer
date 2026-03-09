@@ -72,7 +72,7 @@ function pdf_embed_seo_pro_plus_theme() {
  * @return bool
  *   TRUE if license is valid.
  */
-function pdf_embed_seo_is_pro_plus() {
+function pdf_embed_seo_pro_plus_is_valid() {
   $config = \Drupal::config('pdf_embed_seo_pro_plus.settings');
   $license_key = $config->get('license_key');
   $license_status = $config->get('license_status');

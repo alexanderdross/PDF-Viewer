@@ -50,7 +50,8 @@ class AccessTokenStorageTest extends UnitTestCase {
    * @covers ::createToken
    */
   public function testDefaultExpiration() {
-    $default_expires_in = 86400; // 24 hours.
+    // 24 hours.
+    $default_expires_in = 86400;
     $current_time = time();
     $expires_at = $current_time + $default_expires_in;
 
@@ -63,7 +64,8 @@ class AccessTokenStorageTest extends UnitTestCase {
    * @covers ::createToken
    */
   public function testCustomExpiration() {
-    $expires_in = 3600; // 1 hour.
+    // 1 hour.
+    $expires_in = 3600;
     $current_time = time();
     $expires_at = $current_time + $expires_in;
 
@@ -244,7 +246,8 @@ class AccessTokenStorageTest extends UnitTestCase {
    */
   public function testCleanupExpiredTokens() {
     $current_time = time();
-    $token_expires = $current_time - 3600; // Expired 1 hour ago.
+    // Expired 1 hour ago.
+    $token_expires = $current_time - 3600;
 
     $should_delete = $token_expires < $current_time;
 
@@ -258,7 +261,8 @@ class AccessTokenStorageTest extends UnitTestCase {
    */
   public function testCleanupKeepsValidTokens() {
     $current_time = time();
-    $token_expires = $current_time + 3600; // Expires in 1 hour.
+    // Expires in 1 hour.
+    $token_expires = $current_time + 3600;
 
     $should_delete = $token_expires < $current_time;
 

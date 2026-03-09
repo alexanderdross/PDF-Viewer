@@ -132,7 +132,8 @@ class PdfPremiumApiTest extends UnitTestCase {
    * Tests expiring link default expiration (24 hours).
    */
   public function testExpiringLinkDefaultExpiration() {
-    $default_expiration_seconds = 86400; // 24 hours.
+    // 24 hours.
+    $default_expiration_seconds = 86400;
     $current_time = time();
     $expected_expiry = $current_time + $default_expiration_seconds;
 
@@ -180,8 +181,8 @@ class PdfPremiumApiTest extends UnitTestCase {
       'unique_documents' => 25,
       'period' => '30days',
       'top_documents' => [
-        ['id' => 1, 'title' => 'Doc 1', 'views' => 500, 'downloads' => 100],
-        ['id' => 2, 'title' => 'Doc 2', 'views' => 300, 'downloads' => 50],
+      ['id' => 1, 'title' => 'Doc 1', 'views' => 500, 'downloads' => 100],
+      ['id' => 2, 'title' => 'Doc 2', 'views' => 300, 'downloads' => 50],
       ],
     ];
 

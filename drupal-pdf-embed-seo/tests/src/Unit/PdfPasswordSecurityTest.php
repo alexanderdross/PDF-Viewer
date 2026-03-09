@@ -97,9 +97,9 @@ class PdfPasswordSecurityTest extends UnitTestCase {
 
     // Document that plain text comparison was the vulnerability.
     $this->assertTrue(
-      $wrong_comparison,
-      'Plain text comparison works but is insecure - use password service instead.'
-    );
+          $wrong_comparison,
+          'Plain text comparison works but is insecure - use password service instead.'
+      );
   }
 
   /**

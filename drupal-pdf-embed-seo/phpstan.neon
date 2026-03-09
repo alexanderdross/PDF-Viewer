@@ -1,0 +1,56 @@
+parameters:
+  level: 5
+  paths:
+    - .
+  excludePaths:
+    analyseAndScan:
+      - assets
+      - node_modules (?)
+      - vendor (?)
+      - tests
+      - modules/pdf_embed_seo_premium/tests
+      - modules/pdf_embed_seo_pro_plus/tests
+  scanDirectories:
+    - ../../../core/modules/rest/src
+    - ../../../core/modules/media/src
+    - ../../../core/modules/file/src
+    - ../../../core/modules/user/src
+    - ../../../core/modules/field/src
+    - ../../../core/modules/taxonomy/src
+  bootstrapFiles:
+    - ../../../core/includes/common.inc
+  ignoreErrors:
+    # Drupal's create() factory pattern uses new static() which is standard.
+    -
+      identifier: new.static
+    # Functions defined in .module files are not autoloaded.
+    -
+      identifier: function.notFound
+    # Drupal's FieldItemList uses magic property access for ->entity, ->value, etc.
+    -
+      identifier: property.notFound
+      path: '*/Entity/*'
+    -
+      identifier: property.notFound
+      path: '*/Plugin/*'
+    # ComputedViewCount internal list management uses TypedData API.
+    -
+      identifier: assign.propertyType
+      path: '*/Field/ComputedViewCount.php'
+    -
+      identifier: booleanNot.alwaysFalse
+      path: '*/Field/ComputedViewCount.php'
+    # PHPDoc type certainty false positives.
+    -
+      identifier: booleanAnd.leftAlwaysTrue
+    -
+      identifier: booleanNot.alwaysFalse
+      path: '*/Entity/PdfDocument.php'
+    -
+      identifier: ternary.alwaysTrue
+    -
+      identifier: identical.alwaysFalse
+    # Drupal's FieldItemList uses magic property access for ->entity, ->value, etc.
+    -
+      identifier: property.notFound
+      path: '*/Controller/*'

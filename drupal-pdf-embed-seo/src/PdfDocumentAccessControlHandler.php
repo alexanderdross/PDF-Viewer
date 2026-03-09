@@ -16,7 +16,9 @@ class PdfDocumentAccessControlHandler extends EntityAccessControlHandler {
    * {@inheritdoc}
    */
   protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
-    /** @var \Drupal\pdf_embed_seo\Entity\PdfDocumentInterface $entity */
+    /**
+     * @var \Drupal\pdf_embed_seo\Entity\PdfDocumentInterface $entity
+*/
 
     switch ($operation) {
       case 'view':
@@ -26,8 +28,8 @@ class PdfDocumentAccessControlHandler extends EntityAccessControlHandler {
         }
         // Unpublished documents can only be viewed by the owner or admins.
         return AccessResult::allowedIf(
-          $account->hasPermission('administer pdf embed seo') ||
-          ($account->id() === $entity->getOwnerId())
+            $account->hasPermission('administer pdf embed seo') ||
+            ($account->id() === $entity->getOwnerId())
         )->cachePerUser()->addCacheableDependency($entity);
 
       case 'update':
@@ -66,10 +68,12 @@ class PdfDocumentAccessControlHandler extends EntityAccessControlHandler {
    * {@inheritdoc}
    */
   protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
-    return AccessResult::allowedIfHasPermissions($account, [
-      'administer pdf embed seo',
-      'create pdf document',
-    ], 'OR');
+    return AccessResult::allowedIfHasPermissions(
+          $account, [
+            'administer pdf embed seo',
+            'create pdf document',
+          ], 'OR'
+      );
   }
 
 }

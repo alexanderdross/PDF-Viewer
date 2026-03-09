@@ -495,7 +495,7 @@ function _pdf_embed_seo_premium_migrate_state_tokens() {
     ->execute();
 
   foreach ($result as $row) {
-    $token_data = unserialize($row->value);
+    $token_data = unserialize($row->value, ['allowed_classes' => FALSE]);
     if (is_array($token_data) && isset($token_data['pdf_id'])) {
       $token = str_replace('pdf_access_token_', '', $row->name);
 

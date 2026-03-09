@@ -4,7 +4,9 @@ namespace Drupal\pdf_embed_seo_premium\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\Core\Url;
+use Drupal\pdf_embed_seo\Entity\PdfDocumentInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -14,29 +16,28 @@ use Symfony\Component\HttpFoundation\Response;
 class PdfSitemapController extends ControllerBase {
 
   /**
-   * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
-
-  /**
    * Constructs a PdfSitemapController object.
    *
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity type manager.
+   * @param \Drupal\Core\File\FileUrlGeneratorInterface $fileUrlGenerator
+   *   The file URL generator.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
-    $this->entityTypeManager = $entity_type_manager;
+  public function __construct(
+    EntityTypeManagerInterface $entityTypeManager,
+    protected FileUrlGeneratorInterface $fileUrlGenerator,
+  ) {
+    $this->entityTypeManager = $entityTypeManager;
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container) {
+  public static function create(ContainerInterface $container): static {
     return new static(
-      $container->get('entity_type.manager')
-    );
+          $container->get('entity_type.manager'),
+          $container->get('file_url_generator'),
+      );
   }
 
   /**
@@ -73,6 +74,9 @@ class PdfSitemapController extends ControllerBase {
 
     // Add individual PDF documents.
     foreach ($documents as $document) {
+      if (!$document instanceof PdfDocumentInterface) {
+        continue;
+      }
       $url = $document->toUrl('canonical', ['absolute' => TRUE])->toString();
       $lastmod = date('c', $document->getChangedTime());
 
@@ -95,7 +99,7 @@ class PdfSitemapController extends ControllerBase {
       if ($document->hasField('thumbnail') && !$document->get('thumbnail')->isEmpty()) {
         $thumbnail = $document->get('thumbnail')->entity;
         if ($thumbnail) {
-          $thumb_url = \Drupal::service('file_url_generator')->generateAbsoluteString($thumbnail->getFileUri());
+          $thumb_url = $this->fileUrlGenerator->generateAbsoluteString($thumbnail->getFileUri());
           $xml .= "      <pdf:thumbnail>" . htmlspecialchars($thumb_url) . "</pdf:thumbnail>\n";
         }
       }

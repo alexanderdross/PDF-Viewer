@@ -2,11 +2,12 @@
 
 namespace Drupal\pdf_embed_seo_premium\Service;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
 use Drupal\pdf_embed_seo\Entity\PdfDocumentInterface;
-use Drupal\user\Entity\Role;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
@@ -14,21 +15,20 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
  */
 class PdfAccessManager {
 
-  /**
-   * The current user.
-   *
-   * @var \Drupal\Core\Session\AccountProxyInterface
-   */
-  protected $currentUser;
+  use StringTranslationTrait;
 
   /**
    * Constructs a PdfAccessManager object.
    *
-   * @param \Drupal\Core\Session\AccountProxyInterface $current_user
+   * @param \Drupal\Core\Session\AccountProxyInterface $currentUser
    *   The current user.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   The entity type manager.
    */
-  public function __construct(AccountProxyInterface $current_user) {
-    $this->currentUser = $current_user;
+  public function __construct(
+    protected AccountProxyInterface $currentUser,
+    protected EntityTypeManagerInterface $entityTypeManager,
+  ) {
   }
 
   /**
@@ -141,7 +141,10 @@ class PdfAccessManager {
    */
   public function getAvailableRoles(): array {
     $roles = [];
-    foreach (Role::loadMultiple() as $role) {
+    $roles_entities = $this->entityTypeManager
+      ->getStorage('user_role')
+      ->loadMultiple();
+    foreach ($roles_entities as $role) {
       if ($role->id() !== 'anonymous') {
         $roles[$role->id()] = $role->label();
       }
@@ -171,21 +174,23 @@ class PdfAccessManager {
     $build['title'] = [
       '#type' => 'html_tag',
       '#tag' => 'h3',
-      '#value' => t('Access Restricted'),
+      '#value' => $this->t('Access Restricted'),
     ];
 
     if ($requires_login && $is_anonymous) {
       $build['message'] = [
         '#type' => 'html_tag',
         '#tag' => 'p',
-        '#value' => t('You must be logged in to view this document.'),
+        '#value' => $this->t('You must be logged in to view this document.'),
       ];
       $build['login_link'] = [
         '#type' => 'link',
-        '#title' => t('Log In'),
-        '#url' => Url::fromRoute('user.login', [], [
-          'query' => ['destination' => $pdf_document->toUrl('canonical')->toString()],
-        ]),
+        '#title' => $this->t('Log In'),
+        '#url' => Url::fromRoute(
+            'user.login', [], [
+              'query' => ['destination' => $pdf_document->toUrl('canonical')->toString()],
+            ]
+        ),
         '#attributes' => ['class' => ['button', 'button--primary']],
       ];
     }
@@ -193,7 +198,7 @@ class PdfAccessManager {
       $build['message'] = [
         '#type' => 'html_tag',
         '#tag' => 'p',
-        '#value' => t('You do not have permission to view this document.'),
+        '#value' => $this->t('You do not have permission to view this document.'),
       ];
     }
 
@@ -211,9 +216,11 @@ class PdfAccessManager {
    */
   public function getLoginRedirect(PdfDocumentInterface $pdf_document): ?RedirectResponse {
     if ($this->requiresLogin($pdf_document) && $this->currentUser->isAnonymous()) {
-      $login_url = Url::fromRoute('user.login', [], [
-        'query' => ['destination' => $pdf_document->toUrl('canonical')->toString()],
-      ])->toString();
+      $login_url = Url::fromRoute(
+            'user.login', [], [
+              'query' => ['destination' => $pdf_document->toUrl('canonical')->toString()],
+            ]
+        )->toString();
       return new RedirectResponse($login_url);
     }
     return NULL;
