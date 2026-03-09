@@ -60,7 +60,7 @@ describe('Webhooks', () => {
     });
 
     it('should format signature header correctly', () => {
-      const signature = 'abc123'.repeat(10).slice(0, 64);
+      const signature = 'a1b2c3d4'.repeat(8).slice(0, 64);
       const header = `sha256=${signature}`;
 
       const [algorithm, hash] = header.split('=');

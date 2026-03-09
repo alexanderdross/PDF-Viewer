@@ -54,15 +54,16 @@ class PdfArchiveController extends ControllerBase {
       ->accessCheck(TRUE)
       ->pager($posts_per_page);
 
-    // Apply category filter if set (premium feature).
+    // Apply taxonomy filters if premium module is active.
+    $premium_active = $this->moduleHandler()->moduleExists('pdf_embed_seo_premium');
+
     $category = \Drupal::request()->query->get('pdf_category');
-    if ($category && $this->moduleHandler()->moduleExists('pdf_embed_seo_premium')) {
+    if ($category && $premium_active) {
       $query->condition('pdf_category', $category);
     }
 
-    // Apply tag filter if set (premium feature).
     $tag = \Drupal::request()->query->get('pdf_tag');
-    if ($tag && $this->moduleHandler()->moduleExists('pdf_embed_seo_premium')) {
+    if ($tag && $premium_active) {
       $query->condition('pdf_tags', $tag);
     }
 

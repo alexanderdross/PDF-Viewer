@@ -123,20 +123,29 @@ class PDF_Embed_SEO_Block {
 			array(
 				'post_type'      => 'pdf_document',
 				'post_status'    => 'publish',
-				'posts_per_page' => -1,
+				'posts_per_page' => 200,
 				'orderby'        => 'title',
 				'order'          => 'ASC',
+				'fields'         => 'ids',
+				'no_found_rows'  => true,
 			)
 		);
 
+		if ( empty( $pdfs ) ) {
+			return array();
+		}
+
+		// Batch prime thumbnail meta to avoid N+1 queries.
+		update_meta_cache( 'post', $pdfs );
+
 		$options = array();
 
-		foreach ( $pdfs as $pdf ) {
+		foreach ( $pdfs as $pdf_id ) {
 			$options[] = array(
-				'value'     => $pdf->ID,
-				'label'     => $pdf->post_title,
-				'permalink' => get_permalink( $pdf->ID ),
-				'thumbnail' => get_the_post_thumbnail_url( $pdf->ID, 'thumbnail' ),
+				'value'     => $pdf_id,
+				'label'     => get_the_title( $pdf_id ),
+				'permalink' => get_permalink( $pdf_id ),
+				'thumbnail' => get_the_post_thumbnail_url( $pdf_id, 'thumbnail' ),
 			);
 		}
 

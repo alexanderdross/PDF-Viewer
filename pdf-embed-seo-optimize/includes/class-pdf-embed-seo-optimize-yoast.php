@@ -213,15 +213,23 @@ class PDF_Embed_SEO_Yoast {
 		);
 
 		// Add PDF documents as ItemList with detailed DigitalDocument schema.
-		$pdf_query = new WP_Query(
-			array(
-				'post_type'      => 'pdf_document',
-				'post_status'    => 'publish',
-				'posts_per_page' => 50,
-				'orderby'        => 'date',
-				'order'          => 'DESC',
-			)
-		);
+		// Use transient caching to avoid running this query on every page load.
+		$cache_key = 'pdf_embed_seo_archive_schema_query';
+		$pdf_query = get_transient( $cache_key );
+
+		if ( false === $pdf_query ) {
+			$pdf_query = new WP_Query(
+				array(
+					'post_type'      => 'pdf_document',
+					'post_status'    => 'publish',
+					'posts_per_page' => 50,
+					'orderby'        => 'date',
+					'order'          => 'DESC',
+					'no_found_rows'  => true,
+				)
+			);
+			set_transient( $cache_key, $pdf_query, HOUR_IN_SECONDS );
+		}
 
 		if ( $pdf_query->have_posts() ) {
 			$items = array();
