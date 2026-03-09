@@ -553,7 +553,7 @@ final class PDF_Embed_SEO_Premium {
 				printf(
 					/* translators: %s: link to privacy policy */
 					esc_html__( 'This plugin communicates with pdfviewer.drossmedia.de for license validation. Your site URL, plugin version, and license key are transmitted securely over HTTPS. %s', 'pdf-embed-seo-optimize' ),
-					'<a href="https://pdfviewer.drossmedia.de/privacy/" target="_blank">' . esc_html__( 'Privacy Policy', 'pdf-embed-seo-optimize' ) . '</a>'
+					'<a href="https://dross.net/privacy-policy/" target="_blank">' . esc_html__( 'Privacy Policy', 'pdf-embed-seo-optimize' ) . '</a>'
 				);
 				?>
 			</p>

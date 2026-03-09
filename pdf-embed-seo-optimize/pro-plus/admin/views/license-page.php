@@ -91,7 +91,7 @@ $current_status = isset( $status_info[ $license_status ] ) ? $status_info[ $lice
                 printf(
                     /* translators: %s: Purchase URL */
                     esc_html__( 'Don\'t have a license? %s', 'pdf-embed-seo-optimize' ),
-                    '<a href="https://pdfviewer.drossmedia.de/pro-plus" target="_blank">' . esc_html__( 'Purchase Pro+ License', 'pdf-embed-seo-optimize' ) . '</a>'
+                    '<a href="https://pdfviewer.drossmedia.de/pro/" target="_blank">' . esc_html__( 'Purchase Pro+ License', 'pdf-embed-seo-optimize' ) . '</a>'
                 );
                 ?>
             </p>
