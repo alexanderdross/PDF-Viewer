@@ -54,14 +54,21 @@ class PdfPremiumSettingsForm extends ConfigFormBase {
       $status_class = 'messages--error';
     }
 
+    $status_message = $status_messages[$license_status] ?? $status_messages['inactive'];
     $form['license']['status_message'] = [
-      '#markup' => '<div class="messages ' . $status_class . '">' . ($status_messages[$license_status] ?? $status_messages['inactive']) . '</div>',
+      '#type' => 'html_tag',
+      '#tag' => 'div',
+      '#attributes' => ['class' => ['messages', $status_class]],
+      '#value' => $status_message,
     ];
 
     // Show days remaining if applicable.
     if ($license_status === 'valid' && $days_remaining !== NULL && $days_remaining <= 30) {
       $form['license']['expiry_warning'] = [
-        '#markup' => '<div class="messages messages--warning">' . $this->t('Your license will expire in @days days.', ['@days' => $days_remaining]) . '</div>',
+        '#type' => 'html_tag',
+        '#tag' => 'div',
+        '#attributes' => ['class' => ['messages', 'messages--warning']],
+        '#value' => $this->t('Your license will expire in @days days.', ['@days' => $days_remaining]),
       ];
     }
 
