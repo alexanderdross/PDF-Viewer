@@ -59,7 +59,7 @@ drush en pdf_embed_seo -y
 
 #### WordPress
 1. Download premium ZIP from your account
-2. Upload to `/wp-content/plugins/pdf-embed-seo-optimize/premium/`
+2. Upload to `/wp-content/plugins/wordpress-pdf-embed-seo/premium/`
 3. Go to **PDF Documents > License**
 4. Enter your license key and activate
 

@@ -16,7 +16,7 @@ This release introduces comprehensive QA, UAT, and Unit tests across all modules
 
 ### Pro+ Enterprise Module (v1.3.0)
 
-#### WordPress Pro+ (`/pdf-embed-seo-optimize/pro-plus/`)
+#### WordPress Pro+ (`/wordpress-pdf-embed-seo/pro-plus/`)
 - **Complete Test Suite**: 9 unit test files covering all Pro+ features
   - `test-pro-plus-license.php` - License validation tests
   - `test-pro-plus-advanced-analytics.php` - Heatmaps, engagement scoring
@@ -144,7 +144,7 @@ The "Premium" tier has been renamed to "Pro" for consistency:
 ### New Files Created
 
 ```
-pdf-embed-seo-optimize/pro-plus/tests/
+wordpress-pdf-embed-seo/pro-plus/tests/
 ├── bootstrap.php
 ├── class-pro-plus-test-case.php
 └── unit/

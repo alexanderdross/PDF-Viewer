@@ -162,8 +162,8 @@ Called when the user deactivates their license or uninstalls the plugin.
 ### WordPress (Premium & Pro+)
 
 **Files modified:**
-- `pdf-embed-seo-optimize/premium/class-pdf-embed-seo-premium.php`
-- `pdf-embed-seo-optimize/pro-plus/class-pdf-embed-seo-pro-plus.php`
+- `wordpress-pdf-embed-seo/premium/class-pdf-embed-seo-premium.php`
+- `wordpress-pdf-embed-seo/pro-plus/class-pdf-embed-seo-pro-plus.php`
 
 **Integration points:**
 

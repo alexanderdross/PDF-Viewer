@@ -14,7 +14,7 @@ A comprehensive PDF management solution for WordPress, Drupal, and React/Next.js
 
 | Platform | Free | Premium | Package/Module |
 |----------|:----:|:-------:|----------------|
-| WordPress 5.8+ | ✓ | ✓ | `pdf-embed-seo-optimize` |
+| WordPress 5.8+ | ✓ | ✓ | `wordpress-pdf-embed-seo` |
 | Drupal 10/11 | ✓ | ✓ | `pdf_embed_seo` |
 | React 18+ | ✓ | ✓ | `@pdf-embed-seo/react` |
 | Next.js 13/14/15 | ✓ | ✓ | `@pdf-embed-seo/react` |
