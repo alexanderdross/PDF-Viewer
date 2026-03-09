@@ -2,8 +2,11 @@
 
 namespace Drupal\pdf_embed_seo_pro_plus\Service;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Database\Connection;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
@@ -12,25 +15,11 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class AuditLogger {
 
   /**
-   * Database connection.
+   * The logger.
    *
-   * @var \Drupal\Core\Database\Connection
+   * @var \Psr\Log\LoggerInterface
    */
-  protected $database;
-
-  /**
-   * Current user.
-   *
-   * @var \Drupal\Core\Session\AccountProxyInterface
-   */
-  protected $currentUser;
-
-  /**
-   * Request stack.
-   *
-   * @var \Symfony\Component\HttpFoundation\RequestStack
-   */
-  protected $requestStack;
+  protected LoggerInterface $logger;
 
   /**
    * Audit actions.
@@ -57,19 +46,23 @@ class AuditLogger {
    *
    * @param \Drupal\Core\Database\Connection $database
    *   The database connection.
-   * @param \Drupal\Core\Session\AccountProxyInterface $current_user
+   * @param \Drupal\Core\Session\AccountProxyInterface $currentUser
    *   The current user.
-   * @param \Symfony\Component\HttpFoundation\RequestStack $request_stack
+   * @param \Symfony\Component\HttpFoundation\RequestStack $requestStack
    *   The request stack.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   *   The config factory.
+   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $loggerFactory
+   *   The logger factory.
    */
   public function __construct(
-    Connection $database,
-    AccountProxyInterface $current_user,
-    RequestStack $request_stack
+    protected Connection $database,
+    protected AccountProxyInterface $currentUser,
+    protected RequestStack $requestStack,
+    protected ConfigFactoryInterface $configFactory,
+    LoggerChannelFactoryInterface $loggerFactory,
   ) {
-    $this->database = $database;
-    $this->currentUser = $current_user;
-    $this->requestStack = $request_stack;
+    $this->logger = $loggerFactory->get('pdf_embed_seo_pro_plus');
   }
 
   /**
@@ -85,36 +78,36 @@ class AuditLogger {
    * @return int|false
    *   The log entry ID or FALSE on failure.
    */
-  public function log(string $action, ?int $document_id = NULL, array $details = []) {
+  public function log(string $action, ?int $document_id = NULL, array $details = []): int|false {
     $request = $this->requestStack->getCurrentRequest();
 
     $ip_address = $request ? $request->getClientIp() : '';
     $user_agent = $request ? substr($request->headers->get('User-Agent', ''), 0, 500) : '';
 
-    // Anonymize IP if GDPR mode is enabled
     if ($this->isGdprEnabled()) {
       $ip_address = $this->anonymizeIp($ip_address);
     }
 
     try {
-      $id = $this->database->insert('pdf_audit_log')
-        ->fields([
-          'document_id' => $document_id,
-          'user_id' => $this->currentUser->id() ?: NULL,
-          'action' => $action,
-          'details' => json_encode($details),
-          'ip_address' => $ip_address,
-          'user_agent' => $user_agent,
-          'created_at' => date('Y-m-d H:i:s'),
-        ])
+      return $this->database->insert('pdf_audit_log')
+        ->fields(
+                [
+                  'document_id' => $document_id,
+                  'user_id' => $this->currentUser->id() ?: NULL,
+                  'action' => $action,
+                  'details' => json_encode($details),
+                  'ip_address' => $ip_address,
+                  'user_agent' => $user_agent,
+                  'created_at' => date('Y-m-d H:i:s'),
+                ]
+            )
         ->execute();
-
-      return $id;
     }
     catch (\Exception $e) {
-      \Drupal::logger('pdf_embed_seo_pro_plus')->error('Failed to log audit event: @message', [
-        '@message' => $e->getMessage(),
-      ]);
+      $this->logger->error(
+            'Failed to log audit event: @message',
+            ['@message' => $e->getMessage()],
+        );
       return FALSE;
     }
   }
@@ -165,7 +158,6 @@ class AuditLogger {
 
       $results = $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
 
-      // Decode details
       foreach ($results as &$result) {
         if (!empty($result['details'])) {
           $result['details'] = json_decode($result['details'], TRUE);
@@ -299,20 +291,21 @@ class AuditLogger {
 
     $output = fopen('php://temp', 'r+');
 
-    // Header
     fputcsv($output, ['ID', 'Document ID', 'User ID', 'Action', 'Details', 'IP Address', 'User Agent', 'Created At']);
 
     foreach ($entries as $entry) {
-      fputcsv($output, [
-        $entry['id'],
-        $entry['document_id'],
-        $entry['user_id'],
-        $entry['action'],
-        is_array($entry['details']) ? json_encode($entry['details']) : $entry['details'],
-        $entry['ip_address'],
-        $entry['user_agent'],
-        $entry['created_at'],
-      ]);
+      fputcsv(
+            $output, [
+              $entry['id'],
+              $entry['document_id'],
+              $entry['user_id'],
+              $entry['action'],
+              is_array($entry['details']) ? json_encode($entry['details']) : $entry['details'],
+              $entry['ip_address'],
+              $entry['user_agent'],
+              $entry['created_at'],
+            ]
+        );
     }
 
     rewind($output);
@@ -356,7 +349,7 @@ class AuditLogger {
    *   TRUE if GDPR mode is enabled.
    */
   protected function isGdprEnabled(): bool {
-    $config = \Drupal::config('pdf_embed_seo_pro_plus.settings');
+    $config = $this->configFactory->get('pdf_embed_seo_pro_plus.settings');
     return (bool) $config->get('gdpr_mode');
   }
 

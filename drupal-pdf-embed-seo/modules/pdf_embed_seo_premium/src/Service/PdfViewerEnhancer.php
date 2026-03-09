@@ -4,12 +4,15 @@ namespace Drupal\pdf_embed_seo_premium\Service;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\pdf_embed_seo\Entity\PdfDocumentInterface;
 
 /**
  * Service for enhancing PDF viewer with premium features.
  */
 class PdfViewerEnhancer {
+
+  use StringTranslationTrait;
 
   /**
    * The current user.
@@ -45,7 +48,7 @@ class PdfViewerEnhancer {
   public function __construct(
     AccountProxyInterface $current_user,
     ConfigFactoryInterface $config_factory,
-    PdfProgressTracker $progress_tracker
+    PdfProgressTracker $progress_tracker,
   ) {
     $this->currentUser = $current_user;
     $this->configFactory = $config_factory;
@@ -73,7 +76,7 @@ class PdfViewerEnhancer {
 
     // Get saved progress if available.
     if ($options['enableReadingProgress']) {
-      $progress = $this->progressTracker->getProgress($pdf_document->id());
+      $progress = $this->progressTracker->getProgress($pdf_document);
       if ($progress) {
         $options['savedProgress'] = $progress;
       }
@@ -103,16 +106,16 @@ class PdfViewerEnhancer {
           'getProgress' => '/api/pdf-embed-seo/v1/documents/' . $pdf_document->id() . '/progress',
         ],
         'translations' => [
-          'search' => t('Search'),
-          'searchPlaceholder' => t('Find in document...'),
-          'noResults' => t('No results found'),
-          'bookmarks' => t('Bookmarks'),
-          'noBookmarks' => t('No bookmarks in this document'),
-          'resumeReading' => t('Resume reading'),
-          'resumePrompt' => t('Would you like to continue where you left off?'),
-          'resumeYes' => t('Yes, resume'),
-          'resumeNo' => t('No, start over'),
-          'progressSaved' => t('Progress saved'),
+          'search' => $this->t('Search'),
+          'searchPlaceholder' => $this->t('Find in document...'),
+          'noResults' => $this->t('No results found'),
+          'bookmarks' => $this->t('Bookmarks'),
+          'noBookmarks' => $this->t('No bookmarks in this document'),
+          'resumeReading' => $this->t('Resume reading'),
+          'resumePrompt' => $this->t('Would you like to continue where you left off?'),
+          'resumeYes' => $this->t('Yes, resume'),
+          'resumeNo' => $this->t('No, start over'),
+          'progressSaved' => $this->t('Progress saved'),
         ],
       ],
     ];

@@ -3,7 +3,10 @@
 namespace Drupal\pdf_embed_seo\Form;
 
 use Drupal\Core\Entity\ContentEntityForm;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Password\PasswordInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Form controller for the PDF Document entity add/edit forms.
@@ -11,13 +14,39 @@ use Drupal\Core\Form\FormStateInterface;
 class PdfDocumentForm extends ContentEntityForm {
 
   /**
+   * Constructs a PdfDocumentForm.
+   *
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
+   *   The module handler.
+   * @param \Drupal\Core\Password\PasswordInterface $password
+   *   The password hashing service.
+   */
+  public function __construct(
+    ModuleHandlerInterface $moduleHandler,
+    protected PasswordInterface $password,
+  ) {
+    $this->moduleHandler = $moduleHandler;
+  }
+
+  /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
-    $form = parent::buildForm($form, $form_state);
+  public static function create(ContainerInterface $container): static {
+    $instance = new static(
+          $container->get('module_handler'),
+          $container->get('password'),
+      );
+    $instance->setEntityTypeManager($container->get('entity_type.manager'));
+    $instance->setModuleHandler($container->get('module_handler'));
+    $instance->setStringTranslation($container->get('string_translation'));
+    return $instance;
+  }
 
-    /** @var \Drupal\pdf_embed_seo\Entity\PdfDocumentInterface $entity */
-    $entity = $this->entity;
+  /**
+   * {@inheritdoc}
+   */
+  public function buildForm(array $form, FormStateInterface $form_state): array {
+    $form = parent::buildForm($form, $form_state);
 
     // Add fieldset for PDF settings.
     $form['pdf_settings'] = [
@@ -57,7 +86,7 @@ class PdfDocumentForm extends ContentEntityForm {
     }
 
     // Premium features fieldset.
-    if (\Drupal::moduleHandler()->moduleExists('pdf_embed_seo_premium')) {
+    if ($this->moduleHandler->moduleExists('pdf_embed_seo_premium')) {
       $form['premium_settings'] = [
         '#type' => 'details',
         '#title' => $this->t('Premium Settings'),
@@ -116,51 +145,33 @@ class PdfDocumentForm extends ContentEntityForm {
   /**
    * {@inheritdoc}
    */
-  public function save(array $form, FormStateInterface $form_state) {
+  public function save(array $form, FormStateInterface $form_state): int {
     $entity = $this->entity;
 
     // Hash the password if set and not already hashed.
-    $password = $entity->get('password')->value;
-    if (!empty($password)) {
+    $password_value = $entity->get('password')->value;
+    if (!empty($password_value)) {
       // Check if password appears to be unhashed (doesn't start with $).
-      // Drupal hashed passwords start with $ followed by algorithm identifier.
-      if (strpos($password, '$') !== 0) {
-        /** @var \Drupal\Core\Password\PasswordInterface $password_service */
-        $password_service = \Drupal::service('password');
-        $hashed_password = $password_service->hash($password);
+      if (!str_starts_with($password_value, '$')) {
+        $hashed_password = $this->password->hash($password_value);
         $entity->set('password', $hashed_password);
       }
     }
 
     $status = parent::save($form, $form_state);
 
-    switch ($status) {
-      case SAVED_NEW:
-        $this->messenger()->addStatus($this->t('Created the %label PDF document.', [
-          '%label' => $entity->label(),
-        ]));
-
-        // Generate thumbnail if auto-generate is enabled.
-        $config = \Drupal::config('pdf_embed_seo.settings');
-        if ($config->get('auto_generate_thumbnails') && $entity->getPdfFile()) {
-          try {
-            \Drupal::service('pdf_embed_seo.thumbnail_generator')->generateThumbnail($entity);
-          }
-          catch (\Exception $e) {
-            $this->messenger()->addWarning($this->t('Could not generate thumbnail: @error', [
-              '@error' => $e->getMessage(),
-            ]));
-          }
-        }
-        break;
-
-      default:
-        $this->messenger()->addStatus($this->t('Saved the %label PDF document.', [
-          '%label' => $entity->label(),
-        ]));
-    }
+    match ($status) {
+      SAVED_NEW => $this->messenger()->addStatus(
+            $this->t('Created the %label PDF document.', ['%label' => $entity->label()]),
+        ),
+            default => $this->messenger()->addStatus(
+            $this->t('Saved the %label PDF document.', ['%label' => $entity->label()]),
+        ),
+    };
 
     $form_state->setRedirectUrl($entity->toUrl('collection'));
+
+    return $status;
   }
 
 }

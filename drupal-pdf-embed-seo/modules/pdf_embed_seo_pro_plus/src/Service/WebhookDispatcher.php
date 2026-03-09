@@ -60,7 +60,7 @@ class WebhookDispatcher {
   public function __construct(
     Connection $database,
     ClientInterface $http_client,
-    LoggerChannelFactoryInterface $logger_factory
+    LoggerChannelFactoryInterface $logger_factory,
   ) {
     $this->database = $database;
     $this->httpClient = $http_client;
@@ -87,31 +87,35 @@ class WebhookDispatcher {
       return FALSE;
     }
 
-    // Generate secret if not provided
+    // Generate secret if not provided.
     if (empty($secret)) {
       $secret = bin2hex(random_bytes(32));
     }
 
     try {
       $id = $this->database->insert('pdf_webhooks')
-        ->fields([
-          'name' => $name,
-          'url' => $url,
-          'secret' => $secret,
-          'events' => json_encode($events),
-          'is_active' => 1,
-          'failure_count' => 0,
-          'created_at' => date('Y-m-d H:i:s'),
-          'updated_at' => date('Y-m-d H:i:s'),
-        ])
+        ->fields(
+                [
+                  'name' => $name,
+                  'url' => $url,
+                  'secret' => $secret,
+                  'events' => json_encode($events),
+                  'is_active' => 1,
+                  'failure_count' => 0,
+                  'created_at' => date('Y-m-d H:i:s'),
+                  'updated_at' => date('Y-m-d H:i:s'),
+                ]
+            )
         ->execute();
 
       return $id;
     }
     catch (\Exception $e) {
-      $this->logger->error('Failed to create webhook: @message', [
-        '@message' => $e->getMessage(),
-      ]);
+      $this->logger->error(
+            'Failed to create webhook: @message', [
+              '@message' => $e->getMessage(),
+            ]
+        );
       return FALSE;
     }
   }
@@ -241,7 +245,7 @@ class WebhookDispatcher {
         ->condition('id', $id)
         ->execute();
 
-      // Also delete deliveries
+      // Also delete deliveries.
       $this->database->delete('pdf_webhook_deliveries')
         ->condition('webhook_id', $id)
         ->execute();
@@ -281,9 +285,11 @@ class WebhookDispatcher {
   protected function getSubscribedWebhooks(string $event): array {
     $all_webhooks = $this->getAll(TRUE);
 
-    return array_filter($all_webhooks, function ($webhook) use ($event) {
-      return in_array($event, $webhook['events'], TRUE) || in_array('*', $webhook['events'], TRUE);
-    });
+    return array_filter(
+          $all_webhooks, function ($webhook) use ($event) {
+              return in_array($event, $webhook['events'], TRUE) || in_array('*', $webhook['events'], TRUE);
+          }
+      );
   }
 
   /**
@@ -313,26 +319,30 @@ class WebhookDispatcher {
     $delivery_id = $this->createDelivery($webhook['id'], $event, $json_payload);
 
     try {
-      $response = $this->httpClient->request('POST', $webhook['url'], [
-        'headers' => [
-          'Content-Type' => 'application/json',
-          'X-Webhook-Event' => $event,
-          'X-Webhook-Signature' => $signature,
-          'X-Webhook-Timestamp' => time(),
-        ],
-        'body' => $json_payload,
-        'timeout' => 30,
-      ]);
+      $response = $this->httpClient->request(
+            'POST', $webhook['url'], [
+              'headers' => [
+                'Content-Type' => 'application/json',
+                'X-Webhook-Event' => $event,
+                'X-Webhook-Signature' => $signature,
+                'X-Webhook-Timestamp' => time(),
+              ],
+              'body' => $json_payload,
+              'timeout' => 30,
+            ]
+        );
 
       $duration_ms = (int) ((microtime(TRUE) - $start_time) * 1000);
       $status_code = $response->getStatusCode();
 
-      $this->updateDelivery($delivery_id, [
-        'response_code' => $status_code,
-        'response_body' => substr((string) $response->getBody(), 0, 1000),
-        'duration_ms' => $duration_ms,
-        'status' => ($status_code >= 200 && $status_code < 300) ? 'success' : 'failed',
-      ]);
+      $this->updateDelivery(
+            $delivery_id, [
+              'response_code' => $status_code,
+              'response_body' => substr((string) $response->getBody(), 0, 1000),
+              'duration_ms' => $duration_ms,
+              'status' => ($status_code >= 200 && $status_code < 300) ? 'success' : 'failed',
+            ]
+        );
 
       if ($status_code >= 200 && $status_code < 300) {
         $this->resetFailureCount($webhook['id']);
@@ -346,17 +356,21 @@ class WebhookDispatcher {
     catch (GuzzleException $e) {
       $duration_ms = (int) ((microtime(TRUE) - $start_time) * 1000);
 
-      $this->updateDelivery($delivery_id, [
-        'response_code' => 0,
-        'response_body' => $e->getMessage(),
-        'duration_ms' => $duration_ms,
-        'status' => 'failed',
-      ]);
+      $this->updateDelivery(
+            $delivery_id, [
+              'response_code' => 0,
+              'response_body' => $e->getMessage(),
+              'duration_ms' => $duration_ms,
+              'status' => 'failed',
+            ]
+        );
 
       $this->incrementFailureCount($webhook['id']);
-      $this->logger->warning('Webhook delivery failed: @message', [
-        '@message' => $e->getMessage(),
-      ]);
+      $this->logger->warning(
+            'Webhook delivery failed: @message', [
+              '@message' => $e->getMessage(),
+            ]
+        );
 
       return FALSE;
     }
@@ -411,13 +425,15 @@ class WebhookDispatcher {
   protected function createDelivery(int $webhook_id, string $event, string $payload) {
     try {
       return $this->database->insert('pdf_webhook_deliveries')
-        ->fields([
-          'webhook_id' => $webhook_id,
-          'event' => $event,
-          'payload' => $payload,
-          'status' => 'pending',
-          'created_at' => date('Y-m-d H:i:s'),
-        ])
+        ->fields(
+                [
+                  'webhook_id' => $webhook_id,
+                  'event' => $event,
+                  'payload' => $payload,
+                  'status' => 'pending',
+                  'created_at' => date('Y-m-d H:i:s'),
+                ]
+            )
         ->execute();
     }
     catch (\Exception $e) {
@@ -440,17 +456,19 @@ class WebhookDispatcher {
         ->condition('id', $delivery_id)
         ->execute();
 
-      // Also update webhook last triggered
+      // Also update webhook last triggered.
       $this->database->update('pdf_webhooks')
-        ->fields([
-          'last_triggered' => date('Y-m-d H:i:s'),
-          'last_status' => $data['status'],
-        ])
+        ->fields(
+                [
+                  'last_triggered' => date('Y-m-d H:i:s'),
+                  'last_status' => $data['status'],
+                ]
+            )
         ->condition('id', $this->getDeliveryWebhookId($delivery_id))
         ->execute();
     }
     catch (\Exception $e) {
-      // Ignore update errors
+      // Ignore update errors.
     }
   }
 
@@ -490,7 +508,7 @@ class WebhookDispatcher {
         ->execute();
     }
     catch (\Exception $e) {
-      // Ignore errors
+      // Ignore errors.
     }
   }
 
@@ -507,17 +525,19 @@ class WebhookDispatcher {
         ->condition('id', $webhook_id)
         ->execute();
 
-      // Disable webhook after 10 consecutive failures
+      // Disable webhook after 10 consecutive failures.
       $webhook = $this->get($webhook_id);
       if ($webhook && $webhook['failure_count'] >= 10) {
         $this->update($webhook_id, ['is_active' => FALSE]);
-        $this->logger->warning('Webhook @name disabled after 10 consecutive failures.', [
-          '@name' => $webhook['name'],
-        ]);
+        $this->logger->warning(
+              'Webhook @name disabled after 10 consecutive failures.', [
+                '@name' => $webhook['name'],
+              ]
+          );
       }
     }
     catch (\Exception $e) {
-      // Ignore errors
+      // Ignore errors.
     }
   }
 

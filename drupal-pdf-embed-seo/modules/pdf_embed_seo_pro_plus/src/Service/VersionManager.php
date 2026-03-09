@@ -4,7 +4,10 @@ namespace Drupal\pdf_embed_seo_pro_plus\Service;
 
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\file\FileInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Document versioning service for Pro+ Enterprise.
@@ -12,44 +15,31 @@ use Drupal\Core\Session\AccountProxyInterface;
 class VersionManager {
 
   /**
-   * Database connection.
+   * The logger.
    *
-   * @var \Drupal\Core\Database\Connection
+   * @var \Psr\Log\LoggerInterface
    */
-  protected $database;
-
-  /**
-   * Entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
-
-  /**
-   * Current user.
-   *
-   * @var \Drupal\Core\Session\AccountProxyInterface
-   */
-  protected $currentUser;
+  protected LoggerInterface $logger;
 
   /**
    * Constructs a VersionManager object.
    *
    * @param \Drupal\Core\Database\Connection $database
    *   The database connection.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity type manager.
-   * @param \Drupal\Core\Session\AccountProxyInterface $current_user
+   * @param \Drupal\Core\Session\AccountProxyInterface $currentUser
    *   The current user.
+   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $loggerFactory
+   *   The logger factory.
    */
   public function __construct(
-    Connection $database,
-    EntityTypeManagerInterface $entity_type_manager,
-    AccountProxyInterface $current_user
+    protected Connection $database,
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected AccountProxyInterface $currentUser,
+    LoggerChannelFactoryInterface $loggerFactory,
   ) {
-    $this->database = $database;
-    $this->entityTypeManager = $entity_type_manager;
-    $this->currentUser = $current_user;
+    $this->logger = $loggerFactory->get('pdf_embed_seo_pro_plus');
   }
 
   /**
@@ -68,51 +58,55 @@ class VersionManager {
    *   The new version ID or FALSE on failure.
    */
   public function createVersion(int $document_id, int $file_id, string $file_url, string $change_notes = '') {
-    // Get current version number
+    // Get current version number.
     $current = $this->getCurrentVersion($document_id);
     $version_parts = $current ? explode('.', $current['version_number']) : [0, 0];
     $new_version = (int) $version_parts[0] . '.' . ((int) ($version_parts[1] ?? 0) + 1);
 
-    // Mark all existing versions as not current
+    // Mark all existing versions as not current.
     $this->database->update('pdf_versions')
       ->fields(['is_current' => 0])
       ->condition('document_id', $document_id)
       ->execute();
 
-    // Get file size
+    // Get file size.
     $file_size = 0;
     try {
       $file = $this->entityTypeManager->getStorage('file')->load($file_id);
-      if ($file) {
+      if ($file instanceof FileInterface) {
         $file_size = $file->getSize();
       }
     }
     catch (\Exception $e) {
-      // Ignore file size errors
+      // Ignore file size errors.
     }
 
-    // Insert new version
+    // Insert new version.
     try {
       $id = $this->database->insert('pdf_versions')
-        ->fields([
-          'document_id' => $document_id,
-          'version_number' => $new_version,
-          'file_id' => $file_id,
-          'file_url' => $file_url,
-          'file_size' => $file_size,
-          'change_notes' => $change_notes,
-          'created_by' => $this->currentUser->id(),
-          'created_at' => date('Y-m-d H:i:s'),
-          'is_current' => 1,
-        ])
+        ->fields(
+                [
+                  'document_id' => $document_id,
+                  'version_number' => $new_version,
+                  'file_id' => $file_id,
+                  'file_url' => $file_url,
+                  'file_size' => $file_size,
+                  'change_notes' => $change_notes,
+                  'created_by' => $this->currentUser->id(),
+                  'created_at' => date('Y-m-d H:i:s'),
+                  'is_current' => 1,
+                ]
+            )
         ->execute();
 
       return $id;
     }
     catch (\Exception $e) {
-      \Drupal::logger('pdf_embed_seo_pro_plus')->error('Failed to create version: @message', [
-        '@message' => $e->getMessage(),
-      ]);
+      $this->logger->error(
+            'Failed to create version: @message', [
+              '@message' => $e->getMessage(),
+            ]
+        );
       return FALSE;
     }
   }
@@ -203,13 +197,13 @@ class VersionManager {
     }
 
     try {
-      // Mark all versions as not current
+      // Mark all versions as not current.
       $this->database->update('pdf_versions')
         ->fields(['is_current' => 0])
         ->condition('document_id', $version['document_id'])
         ->execute();
 
-      // Mark this version as current
+      // Mark this version as current.
       $this->database->update('pdf_versions')
         ->fields(['is_current' => 1])
         ->condition('id', $version_id)
@@ -237,7 +231,7 @@ class VersionManager {
       return FALSE;
     }
 
-    // Don't delete the current version
+    // Don't delete the current version.
     if ($version['is_current']) {
       return FALSE;
     }

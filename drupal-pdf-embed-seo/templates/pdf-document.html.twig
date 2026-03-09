@@ -60,7 +60,7 @@
     <nav class="pdf-embed-seo-breadcrumb" aria-label="{{ 'Breadcrumb'|t }}">
       <ol class="pdf-embed-seo-breadcrumb-list">
         <li class="pdf-embed-seo-breadcrumb-item">
-          <a href="{{ site_url }}" title="{{ 'Go to %site homepage'|t({'%site': site_name}) }}">
+          <a href="{{ site_url }}" title="{{ 'Go to @site homepage'|t({'@site': site_name}) }}">
             {{ site_name }}
           </a>
         </li>
@@ -108,14 +108,14 @@
     <div class="pdf-embed-seo-meta">
       <span class="pdf-embed-seo-published">
         <time datetime="{{ pdf_document.created.value|date('c') }}">
-          {{ 'Published: %date'|t({'%date': published_date}) }}
+          {{ 'Published: @date'|t({'@date': published_date}) }}
         </time>
       </span>
 
       {% if published_date != modified_date %}
         <span class="pdf-embed-seo-modified">
           <time datetime="{{ pdf_document.changed.value|date('c') }}">
-            {{ 'Updated: %date'|t({'%date': modified_date}) }}
+            {{ 'Updated: @date'|t({'@date': modified_date}) }}
           </time>
         </span>
       {% endif %}

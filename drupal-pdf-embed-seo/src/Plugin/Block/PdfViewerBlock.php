@@ -2,11 +2,14 @@
 
 namespace Drupal\pdf_embed_seo\Plugin\Block;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Block\BlockBase;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Url;
+use Drupal\pdf_embed_seo\Entity\PdfDocumentInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -21,13 +24,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class PdfViewerBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
   /**
-   * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
-
-  /**
    * Constructs a PdfViewerBlock.
    *
    * @param array $configuration
@@ -36,30 +32,38 @@ class PdfViewerBlock extends BlockBase implements ContainerFactoryPluginInterfac
    *   The plugin_id for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity type manager.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   *   The config factory.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected ConfigFactoryInterface $configFactory,
+  ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->entityTypeManager = $entity_type_manager;
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('entity_type.manager')
-    );
+          $configuration,
+          $plugin_id,
+          $plugin_definition,
+          $container->get('entity_type.manager'),
+          $container->get('config.factory'),
+      );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function defaultConfiguration() {
+  public function defaultConfiguration(): array {
     return [
       'pdf_document_id' => NULL,
       'height' => '600px',
@@ -70,7 +74,7 @@ class PdfViewerBlock extends BlockBase implements ContainerFactoryPluginInterfac
   /**
    * {@inheritdoc}
    */
-  public function blockForm($form, FormStateInterface $form_state) {
+  public function blockForm($form, FormStateInterface $form_state): array {
     $form = parent::blockForm($form, $form_state);
 
     // Get available PDF documents.
@@ -119,7 +123,7 @@ class PdfViewerBlock extends BlockBase implements ContainerFactoryPluginInterfac
   /**
    * {@inheritdoc}
    */
-  public function blockSubmit($form, FormStateInterface $form_state) {
+  public function blockSubmit($form, FormStateInterface $form_state): void {
     $this->configuration['pdf_document_id'] = $form_state->getValue('pdf_document_id');
     $this->configuration['height'] = $form_state->getValue('height');
     $this->configuration['show_title'] = $form_state->getValue('show_title');
@@ -128,7 +132,7 @@ class PdfViewerBlock extends BlockBase implements ContainerFactoryPluginInterfac
   /**
    * {@inheritdoc}
    */
-  public function build() {
+  public function build(): array {
     $pdf_document_id = $this->configuration['pdf_document_id'];
 
     if (!$pdf_document_id) {
@@ -141,13 +145,13 @@ class PdfViewerBlock extends BlockBase implements ContainerFactoryPluginInterfac
       ->getStorage('pdf_document')
       ->load($pdf_document_id);
 
-    if (!$pdf_document || !$pdf_document->isPublished()) {
+    if (!$pdf_document instanceof PdfDocumentInterface || !$pdf_document->isPublished()) {
       return [
         '#markup' => $this->t('PDF document not found or not published.'),
       ];
     }
 
-    $config = \Drupal::config('pdf_embed_seo.settings');
+    $config = $this->configFactory->get('pdf_embed_seo.settings');
     $height = $this->configuration['height'] ?: '600px';
 
     $build = [];
@@ -157,7 +161,7 @@ class PdfViewerBlock extends BlockBase implements ContainerFactoryPluginInterfac
         '#type' => 'html_tag',
         '#tag' => 'h3',
         // Use #value with Html::escape() to properly escape user content and prevent XSS.
-        '#value' => \Drupal\Component\Utility\Html::escape($pdf_document->label()),
+        '#value' => Html::escape($pdf_document->label()),
         '#attributes' => ['class' => ['pdf-viewer-block-title']],
       ];
     }
@@ -165,9 +169,11 @@ class PdfViewerBlock extends BlockBase implements ContainerFactoryPluginInterfac
     $build['viewer'] = [
       '#theme' => 'pdf_viewer',
       '#pdf_document' => $pdf_document,
-      '#pdf_url' => Url::fromRoute('pdf_embed_seo.pdf_data', [
-        'pdf_document' => $pdf_document->id(),
-      ])->toString(),
+      '#pdf_url' => Url::fromRoute(
+          'pdf_embed_seo.pdf_data', [
+            'pdf_document' => $pdf_document->id(),
+          ]
+      )->toString(),
       '#allow_download' => $pdf_document->allowsDownload(),
       '#allow_print' => $pdf_document->allowsPrint(),
       '#viewer_theme' => $config->get('viewer_theme') ?? 'light',
@@ -176,9 +182,11 @@ class PdfViewerBlock extends BlockBase implements ContainerFactoryPluginInterfac
         'library' => ['pdf_embed_seo/viewer'],
         'drupalSettings' => [
           'pdfEmbedSeo' => [
-            'pdfUrl' => Url::fromRoute('pdf_embed_seo.pdf_data', [
-              'pdf_document' => $pdf_document->id(),
-            ])->toString(),
+            'pdfUrl' => Url::fromRoute(
+              'pdf_embed_seo.pdf_data', [
+                'pdf_document' => $pdf_document->id(),
+              ]
+            )->toString(),
             'allowDownload' => $pdf_document->allowsDownload(),
             'allowPrint' => $pdf_document->allowsPrint(),
             'documentId' => $pdf_document->id(),

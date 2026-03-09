@@ -5,6 +5,7 @@ namespace Drupal\pdf_embed_seo\Plugin\media\Source;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Field\FieldTypePluginManagerInterface;
 use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\media\MediaInterface;
@@ -32,13 +33,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class PdfDocument extends MediaSourceBase {
 
   /**
-   * The file URL generator.
-   *
-   * @var \Drupal\Core\File\FileUrlGeneratorInterface
-   */
-  protected $fileUrlGenerator;
-
-  /**
    * Constructs a PdfDocument media source plugin.
    *
    * @param array $configuration
@@ -55,8 +49,10 @@ class PdfDocument extends MediaSourceBase {
    *   The field type plugin manager.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory.
-   * @param \Drupal\Core\File\FileUrlGeneratorInterface $file_url_generator
+   * @param \Drupal\Core\File\FileUrlGeneratorInterface $fileUrlGenerator
    *   The file URL generator.
+   * @param \Drupal\Core\Extension\ModuleExtensionList $moduleExtensionList
+   *   The module extension list.
    */
   public function __construct(
     array $configuration,
@@ -66,32 +62,33 @@ class PdfDocument extends MediaSourceBase {
     EntityFieldManagerInterface $entity_field_manager,
     FieldTypePluginManagerInterface $field_type_manager,
     ConfigFactoryInterface $config_factory,
-    FileUrlGeneratorInterface $file_url_generator
+    protected FileUrlGeneratorInterface $fileUrlGenerator,
+    protected ModuleExtensionList $moduleExtensionList,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_type_manager, $entity_field_manager, $field_type_manager, $config_factory);
-    $this->fileUrlGenerator = $file_url_generator;
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('entity_type.manager'),
-      $container->get('entity_field.manager'),
-      $container->get('plugin.manager.field.field_type'),
-      $container->get('config.factory'),
-      $container->get('file_url_generator')
-    );
+          $configuration,
+          $plugin_id,
+          $plugin_definition,
+          $container->get('entity_type.manager'),
+          $container->get('entity_field.manager'),
+          $container->get('plugin.manager.field.field_type'),
+          $container->get('config.factory'),
+          $container->get('file_url_generator'),
+          $container->get('extension.list.module'),
+      );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getMetadataAttributes() {
+  public function getMetadataAttributes(): array {
     return [
       'file_name' => $this->t('File name'),
       'file_size' => $this->t('File size'),
@@ -105,44 +102,24 @@ class PdfDocument extends MediaSourceBase {
   /**
    * {@inheritdoc}
    */
-  public function getMetadata(MediaInterface $media, $attribute_name) {
+  public function getMetadata(MediaInterface $media, $attribute_name): mixed {
     $file = $this->getSourceFile($media);
 
     if (!$file) {
       return parent::getMetadata($media, $attribute_name);
     }
 
-    switch ($attribute_name) {
-      case 'file_name':
-        return $file->getFilename();
-
-      case 'file_size':
-        return $file->getSize();
-
-      case 'mime_type':
-        return $file->getMimeType();
-
-      case 'title':
-        return $media->label();
-
-      case 'alt':
-        return $this->t('PDF document: @name', ['@name' => $media->label()]);
-
-      case 'thumbnail_uri':
-        return $this->getThumbnailUri($media);
-
-      case 'default_name':
-        // Use the file name without extension as the default media name.
-        $filename = $file->getFilename();
-        return pathinfo($filename, PATHINFO_FILENAME);
-
-      case 'page_count':
-        // Page count would require PDF parsing, return NULL for now.
-        return NULL;
-
-      default:
-        return parent::getMetadata($media, $attribute_name);
-    }
+    return match ($attribute_name) {
+      'file_name' => $file->getFilename(),
+            'file_size' => $file->getSize(),
+            'mime_type' => $file->getMimeType(),
+            'title' => $media->label(),
+            'alt' => $this->t('PDF document: @name', ['@name' => $media->label()]),
+            'thumbnail_uri' => $this->getThumbnailUri($media),
+            'default_name' => pathinfo($file->getFilename(), PATHINFO_FILENAME),
+            'page_count' => NULL,
+            default => parent::getMetadata($media, $attribute_name),
+    };
   }
 
   /**
@@ -154,7 +131,7 @@ class PdfDocument extends MediaSourceBase {
    * @return \Drupal\file\FileInterface|null
    *   The file entity or NULL.
    */
-  protected function getSourceFile(MediaInterface $media) {
+  protected function getSourceFile(MediaInterface $media): mixed {
     $source_field = $this->getSourceFieldDefinition($media->bundle->entity);
     if (!$source_field) {
       return NULL;
@@ -177,7 +154,7 @@ class PdfDocument extends MediaSourceBase {
    * @return string
    *   The thumbnail URI.
    */
-  protected function getThumbnailUri(MediaInterface $media) {
+  protected function getThumbnailUri(MediaInterface $media): string {
     $file = $this->getSourceFile($media);
 
     if (!$file) {
@@ -192,21 +169,6 @@ class PdfDocument extends MediaSourceBase {
       }
     }
 
-    // Try to generate a thumbnail using the PDF thumbnail service.
-    if (\Drupal::hasService('pdf_embed_seo.thumbnail_generator')) {
-      try {
-        /** @var \Drupal\pdf_embed_seo\Service\PdfThumbnailGenerator $generator */
-        $generator = \Drupal::service('pdf_embed_seo.thumbnail_generator');
-        $thumbnail_uri = $generator->generateThumbnailFromFile($file);
-        if ($thumbnail_uri) {
-          return $thumbnail_uri;
-        }
-      }
-      catch (\Exception $e) {
-        // Thumbnail generation failed, use default.
-      }
-    }
-
     return $this->getDefaultThumbnailUri();
   }
 
@@ -216,17 +178,15 @@ class PdfDocument extends MediaSourceBase {
    * @return string
    *   The default thumbnail URI.
    */
-  protected function getDefaultThumbnailUri() {
-    $module_path = \Drupal::service('extension.list.module')->getPath('pdf_embed_seo');
+  protected function getDefaultThumbnailUri(): string {
+    $module_path = $this->moduleExtensionList->getPath('pdf_embed_seo');
     $default_thumbnail = $module_path . '/assets/images/pdf-icon.png';
 
-    // Check if custom default thumbnail exists.
     if (file_exists($default_thumbnail)) {
       return $default_thumbnail;
     }
 
-    // Fall back to media module's generic icon.
-    return \Drupal::service('extension.list.module')->getPath('media') . '/images/icons/generic.png';
+    return $this->moduleExtensionList->getPath('media') . '/images/icons/generic.png';
   }
 
   /**
@@ -235,34 +195,39 @@ class PdfDocument extends MediaSourceBase {
   public function createSourceField(MediaTypeInterface $type) {
     return parent::createSourceField($type)
       ->set('label', $this->t('PDF file'))
-      ->set('settings', [
-        'file_extensions' => 'pdf',
-        'file_directory' => 'pdf_documents',
-        'max_filesize' => '50 MB',
-      ]);
+      ->set(
+              'settings', [
+                'file_extensions' => 'pdf',
+                'file_directory' => 'pdf_documents',
+                'max_filesize' => '50 MB',
+              ]
+          );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function prepareViewDisplay(MediaTypeInterface $type, $display) {
-    $display->setComponent($this->getSourceFieldDefinition($type)->getName(), [
-      'type' => 'pdf_embed_seo_viewer',
-      'label' => 'hidden',
-    ]);
+  public function prepareViewDisplay(MediaTypeInterface $type, $display): void {
+    $display->setComponent(
+          $this->getSourceFieldDefinition($type)->getName(),
+          [
+            'type' => 'pdf_embed_seo_viewer',
+            'label' => 'hidden',
+          ],
+      );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function prepareFormDisplay(MediaTypeInterface $type, $display) {
+  public function prepareFormDisplay(MediaTypeInterface $type, $display): void {
     parent::prepareFormDisplay($type, $display);
 
-    // Set up the source field widget.
     $source_field = $this->getSourceFieldDefinition($type);
-    $display->setComponent($source_field->getName(), [
-      'type' => 'file_generic',
-    ]);
+    $display->setComponent(
+          $source_field->getName(),
+          ['type' => 'file_generic'],
+      );
   }
 
 }

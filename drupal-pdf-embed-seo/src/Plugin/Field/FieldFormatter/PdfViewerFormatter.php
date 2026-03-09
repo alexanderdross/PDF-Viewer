@@ -2,10 +2,15 @@
 
 namespace Drupal\pdf_embed_seo\Plugin\Field\FieldFormatter;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Extension\ModuleExtensionList;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FormatterBase;
+use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Url;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Plugin implementation of the 'pdf_embed_seo_viewer' formatter.
@@ -21,12 +26,69 @@ use Drupal\Core\Url;
  *   }
  * )
  */
-class PdfViewerFormatter extends FormatterBase {
+class PdfViewerFormatter extends FormatterBase implements ContainerFactoryPluginInterface {
+
+  /**
+   * Constructs a PdfViewerFormatter.
+   *
+   * @param string $plugin_id
+   *   The plugin_id for the formatter.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
+   *   The definition of the field to which the formatter is associated.
+   * @param array $settings
+   *   The formatter settings.
+   * @param string $label
+   *   The formatter label display setting.
+   * @param string $view_mode
+   *   The view mode.
+   * @param array $third_party_settings
+   *   Any third party settings.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   *   The config factory.
+   * @param \Drupal\Core\File\FileUrlGeneratorInterface $fileUrlGenerator
+   *   The file URL generator.
+   * @param \Drupal\Core\Extension\ModuleExtensionList $moduleExtensionList
+   *   The module extension list.
+   */
+  public function __construct(
+    $plugin_id,
+    $plugin_definition,
+    FieldDefinitionInterface $field_definition,
+    array $settings,
+    $label,
+    $view_mode,
+    array $third_party_settings,
+    protected ConfigFactoryInterface $configFactory,
+    protected FileUrlGeneratorInterface $fileUrlGenerator,
+    protected ModuleExtensionList $moduleExtensionList,
+  ) {
+    parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $label, $view_mode, $third_party_settings);
+  }
 
   /**
    * {@inheritdoc}
    */
-  public static function defaultSettings() {
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
+    return new static(
+          $plugin_id,
+          $plugin_definition,
+          $configuration['field_definition'],
+          $configuration['settings'],
+          $configuration['label'],
+          $configuration['view_mode'],
+          $configuration['third_party_settings'],
+          $container->get('config.factory'),
+          $container->get('file_url_generator'),
+          $container->get('extension.list.module'),
+      );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function defaultSettings(): array {
     return [
       'width' => '100%',
       'height' => '800px',
@@ -38,7 +100,7 @@ class PdfViewerFormatter extends FormatterBase {
   /**
    * {@inheritdoc}
    */
-  public function settingsForm(array $form, FormStateInterface $form_state) {
+  public function settingsForm(array $form, FormStateInterface $form_state): array {
     $elements = parent::settingsForm($form, $form_state);
 
     $elements['width'] = [
@@ -77,12 +139,14 @@ class PdfViewerFormatter extends FormatterBase {
   /**
    * {@inheritdoc}
    */
-  public function settingsSummary() {
+  public function settingsSummary(): array {
     $summary = [];
-    $summary[] = $this->t('Dimensions: @width x @height', [
-      '@width' => $this->getSetting('width'),
-      '@height' => $this->getSetting('height'),
-    ]);
+    $summary[] = $this->t(
+          'Dimensions: @width x @height', [
+            '@width' => $this->getSetting('width'),
+            '@height' => $this->getSetting('height'),
+          ]
+      );
 
     if ($this->getSetting('allow_download')) {
       $summary[] = $this->t('Download enabled');
@@ -98,9 +162,9 @@ class PdfViewerFormatter extends FormatterBase {
   /**
    * {@inheritdoc}
    */
-  public function viewElements(FieldItemListInterface $items, $langcode) {
+  public function viewElements(FieldItemListInterface $items, $langcode): array {
     $elements = [];
-    $config = \Drupal::config('pdf_embed_seo.settings');
+    $config = $this->configFactory->get('pdf_embed_seo.settings');
 
     foreach ($items as $delta => $item) {
       $file = $item->entity;
@@ -113,7 +177,7 @@ class PdfViewerFormatter extends FormatterBase {
         continue;
       }
 
-      $file_url = \Drupal::service('file_url_generator')->generateAbsoluteString($file->getFileUri());
+      $file_url = $this->fileUrlGenerator->generateAbsoluteString($file->getFileUri());
       $viewer_theme = $config->get('viewer_theme') ?? 'light';
 
       $elements[$delta] = [
@@ -132,7 +196,7 @@ class PdfViewerFormatter extends FormatterBase {
           'drupalSettings' => [
             'pdfEmbedSeo' => [
               'pdfUrl' => $file_url,
-              'workerSrc' => '/' . \Drupal::service('extension.list.module')->getPath('pdf_embed_seo') . '/assets/pdfjs/pdf.worker.min.js',
+              'workerSrc' => '/' . $this->moduleExtensionList->getPath('pdf_embed_seo') . '/assets/pdfjs/pdf.worker.min.js',
               'allowDownload' => (bool) $this->getSetting('allow_download'),
               'allowPrint' => (bool) $this->getSetting('allow_print'),
             ],

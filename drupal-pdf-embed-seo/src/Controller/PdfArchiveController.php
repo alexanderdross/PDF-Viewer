@@ -4,7 +4,10 @@ namespace Drupal\pdf_embed_seo\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\pdf_embed_seo\Entity\PdfDocumentInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Controller for the PDF archive page.
@@ -12,12 +15,32 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 class PdfArchiveController extends ControllerBase {
 
   /**
+   * Constructs a PdfArchiveController.
+   *
+   * @param \Symfony\Component\HttpFoundation\RequestStack $requestStack
+   *   The request stack.
+   */
+  public function __construct(
+    protected RequestStack $requestStack,
+  ) {
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): static {
+    return new static(
+          $container->get('request_stack'),
+      );
+  }
+
+  /**
    * Display the PDF archive listing.
    *
    * @return array|\Symfony\Component\HttpFoundation\RedirectResponse
    *   A render array or redirect response.
    */
-  public function listing() {
+  public function listing(): array|RedirectResponse {
     // Check for premium redirect first.
     $redirect = $this->checkArchiveRedirect();
     if ($redirect) {
@@ -43,9 +66,7 @@ class PdfArchiveController extends ControllerBase {
 
     // Load published PDF documents.
     $storage = $this->entityTypeManager()->getStorage('pdf_document');
-
-    // Get the current page from the request.
-    $page = \Drupal::request()->query->get('page', 0);
+    $request = $this->requestStack->getCurrentRequest();
 
     // Build query.
     $query = $storage->getQuery()
@@ -54,16 +75,15 @@ class PdfArchiveController extends ControllerBase {
       ->accessCheck(TRUE)
       ->pager($posts_per_page);
 
-    // Apply taxonomy filters if premium module is active.
-    $premium_active = $this->moduleHandler()->moduleExists('pdf_embed_seo_premium');
-
-    $category = \Drupal::request()->query->get('pdf_category');
-    if ($category && $premium_active) {
+    // Apply category filter if set (premium feature).
+    $category = $request ? $request->query->get('pdf_category') : NULL;
+    if ($category && $this->moduleHandler()->moduleExists('pdf_embed_seo_premium')) {
       $query->condition('pdf_category', $category);
     }
 
-    $tag = \Drupal::request()->query->get('pdf_tag');
-    if ($tag && $premium_active) {
+    // Apply tag filter if set (premium feature).
+    $tag = $request ? $request->query->get('pdf_tag') : NULL;
+    if ($tag && $this->moduleHandler()->moduleExists('pdf_embed_seo_premium')) {
       $query->condition('pdf_tags', $tag);
     }
 
@@ -73,6 +93,9 @@ class PdfArchiveController extends ControllerBase {
     // Build document items.
     $items = [];
     foreach ($documents as $document) {
+      if (!$document instanceof PdfDocumentInterface) {
+        continue;
+      }
       $thumbnail = NULL;
       if ($document->getThumbnail()) {
         $thumbnail = [
@@ -153,8 +176,9 @@ class PdfArchiveController extends ControllerBase {
    * @return array
    *   A render array for filters.
    */
-  protected function buildFilters() {
+  protected function buildFilters(): array {
     $filters = [];
+    $request = $this->requestStack->getCurrentRequest();
 
     // Category filter.
     $categories = $this->entityTypeManager()
@@ -167,7 +191,7 @@ class PdfArchiveController extends ControllerBase {
         $options[$term->id()] = $term->label();
       }
 
-      $current_category = \Drupal::request()->query->get('pdf_category', '');
+      $current_category = $request ? $request->query->get('pdf_category', '') : '';
 
       $filters['category'] = [
         '#type' => 'select',
@@ -191,7 +215,7 @@ class PdfArchiveController extends ControllerBase {
         $options[$term->id()] = $term->label();
       }
 
-      $current_tag = \Drupal::request()->query->get('pdf_tag', '');
+      $current_tag = $request ? $request->query->get('pdf_tag', '') : '';
 
       $filters['tag'] = [
         '#type' => 'select',
@@ -231,7 +255,7 @@ class PdfArchiveController extends ControllerBase {
    * @return \Symfony\Component\HttpFoundation\RedirectResponse|null
    *   A redirect response or NULL if no redirect is needed.
    */
-  protected function checkArchiveRedirect() {
+  protected function checkArchiveRedirect(): ?RedirectResponse {
     // Check if premium module is active and license is valid.
     if (!$this->moduleHandler()->moduleExists('pdf_embed_seo_premium')) {
       return NULL;

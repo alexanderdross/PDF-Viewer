@@ -119,13 +119,13 @@ class WhiteLabel {
     $css .= "  --pdf-secondary-color: {$config['secondary_color']};\n";
     $css .= "  --pdf-accent-color: {$config['accent_color']};\n";
 
-    // Generate derived colors
+    // Generate derived colors.
     $css .= "  --pdf-primary-hover: " . $this->adjustBrightness($config['primary_color'], -10) . ";\n";
     $css .= "  --pdf-primary-light: " . $this->adjustBrightness($config['primary_color'], 40) . ";\n";
 
     $css .= "}\n";
 
-    // Add custom CSS
+    // Add custom CSS.
     if (!empty($config['custom_css'])) {
       $css .= "\n/* Custom CSS */\n";
       $css .= $config['custom_css'];
@@ -148,18 +148,18 @@ class WhiteLabel {
     $config = $this->getConfig();
     $js = '';
 
-    // Replace branding if enabled
+    // Replace branding if enabled.
     if ($config['hide_branding']) {
       $js .= "document.querySelectorAll('.pdf-embed-seo-branding').forEach(function(el) { el.style.display = 'none'; });\n";
     }
 
-    // Set company name
+    // Set company name.
     if (!empty($config['company_name'])) {
       $company = addslashes($config['company_name']);
       $js .= "document.querySelectorAll('.pdf-viewer-title').forEach(function(el) { el.setAttribute('data-company', '{$company}'); });\n";
     }
 
-    // Add custom JS
+    // Add custom JS.
     if (!empty($config['custom_js'])) {
       $js .= "\n// Custom JavaScript\n";
       $js .= $config['custom_js'];
@@ -271,7 +271,7 @@ class WhiteLabel {
       return FALSE;
     }
 
-    // Check for valid image extension
+    // Check for valid image extension.
     $path = parse_url($url, PHP_URL_PATH);
     $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
 
@@ -307,7 +307,7 @@ class WhiteLabel {
 
     $html = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="font-family: Arial, sans-serif;">';
 
-    // Header
+    // Header.
     $html .= '<div style="background-color: ' . $config['primary_color'] . '; padding: 20px; text-align: center;">';
     if (!empty($config['logo_url'])) {
       $html .= '<img src="' . htmlspecialchars($config['logo_url']) . '" alt="Logo" style="max-height: 50px;">';
@@ -317,10 +317,10 @@ class WhiteLabel {
     }
     $html .= '</div>';
 
-    // Content placeholder
+    // Content placeholder.
     $html .= '<div style="padding: 20px;">{{CONTENT}}</div>';
 
-    // Footer
+    // Footer.
     $html .= '<div style="background-color: #f5f5f5; padding: 10px; text-align: center; font-size: 12px; color: #666;">';
     if (!empty($config['footer_text'])) {
       $html .= htmlspecialchars($config['footer_text']);

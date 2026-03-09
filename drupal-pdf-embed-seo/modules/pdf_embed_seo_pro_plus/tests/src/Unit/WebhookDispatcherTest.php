@@ -65,11 +65,13 @@ class WebhookDispatcherTest extends UnitTestCase {
    */
   public function testWebhookSignatureGeneration() {
     $secret = 'webhook_secret_key_123';
-    $payload = json_encode([
-      'event' => 'document.viewed',
-      'timestamp' => gmdate('c'),
-      'data' => ['document_id' => 123],
-    ]);
+    $payload = json_encode(
+          [
+            'event' => 'document.viewed',
+            'timestamp' => gmdate('c'),
+            'data' => ['document_id' => 123],
+          ]
+      );
 
     $signature = hash_hmac('sha256', $payload, $secret);
 

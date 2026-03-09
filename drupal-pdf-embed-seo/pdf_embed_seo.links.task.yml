@@ -1,0 +1,14 @@
+# Local tasks (tabs) for PDF Embed & SEO Optimize.
+
+# Tab on Admin > Content page.
+pdf_embed_seo.pdf_documents_tab:
+  title: 'PDF Documents'
+  route_name: entity.pdf_document.collection
+  base_route: system.admin_content
+  weight: 10
+
+# Settings tab.
+pdf_embed_seo.settings_tab:
+  title: 'Settings'
+  route_name: pdf_embed_seo.settings
+  base_route: pdf_embed_seo.settings

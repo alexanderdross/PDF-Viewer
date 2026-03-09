@@ -3,7 +3,7 @@
 namespace Drupal\pdf_embed_seo\Service;
 
 use Drupal\Core\Database\Connection;
-use Drupal\Core\Datetime\TimeInterface;
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\pdf_embed_seo\Entity\PdfDocumentInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -37,7 +37,7 @@ class PdfAnalyticsTracker {
   /**
    * The time service.
    *
-   * @var \Drupal\Core\Datetime\TimeInterface
+   * @var \Drupal\Component\Datetime\TimeInterface
    */
   protected $time;
 
@@ -57,14 +57,14 @@ class PdfAnalyticsTracker {
    *   The current user.
    * @param \Symfony\Component\HttpFoundation\RequestStack $request_stack
    *   The request stack.
-   * @param \Drupal\Core\Datetime\TimeInterface $time
+   * @param \Drupal\Component\Datetime\TimeInterface $time
    *   The time service.
    */
   public function __construct(
     Connection $database,
     AccountProxyInterface $current_user,
     RequestStack $request_stack,
-    TimeInterface $time
+    TimeInterface $time,
   ) {
     $this->database = $database;
     $this->currentUser = $current_user;
@@ -83,14 +83,16 @@ class PdfAnalyticsTracker {
 
     try {
       $this->database->insert($this->tableName)
-        ->fields([
-          'pdf_document_id' => $pdf_document->id(),
-          'user_id' => $this->currentUser->id(),
-          'ip_address' => $request ? $request->getClientIp() : '',
-          'user_agent' => $request ? substr($request->headers->get('User-Agent', ''), 0, 255) : '',
-          'referer' => $request ? substr($request->headers->get('Referer', ''), 0, 255) : '',
-          'timestamp' => $this->time->getRequestTime(),
-        ])
+        ->fields(
+                [
+                  'pdf_document_id' => $pdf_document->id(),
+                  'user_id' => $this->currentUser->id(),
+                  'ip_address' => $request ? $request->getClientIp() : '',
+                  'user_agent' => $request ? substr($request->headers->get('User-Agent', ''), 0, 255) : '',
+                  'referer' => $request ? substr($request->headers->get('Referer', ''), 0, 255) : '',
+                  'timestamp' => $this->time->getRequestTime(),
+                ]
+            )
         ->execute();
     }
     catch (\Exception $e) {

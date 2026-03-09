@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="PDF Embed SEO">
+  <description>PHPCS configuration for PDF Embed &amp; SEO Optimize module.</description>
+
+  <arg name="extensions" value="php,module,install,inc,theme"/>
+  <arg name="colors"/>
+  <arg value="sp"/>
+
+  <file>.</file>
+
+  <exclude-pattern>*/vendor/*</exclude-pattern>
+  <exclude-pattern>*/node_modules/*</exclude-pattern>
+  <exclude-pattern>*/assets/pdfjs/*</exclude-pattern>
+
+  <rule ref="Drupal">
+    <exclude name="Drupal.Commenting.FileComment.Missing"/>
+  </rule>
+  <rule ref="DrupalPractice"/>
+</ruleset>

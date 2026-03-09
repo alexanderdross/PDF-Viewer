@@ -3,14 +3,41 @@
 namespace Drupal\pdf_embed_seo\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Extension\ModuleExtensionList;
+use Drupal\Core\Url;
 use Drupal\pdf_embed_seo\Entity\PdfDocumentInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Controller for viewing individual PDF documents.
  */
 class PdfViewController extends ControllerBase {
+
+  /**
+   * Constructs a PdfViewController.
+   *
+   * @param \Drupal\Core\Extension\ModuleExtensionList $moduleExtensionList
+   *   The module extension list.
+   * @param \Symfony\Component\HttpFoundation\RequestStack $requestStack
+   *   The request stack.
+   */
+  public function __construct(
+    protected ModuleExtensionList $moduleExtensionList,
+    protected RequestStack $requestStack,
+  ) {
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): static {
+    return new static(
+          $container->get('extension.list.module'),
+          $container->get('request_stack'),
+      );
+  }
 
   /**
    * View a PDF document.
@@ -21,7 +48,7 @@ class PdfViewController extends ControllerBase {
    * @return array
    *   A render array.
    */
-  public function view(PdfDocumentInterface $pdf_document) {
+  public function view(PdfDocumentInterface $pdf_document): array {
     // Check if document is published.
     if (!$pdf_document->isPublished() && !$this->currentUser()->hasPermission('administer pdf embed seo')) {
       throw new NotFoundHttpException();
@@ -65,7 +92,7 @@ class PdfViewController extends ControllerBase {
         'drupalSettings' => [
           'pdfEmbedSeo' => [
             'pdfUrl' => $this->getPdfDataUrl($pdf_document),
-            'workerSrc' => '/' . \Drupal::service('extension.list.module')->getPath('pdf_embed_seo') . '/assets/pdfjs/pdf.worker.min.js',
+            'workerSrc' => '/' . $this->moduleExtensionList->getPath('pdf_embed_seo') . '/assets/pdfjs/pdf.worker.min.js',
             'allowDownload' => $allow_download,
             'allowPrint' => $allow_print,
             'documentId' => $pdf_document->id(),
@@ -112,7 +139,7 @@ class PdfViewController extends ControllerBase {
    * @return string
    *   The title.
    */
-  public function title(PdfDocumentInterface $pdf_document) {
+  public function title(PdfDocumentInterface $pdf_document): string {
     return $pdf_document->label();
   }
 
@@ -127,7 +154,7 @@ class PdfViewController extends ControllerBase {
    * @return array
    *   A render array.
    */
-  protected function passwordForm(PdfDocumentInterface $pdf_document, array $cache_contexts = []) {
+  protected function passwordForm(PdfDocumentInterface $pdf_document, array $cache_contexts = []): array {
     $form = $this->formBuilder()->getForm('Drupal\pdf_embed_seo\Form\PdfPasswordForm', $pdf_document);
 
     // Default cache contexts if not provided.
@@ -145,7 +172,8 @@ class PdfViewController extends ControllerBase {
       '#cache' => [
         'tags' => $pdf_document->getCacheTags(),
         'contexts' => $cache_contexts,
-        'max-age' => 0, // Don't cache password forms to ensure fresh session checks.
+      // Don't cache password forms to ensure fresh session checks.
+        'max-age' => 0,
       ],
     ];
   }
@@ -159,13 +187,18 @@ class PdfViewController extends ControllerBase {
    * @return bool
    *   TRUE if unlocked, FALSE otherwise.
    */
-  protected function isPasswordUnlocked(PdfDocumentInterface $pdf_document) {
+  protected function isPasswordUnlocked(PdfDocumentInterface $pdf_document): bool {
     // Admins can bypass password.
     if ($this->currentUser()->hasPermission('bypass pdf password')) {
       return TRUE;
     }
 
-    $session = \Drupal::request()->getSession();
+    $request = $this->requestStack->getCurrentRequest();
+    if (!$request || !$request->hasSession()) {
+      return FALSE;
+    }
+
+    $session = $request->getSession();
     $unlocked = $session->get('pdf_unlocked', []);
 
     return in_array($pdf_document->id(), $unlocked, TRUE);
@@ -180,10 +213,12 @@ class PdfViewController extends ControllerBase {
    * @return string
    *   The URL to the PDF data endpoint.
    */
-  protected function getPdfDataUrl(PdfDocumentInterface $pdf_document) {
-    return \Drupal\Core\Url::fromRoute('pdf_embed_seo.pdf_data', [
-      'pdf_document' => $pdf_document->id(),
-    ])->toString();
+  protected function getPdfDataUrl(PdfDocumentInterface $pdf_document): string {
+    return Url::fromRoute(
+          'pdf_embed_seo.pdf_data', [
+            'pdf_document' => $pdf_document->id(),
+          ]
+      )->toString();
   }
 
 }

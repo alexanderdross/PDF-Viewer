@@ -249,8 +249,7 @@ class SecurityFeaturesTest extends UnitTestCase {
     $password = 'test';
 
     // Module handler would call alter hook.
-    // \Drupal::moduleHandler()->alter($hook_name, $is_valid, $document, $password);
-
+    // \Drupal::moduleHandler()->alter($hook_name, $is_valid, $document, $password);.
     $this->assertEquals('pdf_embed_seo_verify_password', $hook_name);
   }
 

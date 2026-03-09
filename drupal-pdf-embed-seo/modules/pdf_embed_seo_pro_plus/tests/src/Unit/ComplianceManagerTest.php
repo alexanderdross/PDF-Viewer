@@ -98,18 +98,18 @@ class ComplianceManagerTest extends UnitTestCase {
         'name' => 'Test User',
       ],
       'activities' => [
-        [
-          'type' => 'document_viewed',
-          'timestamp' => gmdate('c'),
-          'document' => 'Test PDF',
-        ],
+      [
+        'type' => 'document_viewed',
+        'timestamp' => gmdate('c'),
+        'document' => 'Test PDF',
+      ],
       ],
       'consents' => [
-        [
-          'type' => 'analytics',
-          'consented' => TRUE,
-          'timestamp' => gmdate('c'),
-        ],
+      [
+        'type' => 'analytics',
+        'consented' => TRUE,
+        'timestamp' => gmdate('c'),
+      ],
       ],
       'exported_at' => gmdate('c'),
     ];
@@ -161,13 +161,13 @@ class ComplianceManagerTest extends UnitTestCase {
    */
   protected function generateUuid() {
     return sprintf(
-      '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-      mt_rand(0, 0xffff), mt_rand(0, 0xffff),
-      mt_rand(0, 0xffff),
-      mt_rand(0, 0x0fff) | 0x4000,
-      mt_rand(0, 0x3fff) | 0x8000,
-      mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
-    );
+          '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+          mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+          mt_rand(0, 0xffff),
+          mt_rand(0, 0x0fff) | 0x4000,
+          mt_rand(0, 0x3fff) | 0x8000,
+          mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+      );
   }
 
 }

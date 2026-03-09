@@ -3,12 +3,15 @@
 namespace Drupal\pdf_embed_seo\Plugin\rest\resource;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\rest\Plugin\ResourceBase;
 use Drupal\rest\ResourceResponse;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Drupal\pdf_embed_seo\Entity\PdfDocumentInterface;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Provides a REST resource for PDF document data (secure file access).
@@ -24,14 +27,24 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 class PdfDataResource extends ResourceBase {
 
   /**
-   * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
-
-  /**
    * Constructs a PdfDataResource object.
+   *
+   * @param array $configuration
+   *   A configuration array.
+   * @param string $plugin_id
+   *   The plugin ID.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param array $serializer_formats
+   *   The available serialization formats.
+   * @param \Psr\Log\LoggerInterface $logger
+   *   A logger instance.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   The entity type manager.
+   * @param \Drupal\Core\File\FileUrlGeneratorInterface $fileUrlGenerator
+   *   The file URL generator.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
+   *   The module handler.
    */
   public function __construct(
     array $configuration,
@@ -39,24 +52,27 @@ class PdfDataResource extends ResourceBase {
     $plugin_definition,
     array $serializer_formats,
     LoggerInterface $logger,
-    EntityTypeManagerInterface $entity_type_manager
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected FileUrlGeneratorInterface $fileUrlGenerator,
+    protected ModuleHandlerInterface $moduleHandler,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $serializer_formats, $logger);
-    $this->entityTypeManager = $entity_type_manager;
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->getParameter('serializer.formats'),
-      $container->get('logger.factory')->get('pdf_embed_seo'),
-      $container->get('entity_type.manager')
-    );
+          $configuration,
+          $plugin_id,
+          $plugin_definition,
+          $container->getParameter('serializer.formats'),
+          $container->get('logger.factory')->get('pdf_embed_seo'),
+          $container->get('entity_type.manager'),
+          $container->get('file_url_generator'),
+          $container->get('module_handler'),
+      );
   }
 
   /**
@@ -68,11 +84,11 @@ class PdfDataResource extends ResourceBase {
    * @return \Drupal\rest\ResourceResponse
    *   The response containing the PDF file data.
    */
-  public function get($id) {
+  public function get(int $id): ResourceResponse {
     $storage = $this->entityTypeManager->getStorage('pdf_document');
     $document = $storage->load($id);
 
-    if (!$document) {
+    if (!$document instanceof PdfDocumentInterface) {
       throw new NotFoundHttpException('PDF document not found.');
     }
 
@@ -90,11 +106,9 @@ class PdfDataResource extends ResourceBase {
       throw new NotFoundHttpException('No PDF file attached to this document.');
     }
 
-    $file_url_generator = \Drupal::service('file_url_generator');
-
     $data = [
       'id' => (int) $document->id(),
-      'pdf_url' => $file_url_generator->generateAbsoluteString($pdf_file->getFileUri()),
+      'pdf_url' => $this->fileUrlGenerator->generateAbsoluteString($pdf_file->getFileUri()),
       'allow_download' => (bool) $document->get('allow_download')->value,
       'allow_print' => (bool) $document->get('allow_print')->value,
       'filename' => $pdf_file->getFilename(),
@@ -103,7 +117,7 @@ class PdfDataResource extends ResourceBase {
     ];
 
     // Allow other modules to alter the data.
-    \Drupal::moduleHandler()->alter('pdf_embed_seo_document_data', $data, $document);
+    $this->moduleHandler->alter('pdf_embed_seo_document_data', $data, $document);
 
     $response = new ResourceResponse($data);
     $response->addCacheableDependency($document);
