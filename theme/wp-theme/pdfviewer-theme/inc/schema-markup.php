@@ -6,7 +6,10 @@
  * Schemas: Organization, WebSite, WebPage, Product, SoftwareApplication,
  *          SiteNavigationElement, CollectionPage, FAQPage, Article.
  *
+ * AggregateRating is present on every page via both Product and SoftwareApplication.
+ *
  * @package PDFViewer
+ * @since 2.2.95
  */
 
 if (!defined('ABSPATH')) {
@@ -23,7 +26,7 @@ if (!defined('PDFVIEWER_VANITY_DOMAIN')) {
 /**
  * Helper: Build a canonical URL for schema markup.
  *
- * @param string $path The path to append.
+ * @param string $path The path to append (e.g. '/pro/').
  * @return string Canonical URL using the vanity domain.
  */
 function pdfviewer_schema_urls($path = '/') {
@@ -31,35 +34,54 @@ function pdfviewer_schema_urls($path = '/') {
 }
 
 /**
+ * Get the shared AggregateRating data.
+ *
+ * Centralized to ensure consistent rating values across Product
+ * and SoftwareApplication schemas on every page.
+ *
+ * @return array Schema.org AggregateRating data.
+ */
+function pdfviewer_schema_aggregate_rating() {
+    return array(
+        '@type'       => 'AggregateRating',
+        'ratingValue' => '4.8',
+        'ratingCount' => '487',
+        'bestRating'  => '5',
+        'worstRating' => '1',
+    );
+}
+
+/**
  * Output the consolidated JSON-LD @graph schema.
- * All schema types are merged into a single script tag.
+ *
+ * All schema types are merged into a single script tag for clean,
+ * non-redundant structured data output. Uses wp_json_encode() which
+ * is the WordPress-approved method for safe JSON output in script tags.
  */
 function pdfviewer_consolidated_schema() {
+    // Cache blog info once for all schema functions.
+    $site_name = get_bloginfo('name');
+    $site_description = get_bloginfo('description');
+
     $graph = array();
 
     // 1. Organization (all pages)
     $graph[] = pdfviewer_schema_organization();
 
     // 2. WebSite (all pages)
-    $graph[] = pdfviewer_schema_website();
+    $graph[] = pdfviewer_schema_website($site_name);
 
     // 3. WebPage (all pages)
-    $graph[] = pdfviewer_schema_webpage();
+    $graph[] = pdfviewer_schema_webpage($site_name, $site_description);
 
     // 4. Product with AggregateRating (all pages)
     $graph[] = pdfviewer_schema_product();
 
     // 5. SiteNavigationElement (all pages)
-    $nav_items = pdfviewer_schema_site_navigation();
-    foreach ($nav_items as $nav_item) {
-        $graph[] = $nav_item;
-    }
+    $graph = array_merge($graph, pdfviewer_schema_site_navigation());
 
-    // 6. SoftwareApplication (platform pages + pro)
-    $software = pdfviewer_schema_software_application();
-    if ($software) {
-        $graph[] = $software;
-    }
+    // 6. SoftwareApplication with AggregateRating (all pages)
+    $graph[] = pdfviewer_schema_software_application();
 
     // 7. CollectionPage (examples, /pdf/, /pdf-grid/)
     $collection = pdfviewer_schema_collection_page();
@@ -84,12 +106,16 @@ function pdfviewer_consolidated_schema() {
         '@graph'   => $graph,
     );
 
+    // wp_json_encode is the WordPress-approved method for JSON output in script tags.
+    // It handles all necessary encoding to prevent injection.
     echo '<script type="application/ld+json">' . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
 }
 add_action('wp_head', 'pdfviewer_consolidated_schema', 15);
 
 /**
  * 1. Organization schema.
+ *
+ * @return array Schema.org Organization data.
  */
 function pdfviewer_schema_organization() {
     return array(
@@ -114,12 +140,15 @@ function pdfviewer_schema_organization() {
 
 /**
  * 2. WebSite schema with SearchAction.
+ *
+ * @param string $site_name Cached site name from get_bloginfo().
+ * @return array Schema.org WebSite data.
  */
-function pdfviewer_schema_website() {
+function pdfviewer_schema_website($site_name) {
     return array(
         '@type'           => 'WebSite',
         '@id'             => pdfviewer_schema_urls('/#website'),
-        'name'            => get_bloginfo('name'),
+        'name'            => $site_name,
         'url'             => pdfviewer_schema_urls('/'),
         'publisher'       => array(
             '@id' => pdfviewer_schema_urls('/#organization'),
@@ -137,15 +166,19 @@ function pdfviewer_schema_website() {
 
 /**
  * 3. WebPage schema for the current page.
+ *
+ * @param string $site_name        Cached site name from get_bloginfo().
+ * @param string $site_description Cached site description from get_bloginfo().
+ * @return array Schema.org WebPage data.
  */
-function pdfviewer_schema_webpage() {
+function pdfviewer_schema_webpage($site_name, $site_description) {
     $page_slug = '';
-    $page_title = get_bloginfo('name');
-    $page_description = get_bloginfo('description');
+    $page_title = $site_name;
+    $page_description = $site_description;
     $page_url = pdfviewer_schema_urls('/');
 
     if (is_front_page()) {
-        $page_title = get_bloginfo('name') . ' - ' . get_bloginfo('description');
+        $page_title = $site_name . ' - ' . $site_description;
         $page_description = 'Display PDFs beautifully with SEO-optimized pages. Schema.org markup, AI-ready structured data, and analytics for WordPress, Drupal, and React/Next.js.';
     } elseif (is_page()) {
         global $post;
@@ -174,15 +207,15 @@ function pdfviewer_schema_webpage() {
     }
 
     return array(
-        '@type'       => 'WebPage',
-        '@id'         => $page_url . '#webpage',
-        'name'        => $page_title,
-        'description' => $page_description,
-        'url'         => $page_url,
-        'isPartOf'    => array(
+        '@type'        => 'WebPage',
+        '@id'          => $page_url . '#webpage',
+        'name'         => $page_title,
+        'description'  => $page_description,
+        'url'          => $page_url,
+        'isPartOf'     => array(
             '@id' => pdfviewer_schema_urls('/#website'),
         ),
-        'about'       => array(
+        'about'        => array(
             '@id' => pdfviewer_schema_urls('/#product'),
         ),
         'dateModified' => get_the_modified_date('c') ?: gmdate('c'),
@@ -191,10 +224,16 @@ function pdfviewer_schema_webpage() {
 
 /**
  * 4. Product schema with AggregateRating.
- * Single consolidated product across all pages.
+ *
+ * Single consolidated product present on all pages to ensure
+ * AggregateRating is always visible to search engines.
+ *
+ * @return array Schema.org Product data with AggregateRating.
  */
 function pdfviewer_schema_product() {
-    $product = array(
+    $price_valid_until = gmdate('Y-m-d', strtotime('+1 year'));
+
+    return array(
         '@type'           => 'Product',
         '@id'             => pdfviewer_schema_urls('/#product'),
         'name'            => 'PDF Embed & SEO Optimize',
@@ -219,12 +258,12 @@ function pdfviewer_schema_product() {
             'offerCount'    => '5',
             'offers'        => array(
                 array(
-                    '@type'           => 'Offer',
-                    'name'            => 'Free',
-                    'price'           => '0',
-                    'priceCurrency'   => 'EUR',
-                    'availability'    => 'https://schema.org/InStock',
-                    'url'             => pdfviewer_schema_urls('/wordpress-pdf-viewer/'),
+                    '@type'         => 'Offer',
+                    'name'          => 'Free',
+                    'price'         => '0',
+                    'priceCurrency' => 'EUR',
+                    'availability'  => 'https://schema.org/InStock',
+                    'url'           => pdfviewer_schema_urls('/wordpress-pdf-viewer/'),
                 ),
                 array(
                     '@type'           => 'Offer',
@@ -232,7 +271,7 @@ function pdfviewer_schema_product() {
                     'price'           => '49',
                     'priceCurrency'   => 'EUR',
                     'availability'    => 'https://schema.org/InStock',
-                    'priceValidUntil' => gmdate('Y-m-d', strtotime('+1 year')),
+                    'priceValidUntil' => $price_valid_until,
                     'url'             => pdfviewer_schema_urls('/pro/'),
                 ),
                 array(
@@ -241,7 +280,7 @@ function pdfviewer_schema_product() {
                     'price'           => '99',
                     'priceCurrency'   => 'EUR',
                     'availability'    => 'https://schema.org/InStock',
-                    'priceValidUntil' => gmdate('Y-m-d', strtotime('+1 year')),
+                    'priceValidUntil' => $price_valid_until,
                     'url'             => pdfviewer_schema_urls('/pro/'),
                 ),
                 array(
@@ -250,7 +289,7 @@ function pdfviewer_schema_product() {
                     'price'           => '199',
                     'priceCurrency'   => 'EUR',
                     'availability'    => 'https://schema.org/InStock',
-                    'priceValidUntil' => gmdate('Y-m-d', strtotime('+1 year')),
+                    'priceValidUntil' => $price_valid_until,
                     'url'             => pdfviewer_schema_urls('/pro/'),
                 ),
                 array(
@@ -259,41 +298,35 @@ function pdfviewer_schema_product() {
                     'price'           => '399',
                     'priceCurrency'   => 'EUR',
                     'availability'    => 'https://schema.org/InStock',
-                    'priceValidUntil' => gmdate('Y-m-d', strtotime('+1 year')),
+                    'priceValidUntil' => $price_valid_until,
                     'url'             => pdfviewer_schema_urls('/pro/'),
                 ),
             ),
         ),
-        'aggregateRating' => array(
-            '@type'       => 'AggregateRating',
-            'ratingValue' => '4.8',
-            'ratingCount' => '487',
-            'bestRating'  => '5',
-            'worstRating' => '1',
-        ),
+        'aggregateRating' => pdfviewer_schema_aggregate_rating(),
     );
-
-    return $product;
 }
 
 /**
  * 5. SiteNavigationElement schema for all website links/pages.
+ *
+ * @return array[] Array of Schema.org SiteNavigationElement items.
  */
 function pdfviewer_schema_site_navigation() {
     $nav_links = array(
-        array('name' => 'Home',                     'path' => '/'),
-        array('name' => 'Features',                  'path' => '/#features'),
-        array('name' => 'Examples',                  'path' => '/examples/'),
-        array('name' => 'Pro',                       'path' => '/pro/'),
-        array('name' => 'Documentation',             'path' => '/documentation/'),
-        array('name' => 'Changelog',                 'path' => '/changelog/'),
-        array('name' => 'WordPress PDF Viewer',      'path' => '/wordpress-pdf-viewer/'),
-        array('name' => 'Drupal PDF Viewer',         'path' => '/drupal-pdf-viewer/'),
+        array('name' => 'Home',                      'path' => '/'),
+        array('name' => 'Features',                   'path' => '/#features'),
+        array('name' => 'Examples',                   'path' => '/examples/'),
+        array('name' => 'Pro',                        'path' => '/pro/'),
+        array('name' => 'Documentation',              'path' => '/documentation/'),
+        array('name' => 'Changelog',                  'path' => '/changelog/'),
+        array('name' => 'WordPress PDF Viewer',       'path' => '/wordpress-pdf-viewer/'),
+        array('name' => 'Drupal PDF Viewer',          'path' => '/drupal-pdf-viewer/'),
         array('name' => 'React / Next.js PDF Viewer', 'path' => '/nextjs-pdf-viewer/'),
-        array('name' => 'Plugin Comparison',         'path' => '/compare/'),
-        array('name' => 'Enterprise',                'path' => '/enterprise/'),
-        array('name' => 'PDF Archive',               'path' => '/pdf/'),
-        array('name' => 'PDF Gallery',               'path' => '/pdf-grid/'),
+        array('name' => 'Plugin Comparison',          'path' => '/compare/'),
+        array('name' => 'Enterprise',                 'path' => '/enterprise/'),
+        array('name' => 'PDF Archive',                'path' => '/pdf/'),
+        array('name' => 'PDF Gallery',                'path' => '/pdf-grid/'),
         array('name' => 'Contact', 'path' => null, 'url' => 'https://dross.net/contact/?topic=pdfviewer'),
     );
 
@@ -312,15 +345,14 @@ function pdfviewer_schema_site_navigation() {
 }
 
 /**
- * 6. SoftwareApplication schema (platform pages + pro).
+ * 6. SoftwareApplication schema with AggregateRating (all pages).
+ *
+ * Core fields appear on every page to ensure AggregateRating visibility.
+ * Extended details (featureList, screenshot) added on platform and pro pages.
+ *
+ * @return array Schema.org SoftwareApplication data with AggregateRating.
  */
 function pdfviewer_schema_software_application() {
-    $plugin_pages = array('wordpress-pdf-viewer', 'drupal-pdf-viewer', 'nextjs-pdf-viewer', 'pro');
-
-    if (!is_page($plugin_pages)) {
-        return null;
-    }
-
     $schema = array(
         '@type'               => 'SoftwareApplication',
         '@id'                 => pdfviewer_schema_urls('/#software'),
@@ -329,13 +361,20 @@ function pdfviewer_schema_software_application() {
         'operatingSystem'     => 'WordPress, Drupal, React, Next.js',
         'url'                 => pdfviewer_schema_urls('/'),
         'softwareVersion'     => '1.3.0',
+        'downloadUrl'         => 'https://wordpress.org/plugins/pdf-embed-seo-optimize',
         'offers'              => array(
             '@type'         => 'Offer',
             'price'         => '0',
             'priceCurrency' => 'EUR',
             'availability'  => 'https://schema.org/InStock',
         ),
-        'featureList'         => array(
+        'aggregateRating'     => pdfviewer_schema_aggregate_rating(),
+    );
+
+    // Extended details on platform and pro pages.
+    $plugin_pages = array('wordpress-pdf-viewer', 'drupal-pdf-viewer', 'nextjs-pdf-viewer', 'pro');
+    if (is_page($plugin_pages)) {
+        $schema['featureList'] = array(
             'SEO-optimized PDF embedding',
             'Clean URLs for PDFs (/pdf/your-document/)',
             'Schema.org DigitalDocument markup',
@@ -346,24 +385,15 @@ function pdfviewer_schema_software_application() {
             'View analytics and tracking',
             'Password protection',
             'Reading progress tracking',
-        ),
-        'screenshot'          => array(
+        );
+        $schema['screenshot'] = array(
             PDFVIEWER_THEME_URI . '/assets/images/og-image.jpg',
-        ),
-        'downloadUrl'         => 'https://wordpress.org/plugins/pdf-embed-seo-optimize',
-        'aggregateRating'     => array(
-            '@type'       => 'AggregateRating',
-            'ratingValue' => '4.8',
-            'ratingCount' => '487',
-            'bestRating'  => '5',
-            'worstRating' => '1',
-        ),
-    );
+        );
 
-    // Add platform-specific details
-    if (is_page('nextjs-pdf-viewer')) {
-        $schema['programmingLanguage'] = 'TypeScript';
-        $schema['runtimePlatform'] = 'React, Next.js';
+        if (is_page('nextjs-pdf-viewer')) {
+            $schema['programmingLanguage'] = 'TypeScript';
+            $schema['runtimePlatform']     = 'React, Next.js';
+        }
     }
 
     return $schema;
@@ -371,17 +401,19 @@ function pdfviewer_schema_software_application() {
 
 /**
  * 7. CollectionPage schema (examples page, PDF archive, PDF grid).
+ *
+ * @return array|null Schema.org CollectionPage data, or null if not applicable.
  */
 function pdfviewer_schema_collection_page() {
-    // Examples page
+    // Examples page.
     if (is_page('examples')) {
         $examples = array(
-            array('name' => 'In-Page PDF with Download & Print',      'description' => 'PDF embedded directly in page with download and print buttons enabled.',        'url' => PDFVIEWER_VANITY_DOMAIN . '/pdf/example-1/'),
-            array('name' => 'In-Page PDF (View Only)',                 'description' => 'PDF embedded in page without download or print options for secure viewing.',     'url' => PDFVIEWER_VANITY_DOMAIN . '/pdf/example-2/'),
-            array('name' => 'Standalone PDF with Download & Print',    'description' => 'PDF opens in new tab with full download and print capabilities.',               'url' => PDFVIEWER_VANITY_DOMAIN . '/pdf/example-3/'),
-            array('name' => 'Standalone PDF (View Only)',              'description' => 'PDF opens in new tab without download or print options.',                        'url' => PDFVIEWER_VANITY_DOMAIN . '/pdf/example-4/'),
-            array('name' => 'Password Protected In-Page PDF',         'description' => 'PDF embedded in page requiring password authentication.',                        'url' => PDFVIEWER_VANITY_DOMAIN . '/pdf/example-5/'),
-            array('name' => 'Password Protected Standalone PDF',      'description' => 'PDF opens in new tab requiring password authentication.',                        'url' => PDFVIEWER_VANITY_DOMAIN . '/pdf/example-6/'),
+            array('name' => 'In-Page PDF with Download & Print',   'description' => 'PDF embedded directly in page with download and print buttons enabled.',    'url' => PDFVIEWER_VANITY_DOMAIN . '/pdf/example-1/'),
+            array('name' => 'In-Page PDF (View Only)',              'description' => 'PDF embedded in page without download or print options for secure viewing.', 'url' => PDFVIEWER_VANITY_DOMAIN . '/pdf/example-2/'),
+            array('name' => 'Standalone PDF with Download & Print', 'description' => 'PDF opens in new tab with full download and print capabilities.',           'url' => PDFVIEWER_VANITY_DOMAIN . '/pdf/example-3/'),
+            array('name' => 'Standalone PDF (View Only)',           'description' => 'PDF opens in new tab without download or print options.',                    'url' => PDFVIEWER_VANITY_DOMAIN . '/pdf/example-4/'),
+            array('name' => 'Password Protected In-Page PDF',      'description' => 'PDF embedded in page requiring password authentication.',                    'url' => PDFVIEWER_VANITY_DOMAIN . '/pdf/example-5/'),
+            array('name' => 'Password Protected Standalone PDF',   'description' => 'PDF opens in new tab requiring password authentication.',                    'url' => PDFVIEWER_VANITY_DOMAIN . '/pdf/example-6/'),
         );
 
         $list_items = array();
@@ -412,11 +444,13 @@ function pdfviewer_schema_collection_page() {
         );
     }
 
-    // PDF archive or grid pages
-    $request_uri = isset($_SERVER['REQUEST_URI']) ? sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : '';
+    // PDF archive or grid pages (plugin-generated, detected via request URI).
+    $request_uri = isset($_SERVER['REQUEST_URI'])
+        ? sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI']))
+        : '';
 
-    if ($request_uri === '/pdf/' || $request_uri === '/pdf-grid/') {
-        $is_grid = ($request_uri === '/pdf-grid/');
+    if ('/pdf/' === $request_uri || '/pdf-grid/' === $request_uri) {
+        $is_grid = ('/pdf-grid/' === $request_uri);
 
         return array(
             '@type'       => 'CollectionPage',
@@ -437,6 +471,11 @@ function pdfviewer_schema_collection_page() {
 
 /**
  * 8. FAQPage schema (auto-detected from page content).
+ *
+ * Scans the current page content for accordion-trigger buttons or
+ * details/summary elements and generates FAQ structured data.
+ *
+ * @return array|null Schema.org FAQPage data, or null if no FAQ content found.
  */
 function pdfviewer_schema_faq_page() {
     if (!is_singular()) {
@@ -450,18 +489,18 @@ function pdfviewer_schema_faq_page() {
 
     $content = $post->post_content;
 
-    // Check if page has FAQ content
+    // Early exit if no FAQ-related content markers.
     if (strpos($content, 'faq') === false && strpos($content, 'accordion') === false) {
         return null;
     }
 
     $faq_items = array();
 
-    // Match accordion-style FAQs
+    // Match accordion-style FAQs.
     if (preg_match_all('/<button[^>]*class="[^"]*accordion-trigger[^"]*"[^>]*>([^<]+)<\/button>.*?<div[^>]*class="[^"]*accordion-content[^"]*"[^>]*>(.*?)<\/div>/is', $content, $matches, PREG_SET_ORDER)) {
         foreach ($matches as $match) {
             $question = wp_strip_all_tags(trim($match[1]));
-            $answer = wp_strip_all_tags(trim($match[2]));
+            $answer   = wp_strip_all_tags(trim($match[2]));
 
             if (!empty($question) && !empty($answer)) {
                 $faq_items[] = array(
@@ -476,11 +515,11 @@ function pdfviewer_schema_faq_page() {
         }
     }
 
-    // Match details/summary elements
+    // Match details/summary elements.
     if (preg_match_all('/<summary[^>]*>(.*?)<\/summary>.*?<div[^>]*>(.*?)<\/div>/is', $content, $matches, PREG_SET_ORDER)) {
         foreach ($matches as $match) {
             $question = wp_strip_all_tags(trim($match[1]));
-            $answer = wp_strip_all_tags(trim($match[2]));
+            $answer   = wp_strip_all_tags(trim($match[2]));
 
             if (!empty($question) && !empty($answer)) {
                 $faq_items[] = array(
@@ -508,7 +547,11 @@ function pdfviewer_schema_faq_page() {
 
 /**
  * 9. Article schema for the front page highlight/purpose text.
- * Describes what the product does and why it exists.
+ *
+ * Describes the product's purpose using the hero and problem/solution
+ * content from the front page as structured Article data.
+ *
+ * @return array|null Schema.org Article data, or null if not front page.
  */
 function pdfviewer_schema_article() {
     if (!is_front_page()) {
