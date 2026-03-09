@@ -153,14 +153,14 @@ Direct `parse_url($_SERVER['REQUEST_URI'])` without sanitization. Applied `sanit
 
 ### 2.5 Missing Cache-Control Headers (WordPress Plugin)
 
-**File:** `pdf-embed-seo-optimize/includes/class-pdf-embed-seo-optimize-frontend.php`
+**File:** `wordpress-pdf-embed-seo/includes/class-pdf-embed-seo-optimize-frontend.php`
 **Severity:** Medium
 
 AJAX endpoint returning PDF URLs lacked `nocache_headers()`. Sensitive URLs could be cached by browsers or proxies.
 
 ### 2.6 Unsanitized POST Input (WordPress Plugin)
 
-**File:** `pdf-embed-seo-optimize/includes/class-pdf-embed-seo-optimize-admin.php`
+**File:** `wordpress-pdf-embed-seo/includes/class-pdf-embed-seo-optimize-admin.php`
 **Severity:** Low
 
 Missing `wp_unslash()` on `$_POST['pdf_file_id']`.
@@ -178,7 +178,7 @@ Settings form output lacked proper escaping. Fixed with Drupal's `#markup` sanit
 
 ### 3.1 N+1 Query in Gutenberg Block Editor
 
-**File:** `pdf-embed-seo-optimize/includes/class-pdf-embed-seo-optimize-block.php`
+**File:** `wordpress-pdf-embed-seo/includes/class-pdf-embed-seo-optimize-block.php`
 
 - Limited query from `-1` (unlimited) to `200` PDFs
 - Changed from full post objects to IDs only (`'fields' => 'ids'`)
@@ -187,7 +187,7 @@ Settings form output lacked proper escaping. Fixed with Drupal's `#markup` sanit
 
 ### 3.2 Archive Schema Query Caching
 
-**File:** `pdf-embed-seo-optimize/includes/class-pdf-embed-seo-optimize-yoast.php`
+**File:** `wordpress-pdf-embed-seo/includes/class-pdf-embed-seo-optimize-yoast.php`
 
 - Added 1-hour transient caching for archive schema PDF query
 - Added `'no_found_rows' => true` to skip unnecessary SQL_CALC_FOUND_ROWS

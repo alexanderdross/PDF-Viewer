@@ -14,8 +14,8 @@ This project provides six modules across three platforms:
 
 | Module | Directory/Package | Platform | Features |
 |--------|-------------------|----------|----------|
-| WP Free | `pdf-embed-seo-optimize/` | WordPress 5.8+ | Core PDF viewer, SEO, REST API |
-| WP Premium | `pdf-embed-seo-optimize/premium/` | WordPress 5.8+ | Analytics, passwords, progress, sitemap |
+| WP Free | `wordpress-pdf-embed-seo/` | WordPress 5.8+ | Core PDF viewer, SEO, REST API |
+| WP Premium | `wordpress-pdf-embed-seo/premium/` | WordPress 5.8+ | Analytics, passwords, progress, sitemap |
 | Drupal Free | `drupal-pdf-embed-seo/` | Drupal 10/11 | Core PDF viewer, SEO, REST API |
 | Drupal Premium | `drupal-pdf-embed-seo/modules/pdf_embed_seo_premium/` | Drupal 10/11 | Analytics, passwords, progress, sitemap |
 | React Free | `@pdf-embed-seo/react` | React 18+, Next.js 13+ | Components, hooks, SEO, API client |
@@ -331,7 +331,7 @@ const { jsonLd, metaTags } = usePdfSeo(document);
 ### WordPress Plugin (Free)
 
 ```
-pdf-embed-seo-optimize/
+wordpress-pdf-embed-seo/
 ├── pdf-embed-seo-optimize.php           # Main plugin file
 ├── uninstall.php                        # Cleanup on uninstall
 ├── README.txt                           # WordPress.org readme

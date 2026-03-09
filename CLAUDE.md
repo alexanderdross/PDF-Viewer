@@ -40,8 +40,8 @@ This monorepo contains **five major components**:
 
 | Component | Directory | Technology | Purpose |
 |-----------|-----------|------------|---------|
-| Marketing Website | `theme/wp-theme/pdfviewer-theme/` | WordPress Theme (Tailwind CSS) | Product website at pdfviewer.drossmedia.de |
-| WordPress Plugin | `pdf-embed-seo-optimize/` | PHP (WordPress 5.8+) | PDF viewer plugin (Free + Premium + Pro+) |
+| Marketing Website | `theme/` | WordPress Theme (Tailwind CSS) | Product website at pdfviewer.drossmedia.de |
+| WordPress Plugin | `wordpress-pdf-embed-seo/` | PHP (WordPress 5.8+) | PDF viewer plugin (Free + Premium + Pro+) |
 | Drupal Module | `drupal-pdf-embed-seo/` | PHP (Drupal 10/11) | PDF viewer module (Free + Premium + Pro+) |
 | React Packages | `react-pdf-embed-seo/` | TypeScript/React 18+ | PDF viewer components (Free + Pro + Pro+) |
 | License Manager | `license-dashboard/` | PHP (WordPress Plugin) | Central license management system |
@@ -50,9 +50,9 @@ This monorepo contains **five major components**:
 
 | Module | Directory | Platform | Version | Features |
 |--------|-----------|----------|---------|----------|
-| WP Free | `pdf-embed-seo-optimize/` | WordPress 5.8+ | 1.2.10 | Core PDF viewer, SEO, REST API |
-| WP Premium | `pdf-embed-seo-optimize/premium/` | WordPress 5.8+ | 1.2.10 | Analytics, passwords, progress, sitemap |
-| WP Pro+ | `pdf-embed-seo-optimize/pro-plus/` | WordPress 5.8+ | 1.3.0 | Advanced analytics, annotations, versioning, webhooks, 2FA, compliance |
+| WP Free | `wordpress-pdf-embed-seo/` | WordPress 5.8+ | 1.2.10 | Core PDF viewer, SEO, REST API |
+| WP Premium | `wordpress-pdf-embed-seo/premium/` | WordPress 5.8+ | 1.2.10 | Analytics, passwords, progress, sitemap |
+| WP Pro+ | `wordpress-pdf-embed-seo/pro-plus/` | WordPress 5.8+ | 1.3.0 | Advanced analytics, annotations, versioning, webhooks, 2FA, compliance |
 | Drupal Free | `drupal-pdf-embed-seo/` | Drupal 10/11 | 1.2.13 | Core PDF viewer, SEO, REST API |
 | Drupal Premium | `drupal-pdf-embed-seo/modules/pdf_embed_seo_premium/` | Drupal 10/11 | 1.2.13 | Analytics, passwords, progress, sitemap |
 | Drupal Pro+ | `drupal-pdf-embed-seo/modules/pdf_embed_seo_pro_plus/` | Drupal 10/11 | 1.3.0 | Advanced analytics, annotations, versioning, webhooks, 2FA, compliance |
@@ -92,10 +92,9 @@ PDF-Viewer/
 ├── DRUPAL-PREMIUM-FEATURES.md           # Drupal premium features overview
 ├── REACT-MODULE-PLAN.md                 # React module implementation plan
 │
-├── theme/                               # Marketing website
-│   └── wp-theme/pdfviewer-theme/        # WordPress theme (Tailwind CSS + vanilla JS)
+├── theme/                               # Marketing website WordPress theme (Tailwind CSS + vanilla JS)
 │
-├── pdf-embed-seo-optimize/              # WordPress plugin (Free + Premium + Pro+)
+├── wordpress-pdf-embed-seo/              # WordPress plugin (Free + Premium + Pro+)
 │   ├── includes/                        # Core PHP classes (8 files)
 │   ├── admin/                           # Admin UI (views, CSS, JS)
 │   ├── public/                          # Frontend (templates, CSS, JS)
@@ -140,7 +139,7 @@ PDF-Viewer/
 
 The marketing website theme for **pdfviewer.drossmedia.de** (also accessible via vanity domain **pdfviewermodule.com**).
 
-**Location:** `theme/wp-theme/pdfviewer-theme/`
+**Location:** `theme/`
 **Version:** 2.2.94
 **Requires:** WordPress 6.0+, PHP 8.0+
 **Tech Stack:** Tailwind CSS (compiled), vanilla JavaScript (no dependencies), self-hosted fonts (Inter + Outfit)
@@ -148,7 +147,7 @@ The marketing website theme for **pdfviewer.drossmedia.de** (also accessible via
 ### Theme Structure
 
 ```
-theme/wp-theme/pdfviewer-theme/
+theme/
 ├── style.css                          # Theme metadata + imports
 ├── functions.php                      # Theme setup (35.9 KB) - enqueues, hooks, patterns
 ├── theme.json                         # Block editor configuration (colors, fonts, layout)
@@ -239,7 +238,7 @@ theme/wp-theme/pdfviewer-theme/
 
 ### Overview
 
-**Location:** `pdf-embed-seo-optimize/`
+**Location:** `wordpress-pdf-embed-seo/`
 **Main File:** `pdf-embed-seo-optimize.php` (v1.2.10)
 **Requires:** WordPress 5.8+, PHP 7.4+
 **Architecture:** Singleton pattern with lazy-loaded components
@@ -1166,8 +1165,8 @@ define( 'PLM_STRIPE_WEBHOOK_SECRET', 'whsec_...' );  // wp-config.php
 
 | Location | Framework | Coverage |
 |----------|-----------|----------|
-| `pdf-embed-seo-optimize/tests/` | PHPUnit | WordPress plugin (11+ test files) |
-| `theme/wp-theme/pdfviewer-theme/tests/` | PHPUnit | Theme functions (4 test files) |
+| `wordpress-pdf-embed-seo/tests/` | PHPUnit | WordPress plugin (11+ test files) |
+| `theme/tests/` | PHPUnit | Theme functions (4 test files) |
 | `react-pdf-embed-seo/tests/unit/` | Vitest | React components/hooks (4 test files) |
 | `react-pdf-embed-seo/packages/react-pro-plus/tests/` | Vitest | Pro+ features (5 test files) |
 | `tests/qa/` | Manual | QA/UAT test plans and reports |
@@ -1191,7 +1190,7 @@ define( 'PLM_STRIPE_WEBHOOK_SECRET', 'whsec_...' );  // wp-config.php
 cd pdf-embed-seo-optimize && phpunit
 
 # WordPress theme
-cd theme/wp-theme/pdfviewer-theme && phpunit
+cd theme && phpunit
 
 # React packages
 cd react-pdf-embed-seo && pnpm test        # Run all tests
