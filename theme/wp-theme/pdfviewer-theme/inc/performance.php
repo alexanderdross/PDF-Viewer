@@ -310,7 +310,7 @@ add_action('template_redirect', 'pdfviewer_start_buffer', -1);
  * Extends cache lifetime for static marketing pages to reduce TTFB on repeat visits.
  */
 function pdfviewer_cache_headers() {
-    if (is_admin() || is_user_logged_in()) {
+    if (is_admin() || is_user_logged_in() || headers_sent()) {
         return;
     }
 

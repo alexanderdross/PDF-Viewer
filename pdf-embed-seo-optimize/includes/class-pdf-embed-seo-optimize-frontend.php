@@ -241,13 +241,16 @@ class PDF_Embed_SEO_Frontend {
 	 * @return void
 	 */
 	public function ajax_get_pdf() {
+		// Prevent caching of sensitive PDF URL responses.
+		nocache_headers();
+
 		// Verify nonce.
 		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pdf_embed_seo_get_pdf' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Security check failed.', 'pdf-embed-seo-optimize' ) ) );
 		}
 
 		// Get post ID.
-		$post_id = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
+		$post_id = isset( $_POST['post_id'] ) ? absint( wp_unslash( $_POST['post_id'] ) ) : 0;
 
 		if ( ! $post_id ) {
 			wp_send_json_error( array( 'message' => __( 'Invalid request.', 'pdf-embed-seo-optimize' ) ) );

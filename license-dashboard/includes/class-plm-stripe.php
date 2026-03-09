@@ -75,6 +75,7 @@ class PLM_Stripe {
 		}
 
 		if ( ! self::verify_signature( $payload, $signature, $secret ) ) {
+			error_log( '[PLM Stripe] Webhook signature verification failed. Payload hash: ' . md5( $payload ) );
 			return new WP_REST_Response( array(
 				'error'   => 'invalid_signature',
 				'message' => 'Webhook signature verification failed.',

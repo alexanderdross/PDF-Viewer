@@ -207,7 +207,7 @@ class AnnotationManager {
     }
 
     // Only owner or admin can update
-    if ($annotation['user_id'] != $this->currentUser->id() && !$this->currentUser->hasPermission('administer pdf_embed_seo')) {
+    if ($annotation['user_id'] !== (string) $this->currentUser->id() && !$this->currentUser->hasPermission('administer pdf_embed_seo')) {
       return FALSE;
     }
 
@@ -253,7 +253,7 @@ class AnnotationManager {
     }
 
     // Only owner or admin can delete
-    if ($annotation['user_id'] != $this->currentUser->id() && !$this->currentUser->hasPermission('administer pdf_embed_seo')) {
+    if ($annotation['user_id'] !== (string) $this->currentUser->id() && !$this->currentUser->hasPermission('administer pdf_embed_seo')) {
       return FALSE;
     }
 
