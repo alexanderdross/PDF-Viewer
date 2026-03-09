@@ -3,14 +3,14 @@
  * PDF Embed & SEO Optimize Theme Functions
  *
  * @package PDFViewer
- * @version 2.2.95
+ * @version 2.2.96
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-define('PDFVIEWER_THEME_VERSION', '2.2.95');
+define('PDFVIEWER_THEME_VERSION', '2.2.96');
 define('PDFVIEWER_THEME_DIR', get_template_directory());
 define('PDFVIEWER_THEME_URI', get_template_directory_uri());
 
@@ -197,9 +197,25 @@ function pdfviewer_register_block_patterns() {
 add_action('init', 'pdfviewer_register_block_patterns');
 
 /**
- * Get Block Pattern Content
+ * Get Block Pattern Content.
+ *
+ * Reads a block pattern HTML file from the patterns directory.
+ * Uses a whitelist to prevent path traversal.
+ *
+ * @param string $pattern_name Pattern filename (without extension).
+ * @return string Pattern HTML content, or empty string if not found.
  */
 function pdfviewer_get_pattern_content($pattern_name) {
+    $allowed_patterns = array(
+        'hero', 'features', 'cta', 'faq', 'comparison',
+        'pricing', 'problem-solution', 'how-it-works',
+        'testimonials', 'geo-section',
+    );
+
+    if (!in_array($pattern_name, $allowed_patterns, true)) {
+        return '';
+    }
+
     $pattern_file = PDFVIEWER_THEME_DIR . '/patterns/' . $pattern_name . '.html';
 
     if (file_exists($pattern_file)) {

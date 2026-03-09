@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
 }
 
 if (!defined('PDFVIEWER_THEME_VERSION')) {
-    define('PDFVIEWER_THEME_VERSION', '2.2.95');
+    define('PDFVIEWER_THEME_VERSION', '2.2.96');
 }
 
 if (!defined('PDFVIEWER_THEME_DIR')) {
