@@ -354,8 +354,9 @@ final class PDF_Embed_SEO_Premium {
 			}
 		}
 
-		// Standard license key validation.
-		if ( preg_match( '/^PDF\$PRO#[A-Z0-9]{4}-[A-Z0-9]{4}@[A-Z0-9]{4}-[A-Z0-9]{4}![A-Z0-9]{4}$/i', $license_key ) ) {
+		// Standard Premium or Pro+ license key validation.
+		// Pro+ keys (PDF$PRO+#...) are accepted as Pro+ is a superset of Premium.
+		if ( preg_match( '/^PDF\$PRO\+?#[A-Z0-9]{4}-[A-Z0-9]{4}@[A-Z0-9]{4}-[A-Z0-9]{4}![A-Z0-9]{4}$/i', $license_key ) ) {
 			update_option( 'pdf_embed_seo_premium_license_status', 'valid' );
 			update_option( 'pdf_embed_seo_premium_license_expires', gmdate( 'Y-m-d', strtotime( '+1 year' ) ) );
 			return;
