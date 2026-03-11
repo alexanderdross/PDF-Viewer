@@ -11,6 +11,26 @@ get_header();
 // ─── WordPress Changelog ───────────────────────────────────────────────
 $changelog_wordpress = array(
     array(
+        'version' => '1.2.12',
+        'date'    => 'March 11, 2026',
+        'type'    => 'both',
+        'title'   => 'PDF AcroForms Support & License Key Fix',
+        'changes' => array(
+            array('type' => 'added', 'description' => 'PDF AcroForms (Public Form Filling) - Fill text fields, checkboxes, radio buttons, dropdowns, and date pickers directly in the browser'),
+            array('type' => 'added', 'description' => 'Form Validation - Real-time validation with visual indicators for required fields, email, phone, and date formats'),
+            array('type' => 'added', 'description' => 'Download Filled PDF - Users can download the PDF with their filled-in form data embedded'),
+            array('type' => 'added', 'description' => 'Print Filled PDF - Print the PDF including all form data with optimized print layout'),
+            array('type' => 'added', 'description' => 'Clear Form Data - Reset all form fields to their default/empty state with confirmation dialog'),
+            array('type' => 'added', 'description' => 'State Persistence - Form data survives page refresh, back/forward navigation, and device rotation via sessionStorage'),
+            array('type' => 'added', 'description' => 'Data Loss Warning - Browser prompt warns users about unsaved form data when navigating away'),
+            array('type' => 'added', 'description' => 'Online Submission (Pro+) - Optional server-side form submission endpoint for collecting completed forms'),
+            array('type' => 'added', 'description' => 'Responsive Form Fields - Minimum 44x44px touch targets, mobile-optimized keyboards for email/phone/number fields'),
+            array('type' => 'added', 'description' => 'Privacy-First Architecture - All form data stored in browser memory only, no server-side PII storage'),
+            array('type' => 'fixed', 'description' => 'License Validation: Pro+ keys (PDF$PRO+#...) were rejected by the Premium module\'s local fallback validator'),
+            array('type' => 'changed', 'description' => 'Version bump to 1.2.12 (Free/Premium), 1.3.1 (Pro+)'),
+        ),
+    ),
+    array(
         'version' => '1.2.11',
         'date'    => 'February 10, 2026',
         'type'    => 'both',
@@ -219,6 +239,51 @@ $changelog_wordpress = array(
 // ─── Drupal Changelog ──────────────────────────────────────────────────
 $changelog_drupal = array(
     array(
+        'version' => '1.2.15',
+        'date'    => 'March 11, 2026',
+        'type'    => 'both',
+        'title'   => 'PDF AcroForms Support (Public Form Filling)',
+        'changes' => array(
+            array('type' => 'added', 'description' => 'PDF AcroForms (Public Form Filling) - Fill text fields, checkboxes, radio buttons, dropdowns, and date pickers directly in the browser'),
+            array('type' => 'added', 'description' => 'Form Validation - Real-time validation with visual indicators for required fields, email, phone, and date formats'),
+            array('type' => 'added', 'description' => 'Download Filled PDF - Users can download the PDF with their filled-in form data embedded'),
+            array('type' => 'added', 'description' => 'Print Filled PDF - Print the PDF including all form data with optimized print layout'),
+            array('type' => 'added', 'description' => 'Clear Form Data - Reset all form fields to their default/empty state with confirmation dialog'),
+            array('type' => 'added', 'description' => 'State Persistence - Form data survives page refresh, back/forward navigation, and device rotation via sessionStorage'),
+            array('type' => 'added', 'description' => 'Data Loss Warning - Browser prompt warns users about unsaved form data when navigating away'),
+            array('type' => 'added', 'description' => 'Online Submission (Pro+) - Optional server-side form submission endpoint for collecting completed forms'),
+            array('type' => 'added', 'description' => 'Responsive Form Fields - Minimum 44x44px touch targets, mobile-optimized keyboards for email/phone/number fields'),
+            array('type' => 'added', 'description' => 'Privacy-First Architecture - All form data stored in browser memory only, no server-side PII storage'),
+            array('type' => 'changed', 'description' => 'Version bump to 1.2.15 (Free/Premium), 1.3.1 (Pro+)'),
+        ),
+    ),
+    array(
+        'version' => '1.2.14',
+        'date'    => 'March 11, 2026',
+        'type'    => 'both',
+        'title'   => 'Pro+ License Key Fix & Cross-Platform Parity',
+        'changes' => array(
+            array('type' => 'fixed', 'description' => 'License Validation: Pro+ keys (PDF$PRO+#...) were rejected by the Premium module\'s local fallback validator'),
+            array('type' => 'fixed', 'description' => 'Local fallback regex now accepts both Premium (PDF$PRO#) and Pro+ (PDF$PRO+#) key formats'),
+            array('type' => 'fixed', 'description' => 'Same fix applied to WordPress Premium plugin for cross-platform parity'),
+            array('type' => 'changed', 'description' => 'Version bump to 1.2.14'),
+        ),
+    ),
+    array(
+        'version' => '1.2.13',
+        'date'    => 'February 17, 2026',
+        'type'    => 'both',
+        'title'   => 'Code Quality & Static Analysis Compliance',
+        'changes' => array(
+            array('type' => 'improved', 'description' => 'PHPStan level 5 compliance — Resolved 526 static analysis errors across all module tiers'),
+            array('type' => 'improved', 'description' => 'PHPCS Drupal standards compliance — Fixed 20,000+ coding standard violations'),
+            array('type' => 'changed', 'description' => 'Replaced all \\Drupal:: static calls in service classes with proper constructor dependency injection (40+ files)'),
+            array('type' => 'fixed', 'description' => 'Entity type narrowing — Added instanceof PdfDocumentInterface checks across 15+ files'),
+            array('type' => 'fixed', 'description' => 'Secured unserialize() call with allowed_classes restriction in premium install file'),
+            array('type' => 'changed', 'description' => 'Version bump to 1.2.13'),
+        ),
+    ),
+    array(
         'version' => '1.2.12',
         'date'    => 'February 17, 2026',
         'type'    => 'both',
@@ -421,6 +486,27 @@ $changelog_drupal = array(
 
 // ─── React / Next.js Changelog ─────────────────────────────────────────
 $changelog_react = array(
+    array(
+        'version' => '1.2.12',
+        'date'    => 'March 11, 2026',
+        'type'    => 'both',
+        'title'   => 'PDF AcroForms Support (Public Form Filling)',
+        'changes' => array(
+            array('type' => 'added', 'description' => 'PDF AcroForms (Public Form Filling) - Fill text fields, checkboxes, radio buttons, dropdowns, and date pickers directly in the browser'),
+            array('type' => 'added', 'description' => 'Form Validation - Real-time validation with visual indicators for required fields, email, phone, and date formats'),
+            array('type' => 'added', 'description' => 'Download Filled PDF - Users can download the PDF with their filled-in form data embedded'),
+            array('type' => 'added', 'description' => 'Print Filled PDF - Print the PDF including all form data with optimized print layout'),
+            array('type' => 'added', 'description' => 'Clear Form Data - Reset all form fields to their default/empty state with confirmation dialog'),
+            array('type' => 'added', 'description' => 'State Persistence - Form data survives page refresh, back/forward navigation, and device rotation via sessionStorage'),
+            array('type' => 'added', 'description' => 'Data Loss Warning - Browser prompt warns users about unsaved form data when navigating away'),
+            array('type' => 'added', 'description' => 'Online Submission (Pro+) - Optional server-side form submission endpoint for collecting completed forms'),
+            array('type' => 'added', 'description' => 'Responsive Form Fields - Minimum 44x44px touch targets, mobile-optimized keyboards for email/phone/number fields'),
+            array('type' => 'added', 'description' => 'Privacy-First Architecture - All form data stored in browser memory only, no server-side PII storage'),
+            array('type' => 'added', 'description' => 'usePdfForm hook - React hook for managing form state, validation, and submission'),
+            array('type' => 'added', 'description' => 'PdfFormViewer component - Drop-in form-aware PDF viewer with built-in form toolbar'),
+            array('type' => 'changed', 'description' => 'Version bump to 1.2.12 (Free/Premium), 1.3.1 (Pro+)'),
+        ),
+    ),
     array(
         'version' => '1.2.11',
         'date'    => 'February 10, 2026',

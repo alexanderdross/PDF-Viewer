@@ -3,7 +3,7 @@ type: module
 description: 'Enterprise features for PDF Embed SEO including advanced analytics, 2FA, webhooks, versioning, annotations, and compliance.'
 package: 'PDF Embed SEO'
 core_version_requirement: ^10 || ^11
-version: '1.3.0'
+version: '1.3.1'
 
 dependencies:
   - pdf_embed_seo:pdf_embed_seo

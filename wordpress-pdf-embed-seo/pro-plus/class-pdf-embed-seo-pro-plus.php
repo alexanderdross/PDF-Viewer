@@ -26,7 +26,7 @@ final class PDF_Embed_SEO_Pro_Plus {
      *
      * @var string
      */
-    const VERSION = '1.3.0';
+    const VERSION = '1.3.1';
 
     /**
      * Minimum Premium version required.

@@ -10,6 +10,38 @@ For the complete unified changelog, see [CHANGELOG.md](https://github.com/alexan
 
 ---
 
+## [1.2.15] - 2026-03-11
+
+### Added
+- **PDF AcroForms (Public Form Filling)** — Users can fill text fields, checkboxes, radio buttons, dropdowns, and date pickers directly in the browser-based PDF viewer
+- **Form Validation** — Real-time validation with visual indicators for required fields, email, phone, and date formats
+- **Download Filled PDF** — Users can download the PDF with their filled-in form data embedded
+- **Print Filled PDF** — Print the PDF including all form data with optimized print layout
+- **Clear Form Data** — Reset all form fields to their default/empty state with confirmation dialog
+- **State Persistence** — Form data survives page refresh, back/forward navigation, and device rotation via sessionStorage
+- **Data Loss Warning** — Browser prompt warns users about unsaved form data when navigating away
+- **Online Submission (Pro+)** — Optional server-side form submission endpoint for collecting completed forms
+- **Responsive Form Fields** — Minimum 44x44px touch targets, mobile-optimized keyboards for email/phone/number fields
+- **Privacy-First Architecture** — All form data stored in browser memory only, no server-side PII storage
+
+### Changed
+- Version bump to 1.2.15 (Free/Premium), 1.3.1 (Pro+)
+
+---
+
+## [1.2.14] - 2026-03-11
+
+### Fixed
+- **License Validation: Pro+ keys rejected on Premium settings page** — The Premium module's local fallback validator only matched `PDF$PRO#` format, rejecting `PDF$PRO+#` (Pro+ Enterprise) keys. When the remote License Manager API returned 404 (key not in DB), local fallback also failed, leaving the client unable to activate.
+  - Updated `LicenseValidator::validateLocally()` to accept Pro+ key format
+  - Updated `PdfPremiumSettingsForm::activateLicenseLocally()` regex to `\+?` (optional `+`)
+  - Same fix applied to WordPress Premium `validate_license_locally()` for cross-platform parity
+
+### Changed
+- Version bump to 1.2.14 (free + premium modules)
+
+---
+
 ## [1.2.13] - 2026-02-17
 
 ### Code Quality & Static Analysis
