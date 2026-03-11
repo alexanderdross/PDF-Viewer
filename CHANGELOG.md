@@ -8,6 +8,29 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.2.15/1.2.12/1.2.12] - 2026-03-11 (All Platforms)
+
+### Added
+- **PDF AcroForms (Public Form Filling)** — Fill text fields, checkboxes, radio buttons, dropdowns, and date pickers directly in the browser
+- **Form Validation** — Real-time validation for required fields, email, phone, and date formats
+- **Download/Print Filled PDF** — Download or print with form data embedded
+- **Clear Form Data** — Reset form fields with confirmation dialog
+- **State Persistence** — Form data survives refresh, back/forward nav, and device rotation via sessionStorage
+- **Data Loss Warning** — Browser prompt on unsaved form data
+- **Online Submission (Pro+)** — Optional server-side form submission endpoint
+- **Responsive Form Fields** — 44x44px min touch targets, mobile-optimized keyboards
+- **Privacy-First** — Browser-only data storage, no server-side PII
+
+### Fixed
+- **License Validation (WordPress)** — Pro+ keys rejected by Premium local fallback validator
+
+### Changed
+- WordPress: 1.2.12 (Free/Premium), 1.3.1 (Pro+)
+- Drupal: 1.2.15 (Free/Premium), 1.3.1 (Pro+)
+- React: 1.2.12 (Free/Premium), 1.3.1 (Pro+)
+
+---
+
 ## [1.2.13] - 2026-02-17 (Drupal)
 
 ### Code Quality

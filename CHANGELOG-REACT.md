@@ -10,6 +10,27 @@ For the complete unified changelog, see [CHANGELOG.md](https://github.com/alexan
 
 ---
 
+## [1.2.12] - 2026-03-11
+
+### Added
+- **PDF AcroForms (Public Form Filling)** — Users can fill text fields, checkboxes, radio buttons, dropdowns, and date pickers directly in the browser-based PDF viewer
+- **Form Validation** — Real-time validation with visual indicators for required fields, email, phone, and date formats
+- **Download Filled PDF** — Users can download the PDF with their filled-in form data embedded
+- **Print Filled PDF** — Print the PDF including all form data with optimized print layout
+- **Clear Form Data** — Reset all form fields to their default/empty state with confirmation dialog
+- **State Persistence** — Form data survives page refresh, back/forward navigation, and device rotation via sessionStorage
+- **Data Loss Warning** — Browser prompt warns users about unsaved form data when navigating away
+- **Online Submission (Pro+)** — Optional server-side form submission endpoint for collecting completed forms
+- **Responsive Form Fields** — Minimum 44x44px touch targets, mobile-optimized keyboards for email/phone/number fields
+- **Privacy-First Architecture** — All form data stored in browser memory only, no server-side PII storage
+- **`usePdfForm` hook** — React hook for managing form state, validation, and submission
+- **`PdfFormViewer` component** — Drop-in form-aware PDF viewer with built-in form toolbar
+
+### Changed
+- Version bump to 1.2.12 (Free/Premium), 1.3.1 (Pro+)
+
+---
+
 ## [1.2.11] - 2026-02-10
 
 No React-specific changes in this release. See [Drupal changelog](https://github.com/alexanderdross/PDF-Viewer-2026/blob/main/CHANGELOG-DRUPAL.md) for platform-specific updates.
