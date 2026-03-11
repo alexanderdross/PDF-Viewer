@@ -444,7 +444,7 @@ describe('PdfArchive', () => {
       </PdfProvider>
     );
 
-    expect(screen.getByText(/test PDF document/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/test PDF document/i).length).toBeGreaterThanOrEqual(1);
   });
 
   it('shows pagination when enabled', () => {
@@ -633,7 +633,7 @@ describe('PdfCard', () => {
       <PdfCard document={mockDocument} showExcerpt={true} />
     );
 
-    expect(screen.getByText(/test PDF document/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/test PDF document/i).length).toBeGreaterThanOrEqual(1);
   });
 
   it('renders date', () => {

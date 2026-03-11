@@ -2,7 +2,7 @@
 
 A comprehensive PDF management solution available for WordPress, Drupal, and React/Next.js that uses Mozilla's PDF.js library to securely display PDFs with SEO optimization. This repository also contains the marketing website (WordPress theme) and a centralized license management system.
 
-**Current Version:** 1.3.0 (Pro+ Enterprise), 1.2.13 (Drupal Free & Premium), 1.2.11 (WordPress & React Free & Premium)
+**Current Version:** 1.3.0/1.3.1 (Pro+ Enterprise), 1.2.13 (Drupal Free & Premium), 1.2.11 (WordPress Free & Premium), 1.2.12 (React Free & Premium)
 **Platforms:** WordPress (Free, Premium & Pro+), Drupal 10/11 (Free, Premium & Pro+), React/Next.js
 **License:** GPL v2 or later (WordPress/Drupal), MIT (React Free), Commercial (React Pro/Pro+)
 **Website:** https://pdfviewer.drossmedia.de
@@ -56,18 +56,18 @@ This monorepo contains **five major components**:
 | Drupal Free | `drupal-pdf-embed-seo/` | Drupal 10/11 | 1.2.13 | Core PDF viewer, SEO, REST API |
 | Drupal Premium | `drupal-pdf-embed-seo/modules/pdf_embed_seo_premium/` | Drupal 10/11 | 1.2.13 | Analytics, passwords, progress, sitemap |
 | Drupal Pro+ | `drupal-pdf-embed-seo/modules/pdf_embed_seo_pro_plus/` | Drupal 10/11 | 1.3.0 | Advanced analytics, annotations, versioning, webhooks, 2FA, compliance |
-| React Free | `react-pdf-embed-seo/packages/react/` | React 18+/Next.js 13+ | 1.2.10 | Components, hooks, SEO, API client |
-| React Pro | `react-pdf-embed-seo/packages/react-premium/` | React 18+/Next.js 13+ | 1.2.10 | Analytics, passwords, progress, search |
-| React Pro+ | `react-pdf-embed-seo/packages/react-pro-plus/` | React 18+/Next.js 13+ | 1.3.0 | Heatmaps, annotations, versioning, webhooks, 2FA, compliance |
+| React Free | `react-pdf-embed-seo/packages/react/` | React 18+/Next.js 13+ | 1.2.12 | Components, hooks, SEO, API client |
+| React Pro | `react-pdf-embed-seo/packages/react-premium/` | React 18+/Next.js 13+ | 1.2.12 | Analytics, passwords, progress, search |
+| React Pro+ | `react-pdf-embed-seo/packages/react-pro-plus/` | React 18+/Next.js 13+ | 1.3.1 | Heatmaps, annotations, versioning, webhooks, 2FA, compliance |
 
 ### NPM Packages (React/Next.js)
 
 | Package | Version | License | Description |
 |---------|---------|---------|-------------|
-| `@pdf-embed-seo/core` | 1.2.10 | MIT | Core types, utilities, API client |
-| `@pdf-embed-seo/react` | 1.2.10 | MIT | Free React components |
-| `@pdf-embed-seo/react-premium` | 1.2.10 | Commercial | Pro React components |
-| `@pdf-embed-seo/react-pro-plus` | 1.3.0 | Commercial | Pro+ Enterprise components |
+| `@pdf-embed-seo/core` | 1.2.12 | MIT | Core types, utilities, API client |
+| `@pdf-embed-seo/react` | 1.2.12 | MIT | Free React components |
+| `@pdf-embed-seo/react-premium` | 1.2.12 | Commercial | Pro React components |
+| `@pdf-embed-seo/react-pro-plus` | 1.3.1 | Commercial | Pro+ Enterprise components |
 
 ---
 
@@ -498,7 +498,7 @@ react-pdf-embed-seo/
 
 ### Core Package (`@pdf-embed-seo/core`)
 
-**Version:** 1.2.10 | **License:** MIT
+**Version:** 1.2.12 | **License:** MIT
 
 **Exports:** `.`, `./types`, `./utils`, `./api`
 
@@ -522,7 +522,7 @@ packages/core/src/
 
 ### React Package (`@pdf-embed-seo/react`)
 
-**Version:** 1.2.10 | **License:** MIT
+**Version:** 1.2.12 | **License:** MIT
 
 **Exports:** `.`, `./nextjs`, `./styles`, `./styles/viewer`, `./styles/archive`, `./styles/dark`
 
@@ -567,7 +567,7 @@ packages/react/src/
 
 ### React Premium Package (`@pdf-embed-seo/react-premium`)
 
-**Version:** 1.2.10 | **License:** Commercial
+**Version:** 1.2.12 | **License:** Commercial
 
 ```
 packages/react-premium/src/
@@ -590,7 +590,7 @@ packages/react-premium/src/
 
 ### React Pro+ Package (`@pdf-embed-seo/react-pro-plus`)
 
-**Version:** 1.3.0 | **License:** Commercial
+**Version:** 1.3.1 | **License:** Commercial
 
 ```
 packages/react-pro-plus/src/
@@ -1209,7 +1209,7 @@ cd react-pdf-embed-seo && pnpm build       # Build all packages
 |---------|---------|----------|
 | `pdf-embed-seo-optimize-v1.3.0.zip` | 1.3.0 | WordPress plugin (Free + Premium + Pro+, license-gated) |
 | `drupal-pdf-embed-seo-v1.2.13.zip` | 1.2.13 | Drupal module (Free + Premium + Pro+) |
-| `react-pdf-embed-seo-v1.2.10.zip` | 1.2.10 | React/Next.js packages |
+| `react-pdf-embed-seo-v1.2.12.zip` | 1.2.12 | React/Next.js packages |
 | `pdfviewer-theme.zip` | 2.2.94 | Marketing website WordPress theme |
 | `pdf-license-manager-v1.0.1.zip` | 1.0.1 | License management WordPress plugin |
 
@@ -1223,7 +1223,8 @@ cd react-pdf-embed-seo && pnpm build       # Build all packages
 
 ### Current Versions
 - **Drupal Free/Premium:** v1.2.13 (2026-02-17)
-- **WP/React Free/Premium:** v1.2.11 (2026-02-10)
+- **WP Free/Premium:** v1.2.11 (2026-02-10)
+- **React Free/Premium:** v1.2.12 (2026-03-11)
 - **Pro+ Enterprise:** v1.3.0 (2026-02-11)
 - **License Manager:** v1.0.1
 

@@ -248,25 +248,27 @@ final class PDF_Embed_SEO {
 	public function activate() {
 		// Check WordPress version.
 		if ( version_compare( get_bloginfo( 'version' ), PDF_EMBED_SEO_MIN_WP_VERSION, '<' ) ) {
-			deactivate_plugins( PDF_EMBED_SEO_PLUGIN_BASENAME );
 			wp_die(
 				sprintf(
 					/* translators: %s: Minimum WordPress version required. */
 					esc_html__( 'PDF Viewer 2026 requires WordPress %s or higher.', 'pdf-embed-seo-optimize' ),
 					esc_html( PDF_EMBED_SEO_MIN_WP_VERSION )
-				)
+				),
+				esc_html__( 'Plugin Activation Error', 'pdf-embed-seo-optimize' ),
+				array( 'back_link' => true )
 			);
 		}
 
 		// Check PHP version.
 		if ( version_compare( PHP_VERSION, PDF_EMBED_SEO_MIN_PHP_VERSION, '<' ) ) {
-			deactivate_plugins( PDF_EMBED_SEO_PLUGIN_BASENAME );
 			wp_die(
 				sprintf(
 					/* translators: %s: Minimum PHP version required. */
 					esc_html__( 'PDF Viewer 2026 requires PHP %s or higher.', 'pdf-embed-seo-optimize' ),
 					esc_html( PDF_EMBED_SEO_MIN_PHP_VERSION )
-				)
+				),
+				esc_html__( 'Plugin Activation Error', 'pdf-embed-seo-optimize' ),
+				array( 'back_link' => true )
 			);
 		}
 

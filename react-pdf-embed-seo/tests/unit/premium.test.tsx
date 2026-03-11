@@ -296,7 +296,7 @@ describe('useReadingProgress Hook', () => {
     );
 
     await waitFor(() => {
-      expect(result.current.progress).toBeDefined();
+      expect(result.current.progress).not.toBeNull();
     });
 
     expect(result.current.progress?.page).toBe(5);
@@ -308,7 +308,7 @@ describe('useReadingProgress Hook', () => {
     );
 
     await waitFor(() => {
-      expect(result.current.progress).toBeDefined();
+      expect(result.current.progress).not.toBeNull();
     });
 
     // Page 5 of 20 = 25%
