@@ -313,10 +313,14 @@ describe('API Clients', () => {
 
   describe('WordPress API Client', () => {
     const mockFetch = vi.fn();
-    global.fetch = mockFetch;
+    let client: WordPressApiClient;
 
-    const client = new WordPressApiClient({
-      apiUrl: 'https://example.com/wp-json/pdf-embed-seo/v1',
+    beforeEach(() => {
+      mockFetch.mockReset();
+      global.fetch = mockFetch;
+      client = new WordPressApiClient({
+        apiUrl: 'https://example.com/wp-json/pdf-embed-seo/v1',
+      });
     });
 
     it('should fetch documents list', async () => {
@@ -425,10 +429,14 @@ describe('API Clients', () => {
 
   describe('Drupal API Client', () => {
     const mockFetch = vi.fn();
-    global.fetch = mockFetch;
+    let client: DrupalApiClient;
 
-    const client = new DrupalApiClient({
-      apiUrl: 'https://example.com/api/pdf-embed-seo/v1',
+    beforeEach(() => {
+      mockFetch.mockReset();
+      global.fetch = mockFetch;
+      client = new DrupalApiClient({
+        apiUrl: 'https://example.com/api/pdf-embed-seo/v1',
+      });
     });
 
     it('should fetch documents list', async () => {
