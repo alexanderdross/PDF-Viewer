@@ -147,6 +147,11 @@ class LicenseValidator {
       return $this->checkExpiration('pdf_embed_seo_premium.settings');
     }
 
+    // Pro+ license (superset of Premium, so also valid here).
+    if (preg_match('/^PDF\$PRO\+#[A-Z0-9]{4}-[A-Z0-9]{4}@[A-Z0-9]{4}-[A-Z0-9]{4}![A-Z0-9]{4}$/i', $license_key)) {
+      return $this->checkExpiration('pdf_embed_seo_premium.settings');
+    }
+
     return self::STATUS_INVALID;
   }
 

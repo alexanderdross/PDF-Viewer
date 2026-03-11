@@ -299,8 +299,9 @@ class PdfPremiumSettingsForm extends ConfigFormBase {
       }
     }
 
-    // Standard license key validation.
-    if (preg_match('/^PDF\$PRO#[A-Z0-9]{4}-[A-Z0-9]{4}@[A-Z0-9]{4}-[A-Z0-9]{4}![A-Z0-9]{4}$/i', $license_key)) {
+    // Standard Premium or Pro+ license key validation.
+    // Pro+ keys (PDF$PRO+#...) are accepted as Pro+ is a superset of Premium.
+    if (preg_match('/^PDF\$PRO\+?#[A-Z0-9]{4}-[A-Z0-9]{4}@[A-Z0-9]{4}-[A-Z0-9]{4}![A-Z0-9]{4}$/i', $license_key)) {
       $expires = date('Y-m-d H:i:s', strtotime('+1 year'));
       $this->config('pdf_embed_seo_premium.settings')
         ->set('license_key', $license_key)
