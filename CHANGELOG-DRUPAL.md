@@ -10,6 +10,19 @@ For the complete unified changelog, see [CHANGELOG.md](https://github.com/alexan
 
 ---
 
+## [1.2.14] - 2026-03-11
+
+### Fixed
+- **License Validation: Pro+ keys rejected on Premium settings page** — The Premium module's local fallback validator only matched `PDF$PRO#` format, rejecting `PDF$PRO+#` (Pro+ Enterprise) keys. When the remote License Manager API returned 404 (key not in DB), local fallback also failed, leaving the client unable to activate.
+  - Updated `LicenseValidator::validateLocally()` to accept Pro+ key format
+  - Updated `PdfPremiumSettingsForm::activateLicenseLocally()` regex to `\+?` (optional `+`)
+  - Same fix applied to WordPress Premium `validate_license_locally()` for cross-platform parity
+
+### Changed
+- Version bump to 1.2.14 (free + premium modules)
+
+---
+
 ## [1.2.13] - 2026-02-17
 
 ### Code Quality & Static Analysis

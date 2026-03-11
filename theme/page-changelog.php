@@ -219,6 +219,32 @@ $changelog_wordpress = array(
 // ─── Drupal Changelog ──────────────────────────────────────────────────
 $changelog_drupal = array(
     array(
+        'version' => '1.2.14',
+        'date'    => 'March 11, 2026',
+        'type'    => 'both',
+        'title'   => 'Pro+ License Key Fix & Cross-Platform Parity',
+        'changes' => array(
+            array('type' => 'fixed', 'description' => 'License Validation: Pro+ keys (PDF$PRO+#...) were rejected by the Premium module\'s local fallback validator'),
+            array('type' => 'fixed', 'description' => 'Local fallback regex now accepts both Premium (PDF$PRO#) and Pro+ (PDF$PRO+#) key formats'),
+            array('type' => 'fixed', 'description' => 'Same fix applied to WordPress Premium plugin for cross-platform parity'),
+            array('type' => 'changed', 'description' => 'Version bump to 1.2.14'),
+        ),
+    ),
+    array(
+        'version' => '1.2.13',
+        'date'    => 'February 17, 2026',
+        'type'    => 'both',
+        'title'   => 'Code Quality & Static Analysis Compliance',
+        'changes' => array(
+            array('type' => 'improved', 'description' => 'PHPStan level 5 compliance — Resolved 526 static analysis errors across all module tiers'),
+            array('type' => 'improved', 'description' => 'PHPCS Drupal standards compliance — Fixed 20,000+ coding standard violations'),
+            array('type' => 'changed', 'description' => 'Replaced all \\Drupal:: static calls in service classes with proper constructor dependency injection (40+ files)'),
+            array('type' => 'fixed', 'description' => 'Entity type narrowing — Added instanceof PdfDocumentInterface checks across 15+ files'),
+            array('type' => 'fixed', 'description' => 'Secured unserialize() call with allowed_classes restriction in premium install file'),
+            array('type' => 'changed', 'description' => 'Version bump to 1.2.13'),
+        ),
+    ),
+    array(
         'version' => '1.2.12',
         'date'    => 'February 17, 2026',
         'type'    => 'both',
