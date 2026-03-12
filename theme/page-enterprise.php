@@ -174,6 +174,129 @@ $faqs = array(
     </div>
 </section>
 
+<!-- Understanding GDPR & HIPAA -->
+<section class="py-20 lg:py-32 bg-card" aria-labelledby="gdpr-hipaa-heading">
+    <div class="container mx-auto px-4 lg:px-8">
+        <header class="max-w-3xl mx-auto text-center mb-12">
+            <h2 id="gdpr-hipaa-heading" class="text-3xl md:text-4xl font-bold mb-6"><?php esc_html_e('Understanding GDPR & HIPAA Compliance', 'pdfviewer'); ?></h2>
+            <p class="text-lg text-muted-foreground"><?php esc_html_e('Two of the most important data protection regulations globally. Here is what they mean and how PDF Embed & SEO Optimize helps you meet their requirements.', 'pdfviewer'); ?></p>
+        </header>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            <!-- GDPR -->
+            <article class="p-8 rounded-2xl bg-background border border-border hover:border-accent/30 transition-all duration-300">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
+                        <?php echo pdfviewer_icon('shield', 24, 'text-accent'); ?>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-foreground"><?php esc_html_e('GDPR', 'pdfviewer'); ?></h3>
+                        <p class="text-xs text-muted-foreground"><?php esc_html_e('General Data Protection Regulation', 'pdfviewer'); ?></p>
+                    </div>
+                </div>
+                <p class="text-sm text-muted-foreground leading-relaxed mb-4"><?php esc_html_e('The GDPR is a European Union regulation (effective since May 2018) that governs how organizations collect, process, store, and share personal data of individuals in the EU/EEA. It applies to any organization worldwide that handles EU residents\' data, regardless of where the organization is based.', 'pdfviewer'); ?></p>
+                <h4 class="text-sm font-semibold text-foreground mb-3"><?php esc_html_e('Key GDPR Principles:', 'pdfviewer'); ?></h4>
+                <ul class="space-y-2 mb-4">
+                    <li class="flex items-start gap-2 text-sm">
+                        <?php echo pdfviewer_icon('check', 16, 'text-accent shrink-0 mt-0.5'); ?>
+                        <span class="text-muted-foreground"><strong class="text-foreground"><?php esc_html_e('Data Minimization', 'pdfviewer'); ?></strong> — <?php esc_html_e('Collect only the personal data that is strictly necessary', 'pdfviewer'); ?></span>
+                    </li>
+                    <li class="flex items-start gap-2 text-sm">
+                        <?php echo pdfviewer_icon('check', 16, 'text-accent shrink-0 mt-0.5'); ?>
+                        <span class="text-muted-foreground"><strong class="text-foreground"><?php esc_html_e('Right to Erasure', 'pdfviewer'); ?></strong> — <?php esc_html_e('Individuals can request deletion of their personal data', 'pdfviewer'); ?></span>
+                    </li>
+                    <li class="flex items-start gap-2 text-sm">
+                        <?php echo pdfviewer_icon('check', 16, 'text-accent shrink-0 mt-0.5'); ?>
+                        <span class="text-muted-foreground"><strong class="text-foreground"><?php esc_html_e('Transparency', 'pdfviewer'); ?></strong> — <?php esc_html_e('Clear information about what data is collected and why', 'pdfviewer'); ?></span>
+                    </li>
+                    <li class="flex items-start gap-2 text-sm">
+                        <?php echo pdfviewer_icon('check', 16, 'text-accent shrink-0 mt-0.5'); ?>
+                        <span class="text-muted-foreground"><strong class="text-foreground"><?php esc_html_e('Accountability', 'pdfviewer'); ?></strong> — <?php esc_html_e('Organizations must demonstrate compliance through documentation', 'pdfviewer'); ?></span>
+                    </li>
+                </ul>
+                <h4 class="text-sm font-semibold text-foreground mb-3"><?php esc_html_e('How We Support GDPR:', 'pdfviewer'); ?></h4>
+                <ul class="space-y-2">
+                    <li class="flex items-start gap-2 text-sm">
+                        <?php echo pdfviewer_icon('check', 16, 'text-primary shrink-0 mt-0.5'); ?>
+                        <span class="text-muted-foreground"><?php esc_html_e('IP anonymization enabled by default (last octet zeroed for IPv4, last 80 bits for IPv6)', 'pdfviewer'); ?></span>
+                    </li>
+                    <li class="flex items-start gap-2 text-sm">
+                        <?php echo pdfviewer_icon('check', 16, 'text-primary shrink-0 mt-0.5'); ?>
+                        <span class="text-muted-foreground"><?php esc_html_e('No third-party CDN or external server dependencies — documents never leave your infrastructure', 'pdfviewer'); ?></span>
+                    </li>
+                    <li class="flex items-start gap-2 text-sm">
+                        <?php echo pdfviewer_icon('check', 16, 'text-primary shrink-0 mt-0.5'); ?>
+                        <span class="text-muted-foreground"><?php esc_html_e('Data Processing Agreement (DPA) available for Enterprise customers', 'pdfviewer'); ?></span>
+                    </li>
+                    <li class="flex items-start gap-2 text-sm">
+                        <?php echo pdfviewer_icon('check', 16, 'text-primary shrink-0 mt-0.5'); ?>
+                        <span class="text-muted-foreground"><?php esc_html_e('Consent management and data retention policies (Pro+)', 'pdfviewer'); ?></span>
+                    </li>
+                    <li class="flex items-start gap-2 text-sm">
+                        <?php echo pdfviewer_icon('check', 16, 'text-primary shrink-0 mt-0.5'); ?>
+                        <span class="text-muted-foreground"><?php esc_html_e('Audit logs for full data processing transparency', 'pdfviewer'); ?></span>
+                    </li>
+                </ul>
+            </article>
+            <!-- HIPAA -->
+            <article class="p-8 rounded-2xl bg-background border border-border hover:border-accent/30 transition-all duration-300">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <?php echo pdfviewer_icon('heart-pulse', 24, 'text-primary'); ?>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-foreground"><?php esc_html_e('HIPAA', 'pdfviewer'); ?></h3>
+                        <p class="text-xs text-muted-foreground"><?php esc_html_e('Health Insurance Portability and Accountability Act', 'pdfviewer'); ?></p>
+                    </div>
+                </div>
+                <p class="text-sm text-muted-foreground leading-relaxed mb-4"><?php esc_html_e('HIPAA is a United States federal law (enacted in 1996) that sets standards for protecting sensitive patient health information (PHI). It applies to healthcare providers, health plans, healthcare clearinghouses, and their business associates who handle Protected Health Information.', 'pdfviewer'); ?></p>
+                <h4 class="text-sm font-semibold text-foreground mb-3"><?php esc_html_e('Key HIPAA Requirements:', 'pdfviewer'); ?></h4>
+                <ul class="space-y-2 mb-4">
+                    <li class="flex items-start gap-2 text-sm">
+                        <?php echo pdfviewer_icon('check', 16, 'text-accent shrink-0 mt-0.5'); ?>
+                        <span class="text-muted-foreground"><strong class="text-foreground"><?php esc_html_e('Access Controls', 'pdfviewer'); ?></strong> — <?php esc_html_e('Only authorized individuals may access PHI', 'pdfviewer'); ?></span>
+                    </li>
+                    <li class="flex items-start gap-2 text-sm">
+                        <?php echo pdfviewer_icon('check', 16, 'text-accent shrink-0 mt-0.5'); ?>
+                        <span class="text-muted-foreground"><strong class="text-foreground"><?php esc_html_e('Audit Trail', 'pdfviewer'); ?></strong> — <?php esc_html_e('All access to PHI must be logged and auditable', 'pdfviewer'); ?></span>
+                    </li>
+                    <li class="flex items-start gap-2 text-sm">
+                        <?php echo pdfviewer_icon('check', 16, 'text-accent shrink-0 mt-0.5'); ?>
+                        <span class="text-muted-foreground"><strong class="text-foreground"><?php esc_html_e('Data Integrity', 'pdfviewer'); ?></strong> — <?php esc_html_e('PHI must be protected from unauthorized alteration or destruction', 'pdfviewer'); ?></span>
+                    </li>
+                    <li class="flex items-start gap-2 text-sm">
+                        <?php echo pdfviewer_icon('check', 16, 'text-accent shrink-0 mt-0.5'); ?>
+                        <span class="text-muted-foreground"><strong class="text-foreground"><?php esc_html_e('Transmission Security', 'pdfviewer'); ?></strong> — <?php esc_html_e('PHI must be encrypted when transmitted electronically', 'pdfviewer'); ?></span>
+                    </li>
+                </ul>
+                <h4 class="text-sm font-semibold text-foreground mb-3"><?php esc_html_e('How We Support HIPAA:', 'pdfviewer'); ?></h4>
+                <ul class="space-y-2">
+                    <li class="flex items-start gap-2 text-sm">
+                        <?php echo pdfviewer_icon('check', 16, 'text-primary shrink-0 mt-0.5'); ?>
+                        <span class="text-muted-foreground"><?php esc_html_e('Role-based access control (RBAC) restricts document access to authorized users only', 'pdfviewer'); ?></span>
+                    </li>
+                    <li class="flex items-start gap-2 text-sm">
+                        <?php echo pdfviewer_icon('check', 16, 'text-primary shrink-0 mt-0.5'); ?>
+                        <span class="text-muted-foreground"><?php esc_html_e('Two-factor authentication (2FA) for sensitive document access (Pro+)', 'pdfviewer'); ?></span>
+                    </li>
+                    <li class="flex items-start gap-2 text-sm">
+                        <?php echo pdfviewer_icon('check', 16, 'text-primary shrink-0 mt-0.5'); ?>
+                        <span class="text-muted-foreground"><?php esc_html_e('Complete audit logs tracking every view, download, and access attempt', 'pdfviewer'); ?></span>
+                    </li>
+                    <li class="flex items-start gap-2 text-sm">
+                        <?php echo pdfviewer_icon('check', 16, 'text-primary shrink-0 mt-0.5'); ?>
+                        <span class="text-muted-foreground"><?php esc_html_e('Secure PDF URLs — no direct file links exposed; documents served via authenticated endpoints', 'pdfviewer'); ?></span>
+                    </li>
+                    <li class="flex items-start gap-2 text-sm">
+                        <?php echo pdfviewer_icon('check', 16, 'text-primary shrink-0 mt-0.5'); ?>
+                        <span class="text-muted-foreground"><?php esc_html_e('Expiring access links with configurable time limits and usage caps', 'pdfviewer'); ?></span>
+                    </li>
+                </ul>
+            </article>
+        </div>
+        <p class="max-w-3xl mx-auto mt-8 text-xs text-muted-foreground text-center italic"><?php esc_html_e('PDF Embed & SEO Optimize provides technical controls that support GDPR and HIPAA compliance. The software itself does not certify compliance — organizations are responsible for implementing appropriate policies and procedures alongside the technical measures provided.', 'pdfviewer'); ?></p>
+    </div>
+</section>
+
 <!-- Use Cases -->
 <section class="py-20 lg:py-32 bg-card" aria-labelledby="usecases-heading">
     <div class="container mx-auto px-4 lg:px-8">

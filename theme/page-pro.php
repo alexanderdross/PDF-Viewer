@@ -345,6 +345,18 @@ $comparison_data = array(
         ),
     ),
     array(
+        'category' => 'Compliance & Privacy',
+        'features' => array(
+            array( 'name' => 'Basic GDPR (IP Anonymization)', 'free' => true, 'pro' => true, 'proPlus' => true, 'enterprise' => true ),
+            array_merge( array( 'name' => 'Full GDPR Mode' ), pdfviewer_from_tier( 'proPlus' ) ),
+            array_merge( array( 'name' => 'HIPAA Compliance Mode' ), pdfviewer_from_tier( 'proPlus' ) ),
+            array_merge( array( 'name' => 'Data Retention Policies' ), pdfviewer_from_tier( 'proPlus' ) ),
+            array_merge( array( 'name' => 'Consent Management' ), pdfviewer_from_tier( 'proPlus' ) ),
+            array_merge( array( 'name' => 'Audit Logs' ), pdfviewer_from_tier( 'proPlus' ) ),
+            array_merge( array( 'name' => 'Two-Factor Authentication (2FA)' ), pdfviewer_from_tier( 'proPlus' ) ),
+        ),
+    ),
+    array(
         'category' => 'REST API',
         'features' => array(
             array_merge( array( 'name' => 'GET /documents (list)' ), pdfviewer_from_tier( 'free' ) ),
@@ -694,6 +706,25 @@ $comparison_data = array(
                 </table>
             </div>
         </div>
+        <div class="max-w-5xl mx-auto mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="p-6 rounded-2xl bg-card border border-border">
+                <div class="flex items-center gap-3 mb-4">
+                    <?php echo pdfviewer_icon('shield', 20, 'text-accent'); ?>
+                    <h3 class="text-base font-semibold text-foreground"><?php esc_html_e('What is GDPR?', 'pdfviewer'); ?></h3>
+                </div>
+                <p class="text-sm text-muted-foreground leading-relaxed"><?php esc_html_e('The General Data Protection Regulation (GDPR) is a European Union regulation that protects the personal data and privacy of individuals in the EU/EEA. It requires organizations to minimize data collection, provide transparency about data processing, and give individuals control over their personal data — including the right to erasure. Non-compliance can result in fines of up to 4% of annual global revenue.', 'pdfviewer'); ?></p>
+                <p class="text-sm text-muted-foreground leading-relaxed mt-3"><?php esc_html_e('Our GDPR features include IP anonymization (enabled by default), no third-party data transfers, consent management, data retention policies, and full audit logging.', 'pdfviewer'); ?></p>
+            </div>
+            <div class="p-6 rounded-2xl bg-card border border-border">
+                <div class="flex items-center gap-3 mb-4">
+                    <?php echo pdfviewer_icon('heart-pulse', 20, 'text-primary'); ?>
+                    <h3 class="text-base font-semibold text-foreground"><?php esc_html_e('What is HIPAA?', 'pdfviewer'); ?></h3>
+                </div>
+                <p class="text-sm text-muted-foreground leading-relaxed"><?php esc_html_e('The Health Insurance Portability and Accountability Act (HIPAA) is a US federal law that protects sensitive patient health information (PHI). It requires healthcare providers, health plans, and their business associates to implement safeguards for access control, audit trails, data integrity, and transmission security when handling Protected Health Information.', 'pdfviewer'); ?></p>
+                <p class="text-sm text-muted-foreground leading-relaxed mt-3"><?php esc_html_e('Our HIPAA features include role-based access control, two-factor authentication, complete audit logs, secure document URLs, and expiring access links — all designed to help meet HIPAA Security Rule requirements.', 'pdfviewer'); ?></p>
+            </div>
+        </div>
+        <p class="max-w-3xl mx-auto mt-6 text-xs text-muted-foreground text-center italic"><?php esc_html_e('PDF Embed & SEO Optimize provides technical controls that support GDPR and HIPAA compliance. Compliance responsibility remains with your organization.', 'pdfviewer'); ?></p>
     </div>
 </section>
 
