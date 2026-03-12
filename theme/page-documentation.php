@@ -784,13 +784,13 @@ document.addEventListener('zoomChanged', (e) => {
                                     <tr class="border-t border-border">
                                         <td class="py-2 px-3 font-mono text-primary">src</td>
                                         <td class="py-2 px-3 text-muted-foreground">string</td>
-                                        <td class="py-2 px-3 text-muted-foreground">—</td>
+                                        <td class="py-2 px-3 text-muted-foreground">-</td>
                                         <td class="py-2 px-3 text-muted-foreground"><?php esc_html_e('PDF file URL (required)', 'pdfviewer'); ?></td>
                                     </tr>
                                     <tr class="border-t border-border">
                                         <td class="py-2 px-3 font-mono text-primary">title</td>
                                         <td class="py-2 px-3 text-muted-foreground">string</td>
-                                        <td class="py-2 px-3 text-muted-foreground">—</td>
+                                        <td class="py-2 px-3 text-muted-foreground">-</td>
                                         <td class="py-2 px-3 text-muted-foreground"><?php esc_html_e('Document title for accessibility', 'pdfviewer'); ?></td>
                                     </tr>
                                     <tr class="border-t border-border">
@@ -832,7 +832,7 @@ document.addEventListener('zoomChanged', (e) => {
                                     <tr class="border-t border-border">
                                         <td class="py-2 px-3 font-mono text-primary">className</td>
                                         <td class="py-2 px-3 text-muted-foreground">string</td>
-                                        <td class="py-2 px-3 text-muted-foreground">—</td>
+                                        <td class="py-2 px-3 text-muted-foreground">-</td>
                                         <td class="py-2 px-3 text-muted-foreground"><?php esc_html_e('Custom CSS class', 'pdfviewer'); ?></td>
                                     </tr>
                                 </tbody>
@@ -869,7 +869,7 @@ document.addEventListener('zoomChanged', (e) => {
                         <?php esc_html_e('AcroForms are interactive form fields embedded in PDF documents. When a PDF contains fillable fields (text inputs, checkboxes, radio buttons, dropdowns), the viewer automatically detects them and displays an interactive form toolbar.', 'pdfviewer'); ?>
                     </p>
                     <p class="text-sm text-muted-foreground">
-                        <?php esc_html_e('This feature works with any PDF that contains standard AcroForm fields — no additional configuration is required. Simply upload your fillable PDF and the form toolbar appears automatically.', 'pdfviewer'); ?>
+                        <?php esc_html_e('This feature works with any PDF that contains standard AcroForm fields - no additional configuration is required. Simply upload your fillable PDF and the form toolbar appears automatically.', 'pdfviewer'); ?>
                     </p>
                 </div>
 
@@ -982,7 +982,7 @@ document.addEventListener('zoomChanged', (e) => {
                             <?php echo pdfviewer_icon('wordpress', 20, 'text-primary'); ?>
                             <h4 class="font-semibold text-foreground text-sm"><?php esc_html_e('WordPress', 'pdfviewer'); ?></h4>
                         </div>
-                        <p class="text-xs text-muted-foreground"><?php esc_html_e('AcroForms work automatically with any PDF uploaded via the PDF Documents admin. No shortcode changes needed — forms are detected on page load.', 'pdfviewer'); ?></p>
+                        <p class="text-xs text-muted-foreground"><?php esc_html_e('AcroForms work automatically with any PDF uploaded via the PDF Documents admin. No shortcode changes needed - forms are detected on page load.', 'pdfviewer'); ?></p>
                     </div>
                     <div class="bg-card rounded-2xl border border-border p-5">
                         <div class="flex items-center gap-2 mb-3">

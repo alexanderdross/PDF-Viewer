@@ -48,7 +48,7 @@ $viewer_features = array(
                 <?php esc_html_e('Display PDFs beautifully on any device with Mozilla\'s trusted PDF.js technology. Free, SEO-optimized, and works with every Drupal theme.', 'pdfviewer'); ?>
             </p>
             <div class="flex flex-wrap items-center justify-center gap-3 mb-10">
-                <a href="https://www.acquia.com?ref=pdfviewer" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-card border border-border text-sm hover:border-primary/30 transition-colors" title="<?php esc_attr_e('Visit Acquia — the leading Drupal enterprise platform', 'pdfviewer'); ?>">
+                <a href="https://www.acquia.com?ref=pdfviewer" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-card border border-border text-sm hover:border-primary/30 transition-colors" title="<?php esc_attr_e('Visit Acquia - the leading Drupal enterprise platform', 'pdfviewer'); ?>">
                     <?php echo pdfviewer_icon('shield', 16, 'text-primary'); ?>
                     <span class="font-medium text-foreground"><?php esc_html_e('Reviewed by Acquia', 'pdfviewer'); ?></span>
                 </a>
@@ -139,7 +139,7 @@ $viewer_features = array(
                     <?php esc_html_e('Built on Mozilla\'s PDF.js (v4.0)', 'pdfviewer'); ?>
                 </h2>
                 <p class="text-lg text-muted-foreground max-w-2xl mx-auto">
-                    <?php esc_html_e('The same technology that powers Firefox\'s PDF viewer—trusted by millions worldwide. Consistent, reliable rendering on every browser and device.', 'pdfviewer'); ?>
+                    <?php esc_html_e('The same technology that powers Firefox\'s PDF viewer-trusted by millions worldwide. Consistent, reliable rendering on every browser and device.', 'pdfviewer'); ?>
                 </p>
             </div>
             <div class="grid md:grid-cols-3 gap-6">
