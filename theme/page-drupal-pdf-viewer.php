@@ -388,6 +388,24 @@ $viewer_features = array(
                     <?php endforeach; ?>
                 <?php endforeach; ?>
             </div>
+            <!-- GDPR & HIPAA Explanation -->
+            <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="p-6 rounded-2xl bg-card border border-border">
+                    <div class="flex items-center gap-3 mb-3">
+                        <?php echo pdfviewer_icon('shield', 20, 'text-accent'); ?>
+                        <h3 class="text-base font-semibold text-foreground"><?php esc_html_e('What is GDPR?', 'pdfviewer'); ?></h3>
+                    </div>
+                    <p class="text-sm text-muted-foreground leading-relaxed"><?php esc_html_e('The General Data Protection Regulation (GDPR) is a European Union regulation that protects the personal data and privacy of individuals in the EU/EEA. It requires organizations to minimize data collection, provide transparency, and give individuals control over their data. Our module supports GDPR with IP anonymization (enabled by default), no third-party data transfers, consent management, and audit logging.', 'pdfviewer'); ?></p>
+                </div>
+                <div class="p-6 rounded-2xl bg-card border border-border">
+                    <div class="flex items-center gap-3 mb-3">
+                        <?php echo pdfviewer_icon('heart-pulse', 20, 'text-primary'); ?>
+                        <h3 class="text-base font-semibold text-foreground"><?php esc_html_e('What is HIPAA?', 'pdfviewer'); ?></h3>
+                    </div>
+                    <p class="text-sm text-muted-foreground leading-relaxed"><?php esc_html_e('The Health Insurance Portability and Accountability Act (HIPAA) is a US federal law that protects sensitive patient health information (PHI). It requires access controls, audit trails, data integrity, and transmission security. Our module supports HIPAA with role-based access control, two-factor authentication, complete audit logs, and secure document delivery.', 'pdfviewer'); ?></p>
+                </div>
+            </div>
+            <p class="mt-4 text-xs text-muted-foreground text-center italic"><?php esc_html_e('PDF Embed & SEO Optimize provides technical controls that support GDPR and HIPAA compliance. Compliance responsibility remains with your organization.', 'pdfviewer'); ?></p>
         </div>
     </div>
 </section>
