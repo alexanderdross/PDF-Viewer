@@ -85,7 +85,7 @@ $faqs = array(
                 <?php esc_html_e('Enterprise', 'pdfviewer'); ?>
             </div>
 
-            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6 animate-fade-in" style="animation-delay: 0.1s">
+            <h1 id="enterprise-heading" class="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6 animate-fade-in" style="animation-delay: 0.1s">
                 <?php esc_html_e('PDF Management Built for', 'pdfviewer'); ?> <span class="text-gradient"><?php esc_html_e('Regulated Industries', 'pdfviewer'); ?></span>
             </h1>
 

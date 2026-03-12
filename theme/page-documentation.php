@@ -148,7 +148,7 @@ $premium_features = array(
                         <?php echo pdfviewer_icon('terminal', 24, 'text-primary-foreground'); ?>
                     </div>
                     <div>
-                        <h2 class="text-2xl font-bold mb-2"><?php esc_html_e('Getting Started', 'pdfviewer'); ?></h2>
+                        <h2 id="getting-started" class="text-2xl font-bold mb-2"><?php esc_html_e('Getting Started', 'pdfviewer'); ?></h2>
                         <p class="text-muted-foreground"><?php esc_html_e('Install and configure the plugin in minutes', 'pdfviewer'); ?></p>
                     </div>
                 </div>
@@ -335,7 +335,7 @@ const PdfViewer = dynamic(
                         <?php echo pdfviewer_icon('settings', 24, 'text-accent-foreground'); ?>
                     </div>
                     <div>
-                        <h2 class="text-2xl font-bold mb-2"><?php esc_html_e('Configuration', 'pdfviewer'); ?></h2>
+                        <h2 id="configuration" class="text-2xl font-bold mb-2"><?php esc_html_e('Configuration', 'pdfviewer'); ?></h2>
                         <p class="text-muted-foreground config-path">
                             <span class="wp-config"><?php esc_html_e('Navigate to: PDF Documents > Settings', 'pdfviewer'); ?></span>
                             <span class="drupal-config hidden"><?php esc_html_e('Navigate to: Admin > Configuration > Content > PDF Embed & SEO', 'pdfviewer'); ?></span>
@@ -372,7 +372,7 @@ const PdfViewer = dynamic(
                         <?php echo pdfviewer_icon('globe', 24, 'text-accent-foreground'); ?>
                     </div>
                     <div>
-                        <h2 class="text-2xl font-bold mb-2"><?php esc_html_e('Automatic Google Sitemap', 'pdfviewer'); ?></h2>
+                        <h2 id="sitemap" class="text-2xl font-bold mb-2"><?php esc_html_e('Automatic Google Sitemap', 'pdfviewer'); ?></h2>
                         <p class="text-muted-foreground"><?php esc_html_e('Help search engines find all your PDF documents automatically', 'pdfviewer'); ?></p>
                     </div>
                 </div>
@@ -401,7 +401,7 @@ const PdfViewer = dynamic(
                         <?php echo pdfviewer_icon('code-2', 24, 'text-primary-foreground'); ?>
                     </div>
                     <div>
-                        <h2 class="text-2xl font-bold mb-2"><?php esc_html_e('Shortcodes & Blocks', 'pdfviewer'); ?></h2>
+                        <h2 id="shortcodes-blocks" class="text-2xl font-bold mb-2"><?php esc_html_e('Shortcodes & Blocks', 'pdfviewer'); ?></h2>
                         <p class="text-muted-foreground"><?php esc_html_e('Embed PDFs anywhere on your site', 'pdfviewer'); ?></p>
                     </div>
                 </div>
@@ -857,7 +857,7 @@ document.addEventListener('zoomChanged', (e) => {
                         <?php echo pdfviewer_icon('file-text', 24, 'text-primary-foreground'); ?>
                     </div>
                     <div>
-                        <h2 class="text-2xl font-bold mb-2"><?php esc_html_e('PDF AcroForms (Fillable Forms)', 'pdfviewer'); ?></h2>
+                        <h2 id="acroforms" class="text-2xl font-bold mb-2"><?php esc_html_e('PDF AcroForms (Fillable Forms)', 'pdfviewer'); ?></h2>
                         <p class="text-muted-foreground"><?php esc_html_e('Interactive form fields in your PDF viewer', 'pdfviewer'); ?></p>
                     </div>
                 </div>
@@ -1008,7 +1008,7 @@ document.addEventListener('zoomChanged', (e) => {
                         <?php echo pdfviewer_icon('database', 24, 'text-primary-foreground'); ?>
                     </div>
                     <div>
-                        <h2 class="text-2xl font-bold mb-2"><?php esc_html_e('REST API Reference', 'pdfviewer'); ?></h2>
+                        <h2 id="rest-api" class="text-2xl font-bold mb-2"><?php esc_html_e('REST API Reference', 'pdfviewer'); ?></h2>
                         <p class="text-muted-foreground api-base">
                             <span class="wp-api"><?php esc_html_e('Base URL: /wp-json/pdf-embed-seo/v1/', 'pdfviewer'); ?></span>
                             <span class="drupal-api hidden"><?php esc_html_e('Base URL: /api/pdf-embed-seo/v1/', 'pdfviewer'); ?></span>
@@ -1117,7 +1117,7 @@ document.addEventListener('zoomChanged', (e) => {
                         <?php echo pdfviewer_icon('puzzle', 24, 'text-accent-foreground'); ?>
                     </div>
                     <div>
-                        <h2 class="text-2xl font-bold mb-2 hooks-title">
+                        <h2 id="hooks" class="text-2xl font-bold mb-2 hooks-title">
                             <span class="wp-hooks-title"><?php esc_html_e('WordPress Hooks', 'pdfviewer'); ?></span>
                             <span class="drupal-hooks-title hidden"><?php esc_html_e('Drupal Hooks', 'pdfviewer'); ?></span>
                         </h2>
@@ -1354,7 +1354,7 @@ export default function TrackedDocument({ src, title }) {
                         <?php echo pdfviewer_icon('file-text', 24, 'text-primary-foreground'); ?>
                     </div>
                     <div>
-                        <h2 class="text-2xl font-bold mb-2"><?php esc_html_e('Theming & Templates', 'pdfviewer'); ?></h2>
+                        <h2 id="theming" class="text-2xl font-bold mb-2"><?php esc_html_e('Theming & Templates', 'pdfviewer'); ?></h2>
                         <p class="text-muted-foreground"><?php esc_html_e('Customize the look and feel', 'pdfviewer'); ?></p>
                     </div>
                 </div>
@@ -1614,7 +1614,7 @@ body.page-pdf-document .content-wrapper {
                     </div>
                     <div>
                         <div class="flex items-center gap-3">
-                            <h2 class="text-2xl font-bold"><?php esc_html_e('Developer Documentation', 'pdfviewer'); ?></h2>
+                            <h2 id="developer-docs" class="text-2xl font-bold"><?php esc_html_e('Developer Documentation', 'pdfviewer'); ?></h2>
                             <span class="text-xs font-medium px-2 py-1 rounded bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"><?php esc_html_e('For Developers', 'pdfviewer'); ?></span>
                         </div>
                         <p class="text-muted-foreground"><?php esc_html_e('Extend and integrate PDF Embed with hooks, REST API, and webhooks', 'pdfviewer'); ?></p>
@@ -1799,7 +1799,7 @@ body.page-pdf-document .content-wrapper {
                     </div>
                     <div>
                         <div class="flex items-center gap-3">
-                            <h2 class="text-2xl font-bold"><?php esc_html_e('Premium Features', 'pdfviewer'); ?></h2>
+                            <h2 id="premium-features" class="text-2xl font-bold"><?php esc_html_e('Premium Features', 'pdfviewer'); ?></h2>
                             <span class="text-xs font-medium px-2 py-1 rounded bg-primary/10 text-primary"><?php esc_html_e('Pro', 'pdfviewer'); ?></span>
                         </div>
                         <p class="text-muted-foreground"><?php esc_html_e('Advanced functionality for Pro users', 'pdfviewer'); ?></p>

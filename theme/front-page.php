@@ -827,7 +827,7 @@ $faqs = array(
     <div class="absolute inset-0 gradient-hero opacity-5" aria-hidden="true"></div>
     <div class="container mx-auto px-4 lg:px-8 relative">
         <div class="max-w-3xl mx-auto text-center">
-            <h2 class="text-3xl md:text-4xl font-bold mb-6">
+            <h2 id="cta-heading" class="text-3xl md:text-4xl font-bold mb-6">
                 <?php esc_html_e('Ready to Share PDFs That Get Found?', 'pdfviewer'); ?>
             </h2>
             <p class="text-lg text-muted-foreground mb-10">
