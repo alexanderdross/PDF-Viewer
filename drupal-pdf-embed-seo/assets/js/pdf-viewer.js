@@ -40,6 +40,8 @@
         this.scale = 1;
         this.rendering = false;
 
+        this.hasAcroForm = false;
+
         this.init();
     };
 
@@ -51,6 +53,8 @@
         this.container = this.wrapper.querySelector('.pdf-viewer-container');
         this.canvas = this.wrapper.querySelector('.pdf-viewer-canvas');
         this.ctx = this.canvas.getContext('2d');
+        this.annotationLayer = this.wrapper.querySelector('.pdf-viewer-annotation-layer');
+        this.formToolbar = this.wrapper.querySelector('.pdf-viewer-form-toolbar');
         this.loading = this.wrapper.querySelector('.pdf-viewer-loading');
         this.error = this.wrapper.querySelector('.pdf-viewer-error');
 
@@ -213,6 +217,29 @@
                 }
             );
         }
+
+        // Form toolbar events.
+        if (this.formToolbar) {
+            var clearBtn = this.formToolbar.querySelector('.pdf-viewer-form-clear');
+            if (clearBtn) {
+                clearBtn.addEventListener(
+                    'click', function () {
+                        if (confirm(Drupal.t('Clear all form fields? This cannot be undone.'))) {
+                            self.clearFormFields();
+                        }
+                    }
+                );
+            }
+
+            var downloadBtn = this.formToolbar.querySelector('.pdf-viewer-form-download');
+            if (downloadBtn) {
+                downloadBtn.addEventListener(
+                    'click', function () {
+                        self.downloadFilledPdf();
+                    }
+                );
+            }
+        }
     };
 
     /**
@@ -245,6 +272,10 @@
                 self.totalPages = pdf.numPages;
                 self.updatePageCount();
                 self.hideLoading();
+
+                // Detect AcroForm fields.
+                self.detectAcroForm(pdf);
+
                 self.renderPage(1);
 
                 // Trigger loaded event.
@@ -295,6 +326,11 @@
                         self.rendering = false;
                         self.currentPage = pageNum;
                         self.updateNavigation();
+
+                        // Render annotation layer for form fields.
+                        if (self.hasAcroForm && self.annotationLayer) {
+                            self.renderAnnotationLayer(page, viewport);
+                        }
 
                         // Trigger page rendered event.
                         self.wrapper.dispatchEvent(
@@ -517,6 +553,202 @@
                 p.textContent = message;
             }
         }
+    };
+
+    /**
+     * Detect if the PDF contains AcroForm fields.
+     *
+     * @param {Object} pdf - The PDF document object.
+     */
+    Drupal.pdfEmbedSeo.Viewer.prototype.detectAcroForm = function (pdf) {
+        const self = this;
+
+        // Check first page for annotations with form widgets.
+        pdf.getPage(1).then(
+            function (page) {
+                page.getAnnotations().then(
+                    function (annotations) {
+                        const formAnnotations = annotations.filter(
+                            function (a) {
+                                return a.subtype === 'Widget';
+                            }
+                        );
+
+                        if (formAnnotations.length > 0) {
+                            self.hasAcroForm = true;
+                            if (self.formToolbar) {
+                                self.formToolbar.style.display = 'flex';
+                            }
+                            // Re-render current page to show annotation layer.
+                            self.rendering = false;
+                            self.renderPage(self.currentPage);
+                        }
+                    }
+                );
+            }
+        );
+    };
+
+    /**
+     * Render the annotation layer for form fields.
+     *
+     * @param {Object} page - The PDF page object.
+     * @param {Object} viewport - The viewport object.
+     */
+    Drupal.pdfEmbedSeo.Viewer.prototype.renderAnnotationLayer = function (page, viewport) {
+        const self = this;
+
+        // Clear existing annotation layer.
+        self.annotationLayer.innerHTML = '';
+        self.annotationLayer.style.width = viewport.width + 'px';
+        self.annotationLayer.style.height = viewport.height + 'px';
+
+        page.getAnnotations().then(
+            function (annotations) {
+                if (!annotations || annotations.length === 0) {
+                    return;
+                }
+
+                // Check if AnnotationLayer is available in PDF.js.
+                if (typeof pdfjsLib.AnnotationLayer !== 'undefined') {
+                    pdfjsLib.AnnotationLayer.render(
+                        {
+                            viewport: viewport.clone({ dontFlip: true }),
+                            div: self.annotationLayer,
+                            annotations: annotations,
+                            page: page,
+                            renderInteractiveForms: true
+                        }
+                    );
+                } else {
+                    // Fallback: render form fields manually for older PDF.js versions.
+                    self.renderFormFieldsFallback(annotations, viewport);
+                }
+            }
+        );
+    };
+
+    /**
+     * Fallback form field rendering for PDF.js versions without AnnotationLayer.
+     *
+     * @param {Array} annotations - The annotation objects.
+     * @param {Object} viewport - The viewport object.
+     */
+    Drupal.pdfEmbedSeo.Viewer.prototype.renderFormFieldsFallback = function (annotations, viewport) {
+        const self = this;
+
+        annotations.forEach(
+            function (annotation) {
+                if (annotation.subtype !== 'Widget') {
+                    return;
+                }
+
+                const rect = annotation.rect;
+                const left = rect[0] * viewport.scale;
+                const bottom = rect[1] * viewport.scale;
+                const width = (rect[2] - rect[0]) * viewport.scale;
+                const height = (rect[3] - rect[1]) * viewport.scale;
+                const top = viewport.height - bottom - height;
+
+                var element;
+
+                switch (annotation.fieldType) {
+                case 'Tx':
+                    element = document.createElement('input');
+                    element.type = 'text';
+                    element.className = 'pdf-form-field pdf-form-text';
+                    if (annotation.fieldValue) {
+                        element.value = annotation.fieldValue;
+                    }
+                    if (annotation.maxLen) {
+                        element.maxLength = annotation.maxLen;
+                    }
+                    break;
+
+                case 'Btn':
+                    if (annotation.checkBox) {
+                        element = document.createElement('input');
+                        element.type = 'checkbox';
+                        element.className = 'pdf-form-field pdf-form-checkbox';
+                        if (annotation.fieldValue && annotation.fieldValue !== 'Off') {
+                            element.checked = true;
+                        }
+                    } else if (annotation.radioButton) {
+                        element = document.createElement('input');
+                        element.type = 'radio';
+                        element.className = 'pdf-form-field pdf-form-radio';
+                        element.name = annotation.fieldName;
+                        if (annotation.fieldValue && annotation.fieldValue !== 'Off') {
+                            element.checked = true;
+                        }
+                    }
+                    break;
+
+                case 'Ch':
+                    element = document.createElement('select');
+                    element.className = 'pdf-form-field pdf-form-select';
+                    if (annotation.options) {
+                        annotation.options.forEach(
+                            function (opt) {
+                                var option = document.createElement('option');
+                                option.value = opt.exportValue || opt.displayValue;
+                                option.textContent = opt.displayValue;
+                                if (annotation.fieldValue === option.value) {
+                                    option.selected = true;
+                                }
+                                element.appendChild(option);
+                            }
+                        );
+                    }
+                    break;
+                }
+
+                if (element) {
+                    element.style.position = 'absolute';
+                    element.style.left = left + 'px';
+                    element.style.top = top + 'px';
+                    element.style.width = width + 'px';
+                    element.style.height = height + 'px';
+                    element.setAttribute('data-field-name', annotation.fieldName || '');
+                    self.annotationLayer.appendChild(element);
+                }
+            }
+        );
+    };
+
+    /**
+     * Clear all form fields in the annotation layer.
+     */
+    Drupal.pdfEmbedSeo.Viewer.prototype.clearFormFields = function () {
+        if (!this.annotationLayer) {
+            return;
+        }
+
+        var inputs = this.annotationLayer.querySelectorAll('input, select, textarea');
+        inputs.forEach(
+            function (input) {
+                if (input.type === 'checkbox' || input.type === 'radio') {
+                    input.checked = false;
+                } else {
+                    input.value = '';
+                }
+            }
+        );
+    };
+
+    /**
+     * Download the PDF with filled form data.
+     */
+    Drupal.pdfEmbedSeo.Viewer.prototype.downloadFilledPdf = function () {
+        if (!this.options.allowDownload || !this.options.pdfUrl) {
+            return;
+        }
+
+        // Download the original PDF (form data is client-side only).
+        const link = document.createElement('a');
+        link.href = this.options.pdfUrl;
+        link.download = (this.options.documentTitle || 'document') + '-filled.pdf';
+        link.click();
     };
 
 })(Drupal, drupalSettings, once);
