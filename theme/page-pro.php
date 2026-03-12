@@ -1,7 +1,7 @@
 <?php
 /**
  * Template Name: Pro
- * Pro/Pricing page — 4-tier comparison (Free, Pro, Pro+, Enterprise)
+ * Pro/Pricing page - 4-tier comparison (Free, Pro, Pro+, Enterprise)
  *
  * @package PDFViewer
  */
@@ -55,7 +55,7 @@ $lifetime = array(
     'features'    => array(
         'All current and future Pro features',
         'Unlimited site licenses',
-        'Lifetime updates — no renewals, ever',
+        'Lifetime updates - no renewals, ever',
         'Priority support included for life',
     ),
 );
@@ -88,7 +88,7 @@ $faqs = array(
     ),
     array(
         'question' => 'What happens when my license expires?',
-        'answer'   => 'Your Pro features continue working indefinitely—we don\'t disable anything. However, you won\'t receive updates or priority support. You can renew at any time to restore access to updates and support.',
+        'answer'   => 'Your Pro features continue working indefinitely-we don\'t disable anything. However, you won\'t receive updates or priority support. You can renew at any time to restore access to updates and support.',
     ),
     array(
         'question' => 'Do you offer refunds?',
@@ -100,7 +100,7 @@ $faqs = array(
     ),
     array(
         'question' => 'Is the Lifetime license really one-time payment?',
-        'answer'   => 'Yes. The Lifetime Unlimited license ($799 one-time) is a perpetual license for all Pro+ features on unlimited sites. This includes all future feature updates — no recurring fees, ever. The price may increase as the product grows, so current pricing is locked for early buyers.',
+        'answer'   => 'Yes. The Lifetime Unlimited license ($799 one-time) is a perpetual license for all Pro+ features on unlimited sites. This includes all future feature updates - no recurring fees, ever. The price may increase as the product grows, so current pricing is locked for early buyers.',
     ),
     array(
         'question' => 'What payment methods do you accept?',
@@ -122,7 +122,7 @@ $faqs = array(
     ),
     array(
         'question' => 'Do you offer discounts for non-profits or education?',
-        'answer'   => 'Yes — 40% off for registered non-profits and educational institutions. Contact support with proof of status.',
+        'answer'   => 'Yes - 40% off for registered non-profits and educational institutions. Contact support with proof of status.',
     ),
     array(
         'question' => 'Does Pro work with WordPress, Drupal, and React/Next.js?',
@@ -134,7 +134,7 @@ $faqs = array(
     ),
     array(
         'question' => 'Who owns the intellectual property (IP)?',
-        'answer'   => 'All intellectual property rights, including but not limited to the source code, design, documentation, trademarks, and trade secrets of PDF Embed &amp; SEO Optimize remain the exclusive property of <a href="https://drossmedia.de/?ref=pdfviewer" target="_blank" rel="noopener" class="text-primary hover:underline">Dross:Media</a>. This applies to both the Free and Pro versions. Your license grants you the right to use the software — it does not transfer ownership. Any modifications, derivative works, or customizations you create based on our code do not affect <a href="https://drossmedia.de/?ref=pdfviewer" target="_blank" rel="noopener" class="text-primary hover:underline">Dross:Media</a>\'s underlying IP ownership. Redistribution of modified versions must retain original copyright notices and may not misrepresent the origin of the software.',
+        'answer'   => 'All intellectual property rights, including but not limited to the source code, design, documentation, trademarks, and trade secrets of PDF Embed &amp; SEO Optimize remain the exclusive property of <a href="https://drossmedia.de/?ref=pdfviewer" target="_blank" rel="noopener" class="text-primary hover:underline">Dross:Media</a>. This applies to both the Free and Pro versions. Your license grants you the right to use the software - it does not transfer ownership. Any modifications, derivative works, or customizations you create based on our code do not affect <a href="https://drossmedia.de/?ref=pdfviewer" target="_blank" rel="noopener" class="text-primary hover:underline">Dross:Media</a>\'s underlying IP ownership. Redistribution of modified versions must retain original copyright notices and may not misrepresent the origin of the software.',
     ),
 );
 
@@ -183,7 +183,7 @@ $testimonials = array(
     ),
 );
 
-// Comparison data — 4 columns (Free, Pro, Pro+, Enterprise)
+// Comparison data - 4 columns (Free, Pro, Pro+, Enterprise)
 $tier_columns = array(
     array( 'key' => 'free',       'label' => 'Free',       'class' => 'text-foreground' ),
     array( 'key' => 'pro',        'label' => 'Pro',        'class' => 'text-primary' ),
@@ -452,7 +452,7 @@ $comparison_data = array(
             </h1>
 
             <p class="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 animate-fade-in" style="animation-delay: 0.2s">
-                <?php esc_html_e('From personal sites to regulated enterprise environments — choose the plan that fits your scale. All plans include a 30-day money-back guarantee.', 'pdfviewer'); ?>
+                <?php esc_html_e('From personal sites to regulated enterprise environments - choose the plan that fits your scale. All plans include a 30-day money-back guarantee.', 'pdfviewer'); ?>
             </p>
 
             <div class="flex flex-wrap justify-center gap-4 mb-10 animate-fade-in" style="animation-delay: 0.3s">
@@ -501,7 +501,7 @@ $comparison_data = array(
         <!-- Annual Plans Header -->
         <div class="max-w-3xl mx-auto text-center mb-8">
             <h3 class="text-2xl font-bold text-foreground mb-2"><?php esc_html_e('Annual Plans', 'pdfviewer'); ?></h3>
-            <p class="text-muted-foreground"><?php esc_html_e('All premium features — choose your scale', 'pdfviewer'); ?></p>
+            <p class="text-muted-foreground"><?php esc_html_e('All premium features - choose your scale', 'pdfviewer'); ?></p>
         </div>
 
         <!-- Annual Plans -->
@@ -578,7 +578,7 @@ $comparison_data = array(
                 </div>
 
                 <p class="text-xs text-muted-foreground mt-4 text-center italic">
-                    <?php esc_html_e('Limited availability — price subject to change as features grow.', 'pdfviewer'); ?>
+                    <?php esc_html_e('Limited availability - price subject to change as features grow.', 'pdfviewer'); ?>
                 </p>
             </article>
         </div>
@@ -618,8 +618,8 @@ $comparison_data = array(
                 </ul>
 
                 <a href="/enterprise/" class="btn w-full bg-accent hover:bg-accent/90 text-accent-foreground gap-2"
-                   title="<?php esc_attr_e('Request Enterprise quote — plans from $2,500/year', 'pdfviewer'); ?>"
-                   aria-label="<?php esc_attr_e('Request Enterprise quote — plans from $2,500/year', 'pdfviewer'); ?>">
+                   title="<?php esc_attr_e('Request Enterprise quote - plans from $2,500/year', 'pdfviewer'); ?>"
+                   aria-label="<?php esc_attr_e('Request Enterprise quote - plans from $2,500/year', 'pdfviewer'); ?>">
                     <?php esc_html_e('Request Enterprise Quote', 'pdfviewer'); ?>
                     <?php echo pdfviewer_icon('arrow-right', 16); ?>
                 </a>
@@ -712,7 +712,7 @@ $comparison_data = array(
                     <?php echo pdfviewer_icon('shield', 20, 'text-accent'); ?>
                     <h3 class="text-base font-semibold text-foreground"><?php esc_html_e('What is GDPR?', 'pdfviewer'); ?></h3>
                 </div>
-                <p class="text-sm text-muted-foreground leading-relaxed"><?php esc_html_e('The General Data Protection Regulation (GDPR) is a European Union regulation that protects the personal data and privacy of individuals in the EU/EEA. It requires organizations to minimize data collection, provide transparency about data processing, and give individuals control over their personal data — including the right to erasure. Non-compliance can result in fines of up to 4% of annual global revenue.', 'pdfviewer'); ?></p>
+                <p class="text-sm text-muted-foreground leading-relaxed"><?php esc_html_e('The General Data Protection Regulation (GDPR) is a European Union regulation that protects the personal data and privacy of individuals in the EU/EEA. It requires organizations to minimize data collection, provide transparency about data processing, and give individuals control over their personal data - including the right to erasure. Non-compliance can result in fines of up to 4% of annual global revenue.', 'pdfviewer'); ?></p>
                 <p class="text-sm text-muted-foreground leading-relaxed mt-3"><?php esc_html_e('Our GDPR features include IP anonymization (enabled by default), no third-party data transfers, consent management, data retention policies, and full audit logging.', 'pdfviewer'); ?></p>
             </div>
             <div class="p-6 rounded-2xl bg-card border border-border">
@@ -721,7 +721,7 @@ $comparison_data = array(
                     <h3 class="text-base font-semibold text-foreground"><?php esc_html_e('What is HIPAA?', 'pdfviewer'); ?></h3>
                 </div>
                 <p class="text-sm text-muted-foreground leading-relaxed"><?php esc_html_e('The Health Insurance Portability and Accountability Act (HIPAA) is a US federal law that protects sensitive patient health information (PHI). It requires healthcare providers, health plans, and their business associates to implement safeguards for access control, audit trails, data integrity, and transmission security when handling Protected Health Information.', 'pdfviewer'); ?></p>
-                <p class="text-sm text-muted-foreground leading-relaxed mt-3"><?php esc_html_e('Our HIPAA features include role-based access control, two-factor authentication, complete audit logs, secure document URLs, and expiring access links — all designed to help meet HIPAA Security Rule requirements.', 'pdfviewer'); ?></p>
+                <p class="text-sm text-muted-foreground leading-relaxed mt-3"><?php esc_html_e('Our HIPAA features include role-based access control, two-factor authentication, complete audit logs, secure document URLs, and expiring access links - all designed to help meet HIPAA Security Rule requirements.', 'pdfviewer'); ?></p>
             </div>
         </div>
         <p class="max-w-3xl mx-auto mt-6 text-xs text-muted-foreground text-center italic"><?php esc_html_e('PDF Embed & SEO Optimize provides technical controls that support GDPR and HIPAA compliance. Compliance responsibility remains with your organization.', 'pdfviewer'); ?></p>

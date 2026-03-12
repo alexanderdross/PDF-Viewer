@@ -32,7 +32,7 @@ $steps = array(
 $faqs = array(
     array(
         'question' => 'Is this PDF plugin really free?',
-        'answer'   => 'Yes! PDF Embed & SEO Optimize is completely free and open source for both WordPress and Drupal. You get all features—Mozilla PDF.js viewer, full SEO optimization, JSON-LD schema, social sharing cards, and view statistics—at no cost.',
+        'answer'   => 'Yes! PDF Embed & SEO Optimize is completely free and open source for both WordPress and Drupal. You get all features-Mozilla PDF.js viewer, full SEO optimization, JSON-LD schema, social sharing cards, and view statistics-at no cost.',
     ),
     array(
         'question' => 'Is the plugin available for both WordPress and Drupal?',
@@ -206,7 +206,7 @@ $faqs = array(
                     <?php echo pdfviewer_icon('external-link', 20, 'text-destructive'); ?>
                 </div>
                 <h3 class="text-lg font-semibold mb-2"><?php esc_html_e('No Social Sharing Preview', 'pdfviewer'); ?></h3>
-                <p class="text-sm text-muted-foreground"><?php esc_html_e('When someone shares your PDF link on social media, it shows nothing—no image, no description, no engagement.', 'pdfviewer'); ?></p>
+                <p class="text-sm text-muted-foreground"><?php esc_html_e('When someone shares your PDF link on social media, it shows nothing-no image, no description, no engagement.', 'pdfviewer'); ?></p>
             </li>
             <li class="relative p-6 rounded-2xl bg-background border border-destructive/20 shadow-soft animate-fade-in" style="animation-delay: 0.3s">
                 <div class="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center mb-4">
@@ -571,7 +571,7 @@ $faqs = array(
         </div>
 
         <p class="text-center text-muted-foreground mt-12 max-w-2xl mx-auto">
-            <?php esc_html_e('With GEO optimization, your valuable PDF content stays at the forefront of information discovery—even as AI technologies continue to advance.', 'pdfviewer'); ?>
+            <?php esc_html_e('With GEO optimization, your valuable PDF content stays at the forefront of information discovery-even as AI technologies continue to advance.', 'pdfviewer'); ?>
         </p>
     </div>
 </section>

@@ -17,26 +17,26 @@ $trust_badges = array(
 );
 
 $pain_points = array(
-    array('challenge' => 'Regulatory Compliance', 'problem' => 'No audit trail, no access logs — fails GxP/GDPR audits', 'solution' => 'Full access audit logs, expiring links, user-level tracking'),
+    array('challenge' => 'Regulatory Compliance', 'problem' => 'No audit trail, no access logs - fails GxP/GDPR audits', 'solution' => 'Full access audit logs, expiring links, user-level tracking'),
     array('challenge' => 'Security & Access', 'problem' => 'PDFs exposed via direct URLs, no authentication layer', 'solution' => 'Secure URLs, password protection, login requirements, CSRF protection'),
-    array('challenge' => 'IT Integration', 'problem' => 'No API, no SSO, no role management — shadow IT results', 'solution' => 'Full REST API, role-based access, integrates with your existing IAM'),
+    array('challenge' => 'IT Integration', 'problem' => 'No API, no SSO, no role management - shadow IT results', 'solution' => 'Full REST API, role-based access, integrates with your existing IAM'),
     array('challenge' => 'Scalability', 'problem' => 'Breaks under bulk imports or multi-site setups', 'solution' => 'Bulk CSV/ZIP import, unlimited sites, white-label deployment'),
-    array('challenge' => 'Vendor Accountability', 'problem' => 'No SLA, no support contract — unacceptable for regulated environments', 'solution' => 'Dedicated SLA, named account manager, priority escalation path'),
+    array('challenge' => 'Vendor Accountability', 'problem' => 'No SLA, no support contract - unacceptable for regulated environments', 'solution' => 'Dedicated SLA, named account manager, priority escalation path'),
 );
 
 $compliance_features = array(
     array('icon' => 'file-text', 'title' => 'Audit-Ready Access Logs', 'description' => 'Every document view, download, and access attempt is logged with user identity, timestamp, and IP. Exportable in CSV/JSON for audit submissions and internal reviews.'),
     array('icon' => 'shield', 'title' => 'Role-Based Access Control (RBAC)', 'description' => 'Restrict document visibility and download permissions by user role or group. Prevent unauthorized access to confidential clinical, regulatory, or commercial materials.'),
-    array('icon' => 'clock', 'title' => 'Expiring Access Links', 'description' => 'Generate time-limited, single-use document links for external reviewers, auditors, or partners. Links expire automatically — no manual revocation needed.'),
+    array('icon' => 'clock', 'title' => 'Expiring Access Links', 'description' => 'Generate time-limited, single-use document links for external reviewers, auditors, or partners. Links expire automatically - no manual revocation needed.'),
     array('icon' => 'key', 'title' => 'SSO-Ready Architecture', 'description' => 'The REST API and role structure are designed to integrate with your existing Identity Provider (Azure AD, Okta, SAML 2.0). Custom integration scoping available for Enterprise customers.'),
     array('icon' => 'lock', 'title' => 'GDPR-Compliant by Design', 'description' => 'No third-party CDN dependencies for document delivery. Documents never leave your infrastructure. Full data processing transparency for DPA requirements.'),
     array('icon' => 'server', 'title' => 'Validated Deployment Support', 'description' => 'Enterprise customers receive deployment documentation, a configuration checklist, and optional validation support for regulated environments requiring IQ/OQ-style change documentation.'),
 );
 
 $use_cases = array(
-    array('icon' => 'flask-conical', 'title' => 'Pharmaceutical & Life Sciences', 'description' => 'Securely manage regulatory submissions, SOPs, clinical study reports, and medical information documents. Control who can view, download, or share sensitive materials — with a full audit trail.', 'docs' => 'SOPs, CSRs, SmPC drafts, regulatory dossiers, training materials'),
+    array('icon' => 'flask-conical', 'title' => 'Pharmaceutical & Life Sciences', 'description' => 'Securely manage regulatory submissions, SOPs, clinical study reports, and medical information documents. Control who can view, download, or share sensitive materials - with a full audit trail.', 'docs' => 'SOPs, CSRs, SmPC drafts, regulatory dossiers, training materials'),
     array('icon' => 'scale', 'title' => 'Legal & Compliance Teams', 'description' => 'Publish internal policies, contracts, and compliance documentation with enforced access controls. Generate expiring links for external counsel or auditors without exposing direct file URLs.', 'docs' => 'Policies, NDAs, audit reports, regulatory guidance documents'),
-    array('icon' => 'landmark', 'title' => 'Finance & Corporate', 'description' => 'Distribute investor materials, annual reports, and internal financial documents with controlled access. Track who opened what and when — critical for disclosure documentation.', 'docs' => 'Annual reports, investor decks, board materials, financial statements'),
+    array('icon' => 'landmark', 'title' => 'Finance & Corporate', 'description' => 'Distribute investor materials, annual reports, and internal financial documents with controlled access. Track who opened what and when - critical for disclosure documentation.', 'docs' => 'Annual reports, investor decks, board materials, financial statements'),
     array('icon' => 'graduation-cap', 'title' => 'Training & Knowledge Management', 'description' => 'Manage large libraries of training materials, e-learnings, and product documentation. Resume reading, progress tracking, and categorization keep learners engaged and organized.', 'docs' => 'Training modules, product manuals, onboarding materials'),
 );
 
@@ -90,7 +90,7 @@ $faqs = array(
             </h1>
 
             <p class="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8 animate-fade-in" style="animation-delay: 0.2s">
-                <?php esc_html_e('Secure, auditable, and compliance-ready PDF delivery for Pharmaceutical, Life Sciences, and Healthcare organizations. GDPR-compliant, audit-trail enabled, and IT-team friendly — on WordPress, Drupal, and React.', 'pdfviewer'); ?>
+                <?php esc_html_e('Secure, auditable, and compliance-ready PDF delivery for Pharmaceutical, Life Sciences, and Healthcare organizations. GDPR-compliant, audit-trail enabled, and IT-team friendly - on WordPress, Drupal, and React.', 'pdfviewer'); ?>
             </p>
 
             <div class="flex flex-wrap justify-center gap-3 mb-10 animate-fade-in" style="animation-delay: 0.3s">
@@ -107,7 +107,7 @@ $faqs = array(
                    target="_blank" rel="noopener"
                    class="btn btn-lg bg-accent hover:bg-accent/90 text-accent-foreground shadow-glow gap-2"
                    title="<?php esc_attr_e('Request a personalized Enterprise demo and consultation', 'pdfviewer'); ?>"
-                   aria-label="<?php esc_attr_e('Request Enterprise demo — schedule a consultation with our team', 'pdfviewer'); ?>">
+                   aria-label="<?php esc_attr_e('Request Enterprise demo - schedule a consultation with our team', 'pdfviewer'); ?>">
                     <?php esc_html_e('Request Enterprise Demo', 'pdfviewer'); ?>
                     <?php echo pdfviewer_icon('arrow-right', 20); ?>
                 </a>
@@ -198,19 +198,19 @@ $faqs = array(
                 <ul class="space-y-2 mb-4">
                     <li class="flex items-start gap-2 text-sm">
                         <?php echo pdfviewer_icon('check', 16, 'text-accent shrink-0 mt-0.5'); ?>
-                        <span class="text-muted-foreground"><strong class="text-foreground"><?php esc_html_e('Data Minimization', 'pdfviewer'); ?></strong> — <?php esc_html_e('Collect only the personal data that is strictly necessary', 'pdfviewer'); ?></span>
+                        <span class="text-muted-foreground"><strong class="text-foreground"><?php esc_html_e('Data Minimization', 'pdfviewer'); ?></strong> - <?php esc_html_e('Collect only the personal data that is strictly necessary', 'pdfviewer'); ?></span>
                     </li>
                     <li class="flex items-start gap-2 text-sm">
                         <?php echo pdfviewer_icon('check', 16, 'text-accent shrink-0 mt-0.5'); ?>
-                        <span class="text-muted-foreground"><strong class="text-foreground"><?php esc_html_e('Right to Erasure', 'pdfviewer'); ?></strong> — <?php esc_html_e('Individuals can request deletion of their personal data', 'pdfviewer'); ?></span>
+                        <span class="text-muted-foreground"><strong class="text-foreground"><?php esc_html_e('Right to Erasure', 'pdfviewer'); ?></strong> - <?php esc_html_e('Individuals can request deletion of their personal data', 'pdfviewer'); ?></span>
                     </li>
                     <li class="flex items-start gap-2 text-sm">
                         <?php echo pdfviewer_icon('check', 16, 'text-accent shrink-0 mt-0.5'); ?>
-                        <span class="text-muted-foreground"><strong class="text-foreground"><?php esc_html_e('Transparency', 'pdfviewer'); ?></strong> — <?php esc_html_e('Clear information about what data is collected and why', 'pdfviewer'); ?></span>
+                        <span class="text-muted-foreground"><strong class="text-foreground"><?php esc_html_e('Transparency', 'pdfviewer'); ?></strong> - <?php esc_html_e('Clear information about what data is collected and why', 'pdfviewer'); ?></span>
                     </li>
                     <li class="flex items-start gap-2 text-sm">
                         <?php echo pdfviewer_icon('check', 16, 'text-accent shrink-0 mt-0.5'); ?>
-                        <span class="text-muted-foreground"><strong class="text-foreground"><?php esc_html_e('Accountability', 'pdfviewer'); ?></strong> — <?php esc_html_e('Organizations must demonstrate compliance through documentation', 'pdfviewer'); ?></span>
+                        <span class="text-muted-foreground"><strong class="text-foreground"><?php esc_html_e('Accountability', 'pdfviewer'); ?></strong> - <?php esc_html_e('Organizations must demonstrate compliance through documentation', 'pdfviewer'); ?></span>
                     </li>
                 </ul>
                 <h4 class="text-sm font-semibold text-foreground mb-3"><?php esc_html_e('How We Support GDPR:', 'pdfviewer'); ?></h4>
@@ -221,7 +221,7 @@ $faqs = array(
                     </li>
                     <li class="flex items-start gap-2 text-sm">
                         <?php echo pdfviewer_icon('check', 16, 'text-primary shrink-0 mt-0.5'); ?>
-                        <span class="text-muted-foreground"><?php esc_html_e('No third-party CDN or external server dependencies — documents never leave your infrastructure', 'pdfviewer'); ?></span>
+                        <span class="text-muted-foreground"><?php esc_html_e('No third-party CDN or external server dependencies - documents never leave your infrastructure', 'pdfviewer'); ?></span>
                     </li>
                     <li class="flex items-start gap-2 text-sm">
                         <?php echo pdfviewer_icon('check', 16, 'text-primary shrink-0 mt-0.5'); ?>
@@ -253,19 +253,19 @@ $faqs = array(
                 <ul class="space-y-2 mb-4">
                     <li class="flex items-start gap-2 text-sm">
                         <?php echo pdfviewer_icon('check', 16, 'text-accent shrink-0 mt-0.5'); ?>
-                        <span class="text-muted-foreground"><strong class="text-foreground"><?php esc_html_e('Access Controls', 'pdfviewer'); ?></strong> — <?php esc_html_e('Only authorized individuals may access PHI', 'pdfviewer'); ?></span>
+                        <span class="text-muted-foreground"><strong class="text-foreground"><?php esc_html_e('Access Controls', 'pdfviewer'); ?></strong> - <?php esc_html_e('Only authorized individuals may access PHI', 'pdfviewer'); ?></span>
                     </li>
                     <li class="flex items-start gap-2 text-sm">
                         <?php echo pdfviewer_icon('check', 16, 'text-accent shrink-0 mt-0.5'); ?>
-                        <span class="text-muted-foreground"><strong class="text-foreground"><?php esc_html_e('Audit Trail', 'pdfviewer'); ?></strong> — <?php esc_html_e('All access to PHI must be logged and auditable', 'pdfviewer'); ?></span>
+                        <span class="text-muted-foreground"><strong class="text-foreground"><?php esc_html_e('Audit Trail', 'pdfviewer'); ?></strong> - <?php esc_html_e('All access to PHI must be logged and auditable', 'pdfviewer'); ?></span>
                     </li>
                     <li class="flex items-start gap-2 text-sm">
                         <?php echo pdfviewer_icon('check', 16, 'text-accent shrink-0 mt-0.5'); ?>
-                        <span class="text-muted-foreground"><strong class="text-foreground"><?php esc_html_e('Data Integrity', 'pdfviewer'); ?></strong> — <?php esc_html_e('PHI must be protected from unauthorized alteration or destruction', 'pdfviewer'); ?></span>
+                        <span class="text-muted-foreground"><strong class="text-foreground"><?php esc_html_e('Data Integrity', 'pdfviewer'); ?></strong> - <?php esc_html_e('PHI must be protected from unauthorized alteration or destruction', 'pdfviewer'); ?></span>
                     </li>
                     <li class="flex items-start gap-2 text-sm">
                         <?php echo pdfviewer_icon('check', 16, 'text-accent shrink-0 mt-0.5'); ?>
-                        <span class="text-muted-foreground"><strong class="text-foreground"><?php esc_html_e('Transmission Security', 'pdfviewer'); ?></strong> — <?php esc_html_e('PHI must be encrypted when transmitted electronically', 'pdfviewer'); ?></span>
+                        <span class="text-muted-foreground"><strong class="text-foreground"><?php esc_html_e('Transmission Security', 'pdfviewer'); ?></strong> - <?php esc_html_e('PHI must be encrypted when transmitted electronically', 'pdfviewer'); ?></span>
                     </li>
                 </ul>
                 <h4 class="text-sm font-semibold text-foreground mb-3"><?php esc_html_e('How We Support HIPAA:', 'pdfviewer'); ?></h4>
@@ -284,7 +284,7 @@ $faqs = array(
                     </li>
                     <li class="flex items-start gap-2 text-sm">
                         <?php echo pdfviewer_icon('check', 16, 'text-primary shrink-0 mt-0.5'); ?>
-                        <span class="text-muted-foreground"><?php esc_html_e('Secure PDF URLs — no direct file links exposed; documents served via authenticated endpoints', 'pdfviewer'); ?></span>
+                        <span class="text-muted-foreground"><?php esc_html_e('Secure PDF URLs - no direct file links exposed; documents served via authenticated endpoints', 'pdfviewer'); ?></span>
                     </li>
                     <li class="flex items-start gap-2 text-sm">
                         <?php echo pdfviewer_icon('check', 16, 'text-primary shrink-0 mt-0.5'); ?>
@@ -293,7 +293,7 @@ $faqs = array(
                 </ul>
             </article>
         </div>
-        <p class="max-w-3xl mx-auto mt-8 text-xs text-muted-foreground text-center italic"><?php esc_html_e('PDF Embed & SEO Optimize provides technical controls that support GDPR and HIPAA compliance. The software itself does not certify compliance — organizations are responsible for implementing appropriate policies and procedures alongside the technical measures provided.', 'pdfviewer'); ?></p>
+        <p class="max-w-3xl mx-auto mt-8 text-xs text-muted-foreground text-center italic"><?php esc_html_e('PDF Embed & SEO Optimize provides technical controls that support GDPR and HIPAA compliance. The software itself does not certify compliance - organizations are responsible for implementing appropriate policies and procedures alongside the technical measures provided.', 'pdfviewer'); ?></p>
     </div>
 </section>
 
@@ -324,7 +324,7 @@ $faqs = array(
 <section id="enterprise-pricing" class="py-20 lg:py-32 bg-background" aria-labelledby="ent-pricing-heading">
     <div class="container mx-auto px-4 lg:px-8">
         <header class="max-w-3xl mx-auto text-center mb-4">
-            <h2 id="ent-pricing-heading" class="text-3xl md:text-4xl font-bold mb-6"><?php esc_html_e('Enterprise Plans — Built Around Your Scale', 'pdfviewer'); ?></h2>
+            <h2 id="ent-pricing-heading" class="text-3xl md:text-4xl font-bold mb-6"><?php esc_html_e('Enterprise Plans - Built Around Your Scale', 'pdfviewer'); ?></h2>
             <p class="text-lg text-muted-foreground"><?php esc_html_e('All Enterprise plans include all Agency features, lifetime updates, and dedicated support. Pricing is annual unless otherwise agreed.', 'pdfviewer'); ?></p>
         </header>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto mt-12">
@@ -347,7 +347,7 @@ $faqs = array(
                     <?php
                     $cta_text = $plan['name'] === 'Enterprise Corporate' ? 'Schedule a Discovery Call' : 'Request a Quote';
                     $cta_title = $cta_text . ' for the ' . $plan['name'] . ' plan';
-                    $cta_label = $cta_text . ' — ' . $plan['name'] . ' (' . $plan['price'] . ')';
+                    $cta_label = $cta_text . ' - ' . $plan['name'] . ' (' . $plan['price'] . ')';
                     ?>
                     <a href="https://dross.net/contact/?topic=pdfviewer"
                        target="_blank" rel="noopener"
@@ -379,12 +379,12 @@ $faqs = array(
             <div class="text-center"><div class="text-3xl font-bold text-foreground">3 Platforms</div><div class="text-sm text-muted-foreground"><?php esc_html_e('WordPress, Drupal & React', 'pdfviewer'); ?></div></div>
             <div class="text-center"><div class="text-3xl font-bold text-foreground">GDPR</div><div class="text-sm text-muted-foreground"><?php esc_html_e('Compliant Infrastructure', 'pdfviewer'); ?></div></div>
             <div class="text-center"><div class="text-3xl font-bold text-foreground">30-day</div><div class="text-sm text-muted-foreground"><?php esc_html_e('Money-Back Guarantee', 'pdfviewer'); ?></div></div>
-            <a href="https://www.acquia.com?ref=pdfviewer" target="_blank" rel="noopener" class="text-center hover:opacity-80 transition-opacity" title="<?php esc_attr_e('Visit Acquia — the leading Drupal enterprise platform', 'pdfviewer'); ?>"><div class="text-3xl font-bold text-foreground">Acquia</div><div class="text-sm text-muted-foreground"><?php esc_html_e('Reviewed Drupal Module', 'pdfviewer'); ?></div></a>
+            <a href="https://www.acquia.com?ref=pdfviewer" target="_blank" rel="noopener" class="text-center hover:opacity-80 transition-opacity" title="<?php esc_attr_e('Visit Acquia - the leading Drupal enterprise platform', 'pdfviewer'); ?>"><div class="text-3xl font-bold text-foreground">Acquia</div><div class="text-sm text-muted-foreground"><?php esc_html_e('Reviewed Drupal Module', 'pdfviewer'); ?></div></a>
         </div>
         <div class="max-w-3xl mx-auto">
             <blockquote class="p-6 rounded-2xl bg-background border border-border">
                 <p class="text-muted-foreground italic mb-3">"<?php esc_html_e('We needed a PDF solution that fit our compliance requirements without a six-figure budget. This delivered.', 'pdfviewer'); ?>"</p>
-                <cite class="text-sm font-medium text-foreground not-italic">— <?php esc_html_e('IT Lead, European Pharmaceutical Company', 'pdfviewer'); ?></cite>
+                <cite class="text-sm font-medium text-foreground not-italic">- <?php esc_html_e('IT Lead, European Pharmaceutical Company', 'pdfviewer'); ?></cite>
             </blockquote>
         </div>
     </div>
@@ -461,7 +461,7 @@ $faqs = array(
             <p class="text-lg text-muted-foreground mb-10">
                 <?php esc_html_e('Every enterprise deployment is different. Get in touch and a member of our team will reach out within one business day to understand your use case, answer compliance questions, and put together a tailored proposal.', 'pdfviewer'); ?>
             </p>
-            <a href="https://dross.net/contact/?topic=pdfviewer" target="_blank" rel="noopener" title="<?php esc_attr_e('Contact us for Enterprise consultation', 'pdfviewer'); ?>" aria-label="<?php esc_attr_e('Contact us — discuss your Enterprise PDF management requirements', 'pdfviewer'); ?>" class="btn btn-lg bg-accent hover:bg-accent/90 text-accent-foreground gap-2 inline-flex">
+            <a href="https://dross.net/contact/?topic=pdfviewer" target="_blank" rel="noopener" title="<?php esc_attr_e('Contact us for Enterprise consultation', 'pdfviewer'); ?>" aria-label="<?php esc_attr_e('Contact us - discuss your Enterprise PDF management requirements', 'pdfviewer'); ?>" class="btn btn-lg bg-accent hover:bg-accent/90 text-accent-foreground gap-2 inline-flex">
                 <?php esc_html_e('Contact Us', 'pdfviewer'); ?>
                 <?php echo pdfviewer_icon('arrow-right', 20); ?>
             </a>

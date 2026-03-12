@@ -472,7 +472,7 @@
             rootMargin: '0px 0px -50px 0px'
         });
 
-        // No per-element style writes needed — CSS handles the paused state
+        // No per-element style writes needed - CSS handles the paused state
         animatedElements.forEach(function(el) {
             observer.observe(el);
         });

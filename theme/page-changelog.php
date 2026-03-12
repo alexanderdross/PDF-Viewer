@@ -16,7 +16,7 @@ $changelog_wordpress = array(
         'type'    => 'both',
         'title'   => 'AcroForms Annotation Layer Fix',
         'changes' => array(
-            array('type' => 'fixed', 'description' => 'AcroForms form toolbar not appearing on PDFs with fillable form fields — added PDF.js AnnotationLayer rendering over canvas'),
+            array('type' => 'fixed', 'description' => 'AcroForms form toolbar not appearing on PDFs with fillable form fields - added PDF.js AnnotationLayer rendering over canvas'),
             array('type' => 'fixed', 'description' => 'Form fields (text inputs, checkboxes, radio buttons, dropdowns) now render interactively on top of the PDF page'),
             array('type' => 'added', 'description' => 'Fallback form field rendering for environments without full PDF.js AnnotationLayer support'),
             array('type' => 'added', 'description' => 'GDPR & HIPAA compliance information added to marketing website (Enterprise, Pro, and platform pages)'),
@@ -199,7 +199,7 @@ $changelog_wordpress = array(
         'version' => '1.2.0',
         'date'    => 'January 25, 2025',
         'type'    => 'both',
-        'title'   => 'Premium Features Release — Pro & Pro+ Tiers',
+        'title'   => 'Premium Features Release - Pro & Pro+ Tiers',
         'changes' => array(
             array('type' => 'added', 'description' => 'Three Pro tiers: Pro 1 Site (€49/yr), Pro 5 Sites (€99/yr), Pro Unlimited (€199/yr)'),
             array('type' => 'added', 'description' => 'Pro Lifetime plan (€399 one-time) with all Pro features on unlimited sites'),
@@ -257,7 +257,7 @@ $changelog_drupal = array(
         'type'    => 'both',
         'title'   => 'AcroForms Annotation Layer Fix',
         'changes' => array(
-            array('type' => 'fixed', 'description' => 'AcroForms form toolbar not appearing on PDFs with fillable form fields — added PDF.js AnnotationLayer rendering over canvas'),
+            array('type' => 'fixed', 'description' => 'AcroForms form toolbar not appearing on PDFs with fillable form fields - added PDF.js AnnotationLayer rendering over canvas'),
             array('type' => 'fixed', 'description' => 'Form fields (text inputs, checkboxes, radio buttons, dropdowns) now render interactively on top of the PDF page'),
             array('type' => 'added', 'description' => 'Fallback form field rendering for environments without full PDF.js AnnotationLayer support'),
             array('type' => 'added', 'description' => 'GDPR & HIPAA compliance information added to marketing website (Enterprise, Pro, and platform pages)'),
@@ -301,10 +301,10 @@ $changelog_drupal = array(
         'type'    => 'both',
         'title'   => 'Code Quality & Static Analysis Compliance',
         'changes' => array(
-            array('type' => 'improved', 'description' => 'PHPStan level 5 compliance — Resolved 526 static analysis errors across all module tiers'),
-            array('type' => 'improved', 'description' => 'PHPCS Drupal standards compliance — Fixed 20,000+ coding standard violations'),
+            array('type' => 'improved', 'description' => 'PHPStan level 5 compliance - Resolved 526 static analysis errors across all module tiers'),
+            array('type' => 'improved', 'description' => 'PHPCS Drupal standards compliance - Fixed 20,000+ coding standard violations'),
             array('type' => 'changed', 'description' => 'Replaced all \\Drupal:: static calls in service classes with proper constructor dependency injection (40+ files)'),
-            array('type' => 'fixed', 'description' => 'Entity type narrowing — Added instanceof PdfDocumentInterface checks across 15+ files'),
+            array('type' => 'fixed', 'description' => 'Entity type narrowing - Added instanceof PdfDocumentInterface checks across 15+ files'),
             array('type' => 'fixed', 'description' => 'Secured unserialize() call with allowed_classes restriction in premium install file'),
             array('type' => 'changed', 'description' => 'Version bump to 1.2.13'),
         ),
@@ -482,7 +482,7 @@ $changelog_drupal = array(
         'version' => '1.2.0',
         'date'    => 'January 25, 2025',
         'type'    => 'both',
-        'title'   => 'REST API & Premium Submodule — Pro & Pro+ Tiers',
+        'title'   => 'REST API & Premium Submodule - Pro & Pro+ Tiers',
         'changes' => array(
             array('type' => 'added', 'description' => 'Three Pro tiers: Pro 1 Site (€49/yr), Pro 5 Sites (€99/yr), Pro Unlimited (€199/yr)'),
             array('type' => 'added', 'description' => 'Complete REST API - GET /documents, GET /documents/{id}, GET /documents/{id}/data'),
@@ -619,7 +619,7 @@ $changelog_react = array(
         'version' => '1.2.0',
         'date'    => 'January 25, 2025',
         'type'    => 'both',
-        'title'   => 'Initial React/Next.js Package Release — Pro & Pro+ Tiers',
+        'title'   => 'Initial React/Next.js Package Release - Pro & Pro+ Tiers',
         'changes' => array(
             array('type' => 'added', 'description' => 'Three Pro tiers: Pro 1 Site (€49/yr), Pro 5 Sites (€99/yr), Pro Unlimited (€199/yr)'),
             array('type' => 'added', 'description' => '@pdf-embed-seo/core - TypeScript types, API client, PDF.js integration, Schema.org generators'),

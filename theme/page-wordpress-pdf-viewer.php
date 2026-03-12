@@ -32,7 +32,7 @@ $embed_methods = array(
     array(
         'icon'        => 'file-text',
         'title'       => 'Shortcode',
-        'description' => 'Use a simple shortcode anywhere on your WordPress site—posts, pages, widgets, or theme files.',
+        'description' => 'Use a simple shortcode anywhere on your WordPress site-posts, pages, widgets, or theme files.',
         'code'        => '[pdf_viewer id="123"]',
     ),
     array(
@@ -97,7 +97,7 @@ $viewer_features = array(
                 <?php esc_html_e('The Best', 'pdfviewer'); ?> <span class="text-gradient"><?php esc_html_e('WordPress PDF Viewer', 'pdfviewer'); ?></span> <?php esc_html_e('& Embed Plugin', 'pdfviewer'); ?>
             </h1>
             <p class="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-10">
-                <?php esc_html_e('Embed and display PDFs beautifully on any device. SEO-optimized with clean URLs, Gutenberg blocks, shortcodes, and view analytics—all for free.', 'pdfviewer'); ?>
+                <?php esc_html_e('Embed and display PDFs beautifully on any device. SEO-optimized with clean URLs, Gutenberg blocks, shortcodes, and view analytics-all for free.', 'pdfviewer'); ?>
             </p>
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <a href="#download-wordpress"
@@ -131,7 +131,7 @@ $viewer_features = array(
                         </li>
                         <li class="flex items-start gap-2">
                             <span class="text-destructive mt-1 shrink-0">&#x2717;</span>
-                            <span><?php esc_html_e('No SEO value—PDFs are invisible to Google', 'pdfviewer'); ?></span>
+                            <span><?php esc_html_e('No SEO value-PDFs are invisible to Google', 'pdfviewer'); ?></span>
                         </li>
                         <li class="flex items-start gap-2">
                             <span class="text-destructive mt-1 shrink-0">&#x2717;</span>
@@ -281,7 +281,7 @@ $viewer_features = array(
                     <?php esc_html_e('Built on Mozilla\'s PDF.js (v4.0)', 'pdfviewer'); ?>
                 </h2>
                 <p class="text-lg text-muted-foreground max-w-2xl mx-auto">
-                    <?php esc_html_e('The same technology that powers Firefox\'s PDF viewer—trusted by millions worldwide. Consistent, reliable rendering on every browser and device.', 'pdfviewer'); ?>
+                    <?php esc_html_e('The same technology that powers Firefox\'s PDF viewer-trusted by millions worldwide. Consistent, reliable rendering on every browser and device.', 'pdfviewer'); ?>
                 </p>
             </div>
             <div class="grid md:grid-cols-3 gap-6">

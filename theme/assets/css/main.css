@@ -1911,7 +1911,7 @@ li:not(:has(*)):not(:has(code)) {
   color: #92400e;
 }
 
-/* Turnstile: CF7 auto-injects it — position next to submit button */
+/* Turnstile: CF7 auto-injects it - position next to submit button */
 .cf7-contact-wrapper .wpcf7-form > .cf-turnstile,
 .cf7-contact-wrapper .wpcf7-form > [data-turnstile-widget],
 .cf7-contact-wrapper .wpcf7-form > p > .cf-turnstile {
