@@ -8,6 +8,23 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.2.16/1.2.13] - 2026-03-12 (WordPress & Drupal)
+
+### Fixed
+- **AcroForms Form Toolbar** — Form toolbar not appearing on PDFs with fillable form fields; added PDF.js AnnotationLayer rendering over canvas
+- **Interactive Form Fields** — Text inputs, checkboxes, radio buttons, and dropdowns now render interactively on top of the PDF page
+
+### Added
+- **Fallback Form Field Rendering** — Manual DOM-based form field rendering for environments without full PDF.js AnnotationLayer support
+- **GDPR & HIPAA Compliance Info** — Added compliance explanations to marketing website (Enterprise, Pro, and platform pages)
+
+### Changed
+- WordPress: 1.2.13 (Free/Premium)
+- Drupal: 1.2.16 (Free/Premium)
+- Theme: 2.2.97
+
+---
+
 ## [1.2.15/1.2.12/1.2.12] - 2026-03-11 (All Platforms)
 
 ### Added

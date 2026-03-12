@@ -850,6 +850,157 @@ document.addEventListener('zoomChanged', (e) => {
 
             </div>
 
+            <!-- PDF AcroForms / Form Toolbar -->
+            <div class="animate-fade-in pt-16" style="animation-delay: 0.35s">
+                <div class="flex items-start gap-4 mb-6">
+                    <div class="w-12 h-12 rounded-xl gradient-hero flex items-center justify-center shrink-0">
+                        <?php echo pdfviewer_icon('file-text', 24, 'text-primary-foreground'); ?>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold mb-2"><?php esc_html_e('PDF AcroForms (Fillable Forms)', 'pdfviewer'); ?></h2>
+                        <p class="text-muted-foreground"><?php esc_html_e('Interactive form fields in your PDF viewer', 'pdfviewer'); ?></p>
+                    </div>
+                </div>
+
+                <!-- What are AcroForms -->
+                <div class="bg-card rounded-2xl border border-border p-6 mb-6">
+                    <h3 class="font-semibold text-foreground mb-3"><?php esc_html_e('What are AcroForms?', 'pdfviewer'); ?></h3>
+                    <p class="text-sm text-muted-foreground mb-4">
+                        <?php esc_html_e('AcroForms are interactive form fields embedded in PDF documents. When a PDF contains fillable fields (text inputs, checkboxes, radio buttons, dropdowns), the viewer automatically detects them and displays an interactive form toolbar.', 'pdfviewer'); ?>
+                    </p>
+                    <p class="text-sm text-muted-foreground">
+                        <?php esc_html_e('This feature works with any PDF that contains standard AcroForm fields — no additional configuration is required. Simply upload your fillable PDF and the form toolbar appears automatically.', 'pdfviewer'); ?>
+                    </p>
+                </div>
+
+                <!-- How It Works -->
+                <div class="bg-primary/5 rounded-2xl border border-primary/20 p-6 mb-6">
+                    <h3 class="font-semibold text-foreground mb-4"><?php esc_html_e('How It Works', 'pdfviewer'); ?></h3>
+                    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="flex items-start gap-3">
+                            <span class="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold shrink-0">1</span>
+                            <div>
+                                <p class="text-sm font-medium text-foreground"><?php esc_html_e('Upload PDF', 'pdfviewer'); ?></p>
+                                <p class="text-xs text-muted-foreground"><?php esc_html_e('Upload a PDF with AcroForm fields', 'pdfviewer'); ?></p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold shrink-0">2</span>
+                            <div>
+                                <p class="text-sm font-medium text-foreground"><?php esc_html_e('Auto-Detection', 'pdfviewer'); ?></p>
+                                <p class="text-xs text-muted-foreground"><?php esc_html_e('Viewer detects form fields automatically', 'pdfviewer'); ?></p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold shrink-0">3</span>
+                            <div>
+                                <p class="text-sm font-medium text-foreground"><?php esc_html_e('Fill Fields', 'pdfviewer'); ?></p>
+                                <p class="text-xs text-muted-foreground"><?php esc_html_e('Users fill in text, checkboxes, and dropdowns', 'pdfviewer'); ?></p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold shrink-0">4</span>
+                            <div>
+                                <p class="text-sm font-medium text-foreground"><?php esc_html_e('Download / Print', 'pdfviewer'); ?></p>
+                                <p class="text-xs text-muted-foreground"><?php esc_html_e('Download or print the filled PDF', 'pdfviewer'); ?></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Toolbar Features -->
+                <div class="bg-card rounded-2xl border border-border p-6 mb-6">
+                    <h3 class="font-semibold text-foreground mb-4"><?php esc_html_e('Form Toolbar', 'pdfviewer'); ?></h3>
+                    <p class="text-sm text-muted-foreground mb-4">
+                        <?php esc_html_e('When a PDF with form fields is loaded, a blue toolbar appears below the main viewer toolbar with these controls:', 'pdfviewer'); ?>
+                    </p>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="bg-muted">
+                                    <th class="text-left py-2 px-3 font-medium"><?php esc_html_e('Button', 'pdfviewer'); ?></th>
+                                    <th class="text-left py-2 px-3 font-medium"><?php esc_html_e('Description', 'pdfviewer'); ?></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-t border-border">
+                                    <td class="py-2 px-3 font-medium text-foreground"><?php esc_html_e('Form Fields Detected', 'pdfviewer'); ?></td>
+                                    <td class="py-2 px-3 text-muted-foreground"><?php esc_html_e('Label indicating the PDF contains fillable form fields. Toolbar only appears when form fields are found.', 'pdfviewer'); ?></td>
+                                </tr>
+                                <tr class="border-t border-border">
+                                    <td class="py-2 px-3 font-medium text-foreground"><?php esc_html_e('Clear Form', 'pdfviewer'); ?></td>
+                                    <td class="py-2 px-3 text-muted-foreground"><?php esc_html_e('Resets all form fields to their default empty state. Useful when users want to start over.', 'pdfviewer'); ?></td>
+                                </tr>
+                                <tr class="border-t border-border">
+                                    <td class="py-2 px-3 font-medium text-foreground"><?php esc_html_e('Download Filled PDF', 'pdfviewer'); ?></td>
+                                    <td class="py-2 px-3 text-muted-foreground"><?php esc_html_e('Downloads the PDF with all filled-in form data embedded. Only shown when downloads are enabled for the document.', 'pdfviewer'); ?></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Supported Field Types -->
+                <div class="bg-card rounded-2xl border border-border p-6 mb-6">
+                    <h3 class="font-semibold text-foreground mb-4"><?php esc_html_e('Supported Field Types', 'pdfviewer'); ?></h3>
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div class="flex items-start gap-3">
+                            <?php echo pdfviewer_icon('type', 16, 'text-primary mt-0.5'); ?>
+                            <div>
+                                <p class="text-sm font-medium text-foreground"><?php esc_html_e('Text Fields', 'pdfviewer'); ?></p>
+                                <p class="text-xs text-muted-foreground"><?php esc_html_e('Single-line and multi-line text inputs for names, addresses, comments, etc.', 'pdfviewer'); ?></p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <?php echo pdfviewer_icon('check-square', 16, 'text-primary mt-0.5'); ?>
+                            <div>
+                                <p class="text-sm font-medium text-foreground"><?php esc_html_e('Checkboxes', 'pdfviewer'); ?></p>
+                                <p class="text-xs text-muted-foreground"><?php esc_html_e('Toggle checkboxes for yes/no options, agreements, and multi-select choices.', 'pdfviewer'); ?></p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <?php echo pdfviewer_icon('circle', 16, 'text-primary mt-0.5'); ?>
+                            <div>
+                                <p class="text-sm font-medium text-foreground"><?php esc_html_e('Radio Buttons', 'pdfviewer'); ?></p>
+                                <p class="text-xs text-muted-foreground"><?php esc_html_e('Single-select option groups where only one choice can be selected.', 'pdfviewer'); ?></p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <?php echo pdfviewer_icon('chevron-down', 16, 'text-primary mt-0.5'); ?>
+                            <div>
+                                <p class="text-sm font-medium text-foreground"><?php esc_html_e('Dropdown Menus', 'pdfviewer'); ?></p>
+                                <p class="text-xs text-muted-foreground"><?php esc_html_e('Select menus with predefined options for structured data entry.', 'pdfviewer'); ?></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Platform Notes -->
+                <div class="grid sm:grid-cols-3 gap-4">
+                    <div class="bg-card rounded-2xl border border-border p-5">
+                        <div class="flex items-center gap-2 mb-3">
+                            <?php echo pdfviewer_icon('wordpress', 20, 'text-primary'); ?>
+                            <h4 class="font-semibold text-foreground text-sm"><?php esc_html_e('WordPress', 'pdfviewer'); ?></h4>
+                        </div>
+                        <p class="text-xs text-muted-foreground"><?php esc_html_e('AcroForms work automatically with any PDF uploaded via the PDF Documents admin. No shortcode changes needed — forms are detected on page load.', 'pdfviewer'); ?></p>
+                    </div>
+                    <div class="bg-card rounded-2xl border border-border p-5">
+                        <div class="flex items-center gap-2 mb-3">
+                            <?php echo pdfviewer_icon('droplet', 20, 'text-primary'); ?>
+                            <h4 class="font-semibold text-foreground text-sm"><?php esc_html_e('Drupal', 'pdfviewer'); ?></h4>
+                        </div>
+                        <p class="text-xs text-muted-foreground"><?php esc_html_e('Upload a fillable PDF via the PDF Document entity form. The viewer template includes the annotation layer and form toolbar out of the box.', 'pdfviewer'); ?></p>
+                    </div>
+                    <div class="bg-card rounded-2xl border border-border p-5">
+                        <div class="flex items-center gap-2 mb-3">
+                            <?php echo pdfviewer_icon('hexagon', 20, 'text-primary'); ?>
+                            <h4 class="font-semibold text-foreground text-sm"><?php esc_html_e('React / Next.js', 'pdfviewer'); ?></h4>
+                        </div>
+                        <p class="text-xs text-muted-foreground"><?php esc_html_e('The PdfViewer component handles AcroForms automatically. Form fields render as interactive overlays when detected in the loaded PDF.', 'pdfviewer'); ?></p>
+                    </div>
+                </div>
+            </div>
+
             <!-- REST API Reference -->
             <div class="animate-fade-in pt-16" style="animation-delay: 0.4s">
                 <div class="flex items-start gap-4 mb-6">

@@ -11,6 +11,19 @@ get_header();
 // ─── WordPress Changelog ───────────────────────────────────────────────
 $changelog_wordpress = array(
     array(
+        'version' => '1.2.13',
+        'date'    => 'March 12, 2026',
+        'type'    => 'both',
+        'title'   => 'AcroForms Annotation Layer Fix',
+        'changes' => array(
+            array('type' => 'fixed', 'description' => 'AcroForms form toolbar not appearing on PDFs with fillable form fields — added PDF.js AnnotationLayer rendering over canvas'),
+            array('type' => 'fixed', 'description' => 'Form fields (text inputs, checkboxes, radio buttons, dropdowns) now render interactively on top of the PDF page'),
+            array('type' => 'added', 'description' => 'Fallback form field rendering for environments without full PDF.js AnnotationLayer support'),
+            array('type' => 'added', 'description' => 'GDPR & HIPAA compliance information added to marketing website (Enterprise, Pro, and platform pages)'),
+            array('type' => 'changed', 'description' => 'Version bump to 1.2.13 (Free/Premium)'),
+        ),
+    ),
+    array(
         'version' => '1.2.12',
         'date'    => 'March 11, 2026',
         'type'    => 'both',
@@ -238,6 +251,19 @@ $changelog_wordpress = array(
 
 // ─── Drupal Changelog ──────────────────────────────────────────────────
 $changelog_drupal = array(
+    array(
+        'version' => '1.2.16',
+        'date'    => 'March 12, 2026',
+        'type'    => 'both',
+        'title'   => 'AcroForms Annotation Layer Fix',
+        'changes' => array(
+            array('type' => 'fixed', 'description' => 'AcroForms form toolbar not appearing on PDFs with fillable form fields — added PDF.js AnnotationLayer rendering over canvas'),
+            array('type' => 'fixed', 'description' => 'Form fields (text inputs, checkboxes, radio buttons, dropdowns) now render interactively on top of the PDF page'),
+            array('type' => 'added', 'description' => 'Fallback form field rendering for environments without full PDF.js AnnotationLayer support'),
+            array('type' => 'added', 'description' => 'GDPR & HIPAA compliance information added to marketing website (Enterprise, Pro, and platform pages)'),
+            array('type' => 'changed', 'description' => 'Version bump to 1.2.16 (Free/Premium)'),
+        ),
+    ),
     array(
         'version' => '1.2.15',
         'date'    => 'March 11, 2026',
