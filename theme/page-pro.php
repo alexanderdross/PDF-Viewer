@@ -447,7 +447,7 @@ $comparison_data = array(
                 WordPress, Drupal & React / Next.js
             </div>
 
-            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6 animate-fade-in" style="animation-delay: 0.1s">
+            <h1 id="pro-heading" class="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6 animate-fade-in" style="animation-delay: 0.1s">
                 <span class="text-gradient"><?php esc_html_e('PDF Embed & SEO Optimize', 'pdfviewer'); ?></span> Pro
             </h1>
 
@@ -841,7 +841,7 @@ $comparison_data = array(
 <section class="py-8 lg:py-10 bg-background">
     <div class="container mx-auto px-4 lg:px-8">
         <div class="max-w-3xl mx-auto text-center">
-            <h2 class="text-3xl md:text-4xl font-bold mb-6">
+            <h2 id="pro-cta-heading" class="text-3xl md:text-4xl font-bold mb-6">
                 <?php esc_html_e('Ready to Unlock Pro Features?', 'pdfviewer'); ?>
             </h2>
             <p class="text-lg text-muted-foreground mb-8">

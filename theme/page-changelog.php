@@ -682,7 +682,7 @@ function pdfviewer_render_changelog_entries($changelog) {
             <div class="bg-card rounded-lg md:rounded-xl border border-border shadow-soft overflow-hidden">
                 <div class="bg-muted/30 border-b border-border px-4 md:px-6 py-3 md:py-4">
                     <div class="flex flex-wrap items-center gap-2 md:gap-4">
-                        <h2 class="text-xl md:text-2xl font-bold text-foreground">v<?php echo esc_html($entry['version']); ?></h2>
+                        <h2 id="v<?php echo esc_attr($entry['version']); ?>" class="text-xl md:text-2xl font-bold text-foreground">v<?php echo esc_html($entry['version']); ?></h2>
                         <?php echo pdfviewer_version_badge($entry['type']); ?>
                         <span class="text-xs md:text-sm text-muted-foreground ml-auto"><?php echo esc_html($entry['date']); ?></span>
                     </div>
