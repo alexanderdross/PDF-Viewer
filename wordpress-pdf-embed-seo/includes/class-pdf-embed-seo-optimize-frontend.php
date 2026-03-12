@@ -349,12 +349,27 @@ class PDF_Embed_SEO_Frontend {
 				</div>
 			</div>
 
+			<div class="pdf-embed-seo-optimize-form-toolbar" style="display: none;">
+				<span class="pdf-embed-seo-optimize-form-toolbar-label"><?php esc_html_e( 'Form Fields Detected', 'pdf-embed-seo-optimize' ); ?></span>
+				<button type="button" class="pdf-embed-seo-optimize-btn pdf-embed-seo-optimize-form-clear" aria-label="<?php esc_attr_e( 'Clear Form', 'pdf-embed-seo-optimize' ); ?>">
+					<?php esc_html_e( 'Clear Form', 'pdf-embed-seo-optimize' ); ?>
+				</button>
+				<?php if ( $allow_download ) : ?>
+					<button type="button" class="pdf-embed-seo-optimize-btn pdf-embed-seo-optimize-form-download" aria-label="<?php esc_attr_e( 'Download Filled PDF', 'pdf-embed-seo-optimize' ); ?>">
+						<?php esc_html_e( 'Download Filled PDF', 'pdf-embed-seo-optimize' ); ?>
+					</button>
+				<?php endif; ?>
+			</div>
+
 			<div class="pdf-embed-seo-optimize-viewer">
 				<div class="pdf-embed-seo-optimize-loading">
 					<span class="spinner"></span>
 					<span class="pdf-embed-seo-optimize-loading-text"><?php esc_html_e( 'Loading PDF...', 'pdf-embed-seo-optimize' ); ?></span>
 				</div>
-				<canvas class="pdf-embed-seo-optimize-canvas"></canvas>
+				<div class="pdf-embed-seo-optimize-page-wrapper">
+					<canvas class="pdf-embed-seo-optimize-canvas"></canvas>
+					<div class="pdf-embed-seo-optimize-annotation-layer"></div>
+				</div>
 			</div>
 		</div>
 		<?php

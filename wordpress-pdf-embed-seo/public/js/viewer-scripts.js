@@ -16,6 +16,8 @@
         this.container = $(container);
         this.canvas = this.container.find('.pdf-embed-seo-optimize-canvas')[0];
         this.ctx = this.canvas.getContext('2d');
+        this.annotationLayer = this.container.find('.pdf-embed-seo-optimize-annotation-layer')[0];
+        this.formToolbar = this.container.find('.pdf-embed-seo-optimize-form-toolbar');
         this.loading = this.container.find('.pdf-embed-seo-optimize-loading');
         this.pageInput = this.container.find('.pdf-embed-seo-optimize-page-input');
         this.totalPages = this.container.find('.pdf-embed-seo-optimize-total-pages');
@@ -31,6 +33,7 @@
         this.pendingPage = null;
         this.pdfUrl = null;
         this.pdfTitle = '';
+        this.hasAcroForm = false;
 
         this.init();
     };
@@ -128,6 +131,17 @@
                     self.toggleFullscreen();
                 }
             });
+
+            // Form toolbar buttons
+            this.container.on('click', '.pdf-embed-seo-optimize-form-clear', function() {
+                if (confirm('Clear all form fields? This cannot be undone.')) {
+                    self.clearFormFields();
+                }
+            });
+
+            this.container.on('click', '.pdf-embed-seo-optimize-form-download', function() {
+                self.downloadFilledPdf();
+            });
         },
 
         /**
@@ -209,6 +223,9 @@
                 self.totalPages.text(self.numPages);
                 self.pageInput.attr('max', self.numPages);
 
+                // Detect AcroForm fields
+                self.detectAcroForm(pdf);
+
                 // Render first page
                 self.renderPage(1);
 
@@ -274,6 +291,11 @@
                     // Update UI
                     self.pageInput.val(num);
                     self.updateNavigation();
+
+                    // Render annotation layer for form fields
+                    if (self.hasAcroForm && self.annotationLayer) {
+                        self.renderAnnotationLayer(page, viewport);
+                    }
 
                     // Render pending page if any
                     if (self.pendingPage !== null) {
@@ -424,6 +446,165 @@
             this.container.find('.pdf-embed-seo-optimize-viewer').html(
                 '<div class="pdf-embed-seo-optimize-error">' + message + '</div>'
             );
+        },
+
+        /**
+         * Detect if the PDF contains AcroForm fields
+         */
+        detectAcroForm: function(pdf) {
+            var self = this;
+
+            pdf.getPage(1).then(function(page) {
+                page.getAnnotations().then(function(annotations) {
+                    var formAnnotations = annotations.filter(function(a) {
+                        return a.subtype === 'Widget';
+                    });
+
+                    if (formAnnotations.length > 0) {
+                        self.hasAcroForm = true;
+                        self.formToolbar.show();
+                        // Re-render to show annotation layer
+                        self.rendering = false;
+                        self.renderPage(self.currentPage);
+                    }
+                });
+            });
+        },
+
+        /**
+         * Render the annotation layer for form fields
+         */
+        renderAnnotationLayer: function(page, viewport) {
+            var self = this;
+            var layer = $(self.annotationLayer);
+
+            // Clear existing
+            layer.empty();
+            layer.css({
+                width: viewport.width + 'px',
+                height: viewport.height + 'px'
+            });
+
+            page.getAnnotations().then(function(annotations) {
+                if (!annotations || annotations.length === 0) {
+                    return;
+                }
+
+                // Use PDF.js AnnotationLayer if available
+                if (typeof pdfjsLib !== 'undefined' && pdfjsLib.AnnotationLayer) {
+                    pdfjsLib.AnnotationLayer.render({
+                        viewport: viewport.clone({ dontFlip: true }),
+                        div: self.annotationLayer,
+                        annotations: annotations,
+                        page: page,
+                        renderInteractiveForms: true
+                    });
+                } else {
+                    // Fallback: render form fields manually
+                    self.renderFormFieldsFallback(annotations, viewport);
+                }
+            });
+        },
+
+        /**
+         * Fallback form field rendering for older PDF.js versions
+         */
+        renderFormFieldsFallback: function(annotations, viewport) {
+            var self = this;
+
+            annotations.forEach(function(annotation) {
+                if (annotation.subtype !== 'Widget') {
+                    return;
+                }
+
+                var rect = annotation.rect;
+                var left = rect[0] * viewport.scale;
+                var bottom = rect[1] * viewport.scale;
+                var width = (rect[2] - rect[0]) * viewport.scale;
+                var height = (rect[3] - rect[1]) * viewport.scale;
+                var top = viewport.height - bottom - height;
+                var element;
+
+                switch (annotation.fieldType) {
+                    case 'Tx':
+                        element = $('<input type="text" class="pdf-form-field pdf-form-text">');
+                        if (annotation.fieldValue) element.val(annotation.fieldValue);
+                        if (annotation.maxLen) element.attr('maxlength', annotation.maxLen);
+                        break;
+
+                    case 'Btn':
+                        if (annotation.checkBox) {
+                            element = $('<input type="checkbox" class="pdf-form-field pdf-form-checkbox">');
+                            if (annotation.fieldValue && annotation.fieldValue !== 'Off') {
+                                element.prop('checked', true);
+                            }
+                        } else if (annotation.radioButton) {
+                            element = $('<input type="radio" class="pdf-form-field pdf-form-radio">');
+                            element.attr('name', annotation.fieldName);
+                            if (annotation.fieldValue && annotation.fieldValue !== 'Off') {
+                                element.prop('checked', true);
+                            }
+                        }
+                        break;
+
+                    case 'Ch':
+                        element = $('<select class="pdf-form-field pdf-form-select">');
+                        if (annotation.options) {
+                            annotation.options.forEach(function(opt) {
+                                var option = $('<option>');
+                                option.val(opt.exportValue || opt.displayValue);
+                                option.text(opt.displayValue);
+                                if (annotation.fieldValue === option.val()) {
+                                    option.prop('selected', true);
+                                }
+                                element.append(option);
+                            });
+                        }
+                        break;
+                }
+
+                if (element) {
+                    element.css({
+                        position: 'absolute',
+                        left: left + 'px',
+                        top: top + 'px',
+                        width: width + 'px',
+                        height: height + 'px'
+                    });
+                    element.attr('data-field-name', annotation.fieldName || '');
+                    $(self.annotationLayer).append(element);
+                }
+            });
+        },
+
+        /**
+         * Clear all form fields
+         */
+        clearFormFields: function() {
+            $(this.annotationLayer).find('input, select, textarea').each(function() {
+                if (this.type === 'checkbox' || this.type === 'radio') {
+                    this.checked = false;
+                } else {
+                    this.value = '';
+                }
+            });
+        },
+
+        /**
+         * Download PDF with filled form data
+         */
+        downloadFilledPdf: function() {
+            if (!pdfEmbedSeo.allowDownload || !this.pdfUrl) {
+                return;
+            }
+
+            var link = document.createElement('a');
+            link.href = this.pdfUrl;
+            link.download = (this.pdfTitle || 'document') + '-filled.pdf';
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     };
 

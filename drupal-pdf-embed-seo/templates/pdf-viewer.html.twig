@@ -94,10 +94,26 @@
     <button type="button" class="pdf-viewer-btn pdf-viewer-search-close">✕</button>
   </div>
 
+  {# Form toolbar (shown when PDF contains fillable forms) #}
+  <div class="pdf-viewer-form-toolbar" style="display: none;">
+    <span class="pdf-viewer-form-toolbar-label">{{ 'Form Fields Detected'|t }}</span>
+    <button type="button" class="pdf-viewer-btn pdf-viewer-form-clear" title="{{ 'Clear all form fields'|t }}">
+      {{ 'Clear Form'|t }}
+    </button>
+    {% if allow_download %}
+      <button type="button" class="pdf-viewer-btn pdf-viewer-form-download" title="{{ 'Download PDF with form data'|t }}">
+        {{ 'Download Filled PDF'|t }}
+      </button>
+    {% endif %}
+  </div>
+
   {# PDF canvas container #}
   <div class="pdf-viewer-container" style="height: {{ height }};">
     <div class="pdf-viewer-canvas-wrapper">
-      <canvas class="pdf-viewer-canvas"></canvas>
+      <div class="pdf-viewer-page-wrapper">
+        <canvas class="pdf-viewer-canvas"></canvas>
+        <div class="pdf-viewer-annotation-layer"></div>
+      </div>
     </div>
     <div class="pdf-viewer-loading">
       <div class="pdf-viewer-loading-spinner"></div>

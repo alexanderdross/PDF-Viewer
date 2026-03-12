@@ -2,6 +2,17 @@
 
 All notable changes to the Drupal module will be documented in this file.
 
+## [1.2.16] - 2026-03-12
+
+### Fixed
+- **AcroForms Form Toolbar** — Form toolbar not appearing on PDFs with fillable form fields; added PDF.js AnnotationLayer rendering over canvas
+- **Interactive Form Fields** — Text inputs, checkboxes, radio buttons, and dropdowns now render interactively on top of the PDF page
+
+### Added
+- **Fallback Form Field Rendering** — Manual DOM-based form field rendering for environments without full PDF.js AnnotationLayer support
+
+---
+
 ## [1.2.13] - 2026-02-17
 
 ### Code Quality & Static Analysis
