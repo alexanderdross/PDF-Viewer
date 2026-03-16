@@ -1,0 +1,87 @@
+/**
+ * @file
+ * Styles for Pro+ annotations.
+ */
+
+.pdf-viewer-annotations-toolbar {
+  display: none;
+  background: #f8f9fa;
+  border-top: 1px solid #e0e0e0;
+  padding: 6px 12px;
+  gap: 4px;
+  align-items: center;
+}
+
+.pdf-viewer-annotations-toolbar.active {
+  display: flex;
+}
+
+.pdf-viewer-annotations-toolbar button {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #374151;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.pdf-viewer-annotations-toolbar button:hover {
+  background-color: #e5e7eb;
+  border-color: #d1d5db;
+}
+
+.pdf-viewer-annotations-toolbar button.active {
+  background-color: #dbeafe;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
+/* Annotation overlays */
+.pdf-annotation {
+  position: absolute;
+  pointer-events: auto;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.pdf-annotation-highlight {
+  background-color: rgba(255, 235, 59, 0.4);
+  border-radius: 2px;
+}
+
+.pdf-annotation-underline {
+  border-bottom: 2px solid #1d4ed8;
+}
+
+.pdf-annotation-strikethrough {
+  background: linear-gradient(transparent 45%, #ef4444 45%, #ef4444 55%, transparent 55%);
+}
+
+.pdf-annotation-comment {
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.5);
+  border-radius: 2px;
+}
+
+.pdf-annotation-text {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px dashed rgba(16, 185, 129, 0.5);
+  border-radius: 2px;
+}
+
+/* Dark theme */
+.pdf-viewer-theme-dark .pdf-viewer-annotations-toolbar {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+.pdf-viewer-theme-dark .pdf-viewer-annotations-toolbar button {
+  color: #d1d5db;
+}
+
+.pdf-viewer-theme-dark .pdf-viewer-annotations-toolbar button:hover {
+  background-color: #374151;
+  border-color: #4b5563;
+}

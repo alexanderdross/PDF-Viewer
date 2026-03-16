@@ -265,8 +265,11 @@
         // Set worker source.
         pdfjsLib.GlobalWorkerOptions.workerSrc = drupalSettings.pdfEmbedSeo.workerSrc || '';
 
-        // Load the PDF.
-        pdfjsLib.getDocument(pdfUrl).promise.then(
+        // Load the PDF with XFA form support enabled.
+        pdfjsLib.getDocument({
+            url: pdfUrl,
+            enableXfa: true
+        }).promise.then(
             function (pdf) {
                 self.pdfDoc = pdf;
                 self.totalPages = pdf.numPages;
