@@ -89,7 +89,7 @@ class AuditLogger {
     }
 
     try {
-      return $this->database->insert('pdf_audit_log')
+      return $this->database->insert('pdf_embed_seo_audit_log')
         ->fields(
                 [
                   'document_id' => $document_id,
@@ -127,7 +127,7 @@ class AuditLogger {
    */
   public function getEntries(array $filters = [], int $limit = 100, int $offset = 0): array {
     try {
-      $query = $this->database->select('pdf_audit_log', 'a')
+      $query = $this->database->select('pdf_embed_seo_audit_log', 'a')
         ->fields('a')
         ->orderBy('created_at', 'DESC')
         ->range($offset, $limit);
@@ -182,7 +182,7 @@ class AuditLogger {
    */
   public function getCount(array $filters = []): int {
     try {
-      $query = $this->database->select('pdf_audit_log', 'a');
+      $query = $this->database->select('pdf_embed_seo_audit_log', 'a');
       $query->addExpression('COUNT(*)', 'count');
 
       if (!empty($filters['document_id'])) {
@@ -215,7 +215,7 @@ class AuditLogger {
    */
   public function getEntry(int $id): ?array {
     try {
-      $query = $this->database->select('pdf_audit_log', 'a')
+      $query = $this->database->select('pdf_embed_seo_audit_log', 'a')
         ->fields('a')
         ->condition('id', $id);
 
@@ -245,7 +245,7 @@ class AuditLogger {
     $cutoff = date('Y-m-d H:i:s', strtotime("-{$days} days"));
 
     try {
-      return $this->database->delete('pdf_audit_log')
+      return $this->database->delete('pdf_embed_seo_audit_log')
         ->condition('created_at', $cutoff, '<')
         ->execute();
     }
@@ -385,7 +385,7 @@ class AuditLogger {
    */
   public function deleteUserData(int $user_id): int {
     try {
-      return $this->database->delete('pdf_audit_log')
+      return $this->database->delete('pdf_embed_seo_audit_log')
         ->condition('user_id', $user_id)
         ->execute();
     }

@@ -76,6 +76,14 @@ class PdfViewController extends ControllerBase {
     $viewer_theme = $config->get('viewer_theme') ?? 'light';
     $viewer_height = $config->get('viewer_height') ?? '800px';
 
+    // Determine Pro+ status and settings.
+    $is_pro_plus = $this->moduleHandler()->moduleExists('pdf_embed_seo_pro_plus')
+      && function_exists('pdf_embed_seo_pro_plus_is_valid')
+      && pdf_embed_seo_pro_plus_is_valid();
+    $pro_plus_settings = $is_pro_plus && function_exists('pdf_embed_seo_pro_plus_get_settings')
+      ? pdf_embed_seo_pro_plus_get_settings()
+      : [];
+
     // Build the render array.
     $build = [
       '#theme' => 'pdf_viewer',
@@ -85,6 +93,11 @@ class PdfViewController extends ControllerBase {
       '#allow_print' => $allow_print,
       '#viewer_theme' => $viewer_theme,
       '#height' => $viewer_height,
+      '#is_pro_plus' => $is_pro_plus,
+      '#enable_annotations' => !empty($pro_plus_settings['enable_annotations']),
+      '#enable_versioning' => !empty($pro_plus_settings['enable_versioning']),
+      '#enable_advanced_analytics' => !empty($pro_plus_settings['enable_advanced_analytics']),
+      '#enable_compliance' => !empty($pro_plus_settings['enable_compliance']),
       '#attached' => [
         'library' => [
           'pdf_embed_seo/viewer',
@@ -97,6 +110,7 @@ class PdfViewController extends ControllerBase {
             'allowPrint' => $allow_print,
             'documentId' => $pdf_document->id(),
             'documentTitle' => $pdf_document->label(),
+            'isProPlus' => $is_pro_plus,
           ],
         ],
       ],
@@ -124,6 +138,14 @@ class PdfViewController extends ControllerBase {
       }
       if ($config->get('enable_analytics')) {
         $build['#attached']['library'][] = 'pdf_embed_seo/premium-analytics';
+      }
+    }
+
+    // Add Pro+ Enterprise features if available.
+    if ($is_pro_plus) {
+      $build['#attached']['library'][] = 'pdf_embed_seo/pro-plus-toolbar';
+      if (!empty($pro_plus_settings['enable_annotations'])) {
+        $build['#attached']['library'][] = 'pdf_embed_seo/pro-plus-annotations';
       }
     }
 

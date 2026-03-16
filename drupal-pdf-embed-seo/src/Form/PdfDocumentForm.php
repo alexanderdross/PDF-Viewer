@@ -3,9 +3,12 @@
 namespace Drupal\pdf_embed_seo\Form;
 
 use Drupal\Core\Entity\ContentEntityForm;
+use Drupal\Core\Entity\EntityRepositoryInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Password\PasswordInterface;
+use Drupal\Component\Datetime\TimeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -16,15 +19,25 @@ class PdfDocumentForm extends ContentEntityForm {
   /**
    * Constructs a PdfDocumentForm.
    *
+   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
+   *   The entity repository.
+   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
+   *   The entity type bundle info.
+   * @param \Drupal\Component\Datetime\TimeInterface $time
+   *   The time service.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
    *   The module handler.
    * @param \Drupal\Core\Password\PasswordInterface $password
    *   The password hashing service.
    */
   public function __construct(
+    EntityRepositoryInterface $entity_repository,
+    EntityTypeBundleInfoInterface $entity_type_bundle_info,
+    TimeInterface $time,
     ModuleHandlerInterface $moduleHandler,
     protected PasswordInterface $password,
   ) {
+    parent::__construct($entity_repository, $entity_type_bundle_info, $time);
     $this->moduleHandler = $moduleHandler;
   }
 
@@ -32,14 +45,13 @@ class PdfDocumentForm extends ContentEntityForm {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container): static {
-    $instance = new static(
-          $container->get('module_handler'),
-          $container->get('password'),
-      );
-    $instance->setEntityTypeManager($container->get('entity_type.manager'));
-    $instance->setModuleHandler($container->get('module_handler'));
-    $instance->setStringTranslation($container->get('string_translation'));
-    return $instance;
+    return new static(
+      $container->get('entity.repository'),
+      $container->get('entity_type.bundle.info'),
+      $container->get('datetime.time'),
+      $container->get('module_handler'),
+      $container->get('password'),
+    );
   }
 
   /**

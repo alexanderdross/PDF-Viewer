@@ -10,6 +10,28 @@ For the complete unified changelog, see [CHANGELOG.md](https://github.com/alexan
 
 ---
 
+## [1.2.17] - 2026-03-16
+
+### Fixed
+- **Pro+ Module Activation** -- Resolved critical installation failures preventing Pro+ Enterprise tier from activating. Added 8 missing controllers, ProPlusSettingsForm, routing, and asset files
+- **Database Schema Alignment** -- Rewrote Pro+ `hook_schema()` for 6 tables and added 3 missing table schemas (heatmaps, 2fa_tokens, 2fa_secrets) to match service layer expectations
+- **Table Name Prefix** -- Fixed all 9 Pro+ services using short table names (e.g., `pdf_versions`) instead of required `pdf_embed_seo_` prefix (60+ query references)
+- **Analytics Column Names** -- Fixed `document_id` to `pdf_document_id` in free module analytics queries (PdfApiController, PdfDataController, ComputedViewCount)
+- **Timestamp Type Alignment** -- Fixed schema columns using int type where services insert datetime strings
+- **AdvancedAnalytics SQL** -- Fixed `DATE_FORMAT` to use `FROM_UNIXTIME()` for integer timestamp columns, fixed mixed cutoff types
+- **Premium Duplicate Table** -- Removed duplicate `pdf_embed_seo_analytics` definition from Premium schema that caused install conflicts
+- **Null Safety** -- Added null coalescing for PDF file URL access in PdfViewController and PdfDocumentForm
+
+### Security
+- **XSS in WhiteLabel** -- Replaced `addslashes()` with `json_encode()` for JavaScript context output in white-label company name rendering
+- **Annotation Permission Logic** -- Fixed broken owner-based permission checks in AnnotationsApiController that allowed owners to bypass `edit own`/`delete own` permissions
+- **Strict Equality** -- Changed loose `!=` to strict `!==` with int cast in expiring link document ID validation
+
+### Changed
+- Version bump: Free/Premium 1.2.16 -> 1.2.17, Pro+ 1.3.1 -> 1.3.2
+
+---
+
 ## [1.2.16] - 2026-03-12
 
 ### Fixed

@@ -52,8 +52,13 @@
         // Get elements.
         this.container = this.wrapper.querySelector('.pdf-viewer-container');
         this.canvas = this.wrapper.querySelector('.pdf-viewer-canvas');
-        this.ctx = this.canvas.getContext('2d');
+        this.ctx = this.canvas ? this.canvas.getContext('2d') : null;
         this.annotationLayer = this.wrapper.querySelector('.pdf-viewer-annotation-layer');
+
+        if (!this.canvas || !this.ctx) {
+            console.error('PDF Viewer: Canvas element not found.');
+            return;
+        }
         this.formToolbar = this.wrapper.querySelector('.pdf-viewer-form-toolbar');
         this.loading = this.wrapper.querySelector('.pdf-viewer-loading');
         this.error = this.wrapper.querySelector('.pdf-viewer-error');
@@ -265,8 +270,11 @@
         // Set worker source.
         pdfjsLib.GlobalWorkerOptions.workerSrc = drupalSettings.pdfEmbedSeo.workerSrc || '';
 
-        // Load the PDF.
-        pdfjsLib.getDocument(pdfUrl).promise.then(
+        // Load the PDF with XFA form support enabled.
+        pdfjsLib.getDocument({
+            url: pdfUrl,
+            enableXfa: true
+        }).promise.then(
             function (pdf) {
                 self.pdfDoc = pdf;
                 self.totalPages = pdf.numPages;

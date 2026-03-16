@@ -43,41 +43,25 @@ class ComputedViewCount extends FieldItemList {
   protected function getViewCountFromAnalytics(int $pdf_id): int {
     $database = \Drupal::database();
 
-    // Try the premium analytics table first.
-    if ($database->schema()->tableExists('pdf_embed_seo_analytics')) {
-      try {
-        $count = $database->select('pdf_embed_seo_analytics', 'a')
-          ->condition('pdf_id', $pdf_id)
-          ->countQuery()
-          ->execute()
-          ->fetchField();
-
-        return (int) $count;
-      }
-      catch (\Exception $e) {
-        // Log but don't fail.
-        \Drupal::logger('pdf_embed_seo')->warning(
-              'Failed to compute view count: @message', [
-                '@message' => $e->getMessage(),
-              ]
-          );
-      }
+    if (!$database->schema()->tableExists('pdf_embed_seo_analytics')) {
+      return 0;
     }
 
-    // Fallback: Check if there's a pdf_document_id column instead of pdf_id.
-    if ($database->schema()->tableExists('pdf_embed_seo_analytics')) {
-      try {
-        $count = $database->select('pdf_embed_seo_analytics', 'a')
-          ->condition('pdf_document_id', $pdf_id)
-          ->countQuery()
-          ->execute()
-          ->fetchField();
+    try {
+      $count = $database->select('pdf_embed_seo_analytics', 'a')
+        ->condition('pdf_document_id', $pdf_id)
+        ->countQuery()
+        ->execute()
+        ->fetchField();
 
-        return (int) $count;
-      }
-      catch (\Exception $e) {
-        // Column doesn't exist, return 0.
-      }
+      return (int) $count;
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('pdf_embed_seo')->warning(
+        'Failed to compute view count: @message', [
+          '@message' => $e->getMessage(),
+        ]
+      );
     }
 
     return 0;

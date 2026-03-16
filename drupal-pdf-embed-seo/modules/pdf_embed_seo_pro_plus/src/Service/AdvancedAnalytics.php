@@ -65,7 +65,7 @@ class AdvancedAnalytics {
     ?string $session_id = NULL,
   ): void {
     try {
-      $this->database->insert('pdf_heatmaps')
+      $this->database->insert('pdf_embed_seo_heatmaps')
         ->fields(
                 [
                   'document_id' => $document_id,
@@ -105,7 +105,7 @@ class AdvancedAnalytics {
     $cutoff = date('Y-m-d H:i:s', strtotime("-{$days} days"));
 
     try {
-      $query = $this->database->select('pdf_heatmaps', 'h')
+      $query = $this->database->select('pdf_embed_seo_heatmaps', 'h')
         ->fields('h', ['page_number', 'x_position', 'y_position', 'interaction_type', 'duration_ms'])
         ->condition('document_id', $document_id)
         ->condition('created_at', $cutoff, '>=');
@@ -221,41 +221,41 @@ class AdvancedAnalytics {
    *   Document metrics.
    */
   public function getDocumentMetrics(int $document_id, int $days = 30): array {
-    $cutoff = date('Y-m-d H:i:s', strtotime("-{$days} days"));
+    $cutoff = strtotime("-{$days} days");
 
     try {
       $views_query = $this->database->select('pdf_embed_seo_analytics', 'a');
       $views_query->addExpression('COUNT(*)', 'count');
-      $views_query->condition('document_id', $document_id);
+      $views_query->condition('pdf_document_id', $document_id);
       $views_query->condition('event_type', 'view');
-      $views_query->condition('created_at', $cutoff, '>=');
+      $views_query->condition('timestamp', $cutoff, '>=');
       $views = (int) $views_query->execute()->fetchField();
 
       $downloads_query = $this->database->select('pdf_embed_seo_analytics', 'a');
       $downloads_query->addExpression('COUNT(*)', 'count');
-      $downloads_query->condition('document_id', $document_id);
+      $downloads_query->condition('pdf_document_id', $document_id);
       $downloads_query->condition('event_type', 'download');
-      $downloads_query->condition('created_at', $cutoff, '>=');
+      $downloads_query->condition('timestamp', $cutoff, '>=');
       $downloads = (int) $downloads_query->execute()->fetchField();
 
       $time_query = $this->database->select('pdf_embed_seo_analytics', 'a');
       $time_query->addExpression('AVG(time_spent)', 'avg_time');
-      $time_query->condition('document_id', $document_id);
-      $time_query->condition('created_at', $cutoff, '>=');
+      $time_query->condition('pdf_document_id', $document_id);
+      $time_query->condition('timestamp', $cutoff, '>=');
       $time_query->isNotNull('time_spent');
       $avg_time = (float) $time_query->execute()->fetchField();
 
       $visitors_query = $this->database->select('pdf_embed_seo_analytics', 'a');
       $visitors_query->addExpression('COUNT(DISTINCT session_id)', 'count');
-      $visitors_query->condition('document_id', $document_id);
-      $visitors_query->condition('created_at', $cutoff, '>=');
+      $visitors_query->condition('pdf_document_id', $document_id);
+      $visitors_query->condition('timestamp', $cutoff, '>=');
       $unique_visitors = (int) $visitors_query->execute()->fetchField();
 
       $return_query = $this->database->select('pdf_embed_seo_analytics', 'a');
       $return_query->addField('a', 'session_id');
       $return_query->addExpression('COUNT(*)', 'visit_count');
-      $return_query->condition('document_id', $document_id);
-      $return_query->condition('created_at', $cutoff, '>=');
+      $return_query->condition('pdf_document_id', $document_id);
+      $return_query->condition('timestamp', $cutoff, '>=');
       $return_query->groupBy('session_id');
       $return_query->having('COUNT(*) > 1');
       $return_visits = $return_query->execute()->rowCount();
@@ -293,23 +293,23 @@ class AdvancedAnalytics {
    *   Top documents with scores.
    */
   public function getTopDocuments(int $limit = 10, int $days = 30): array {
-    $cutoff = date('Y-m-d H:i:s', strtotime("-{$days} days"));
+    $cutoff = strtotime("-{$days} days");
 
     try {
       $query = $this->database->select('pdf_embed_seo_analytics', 'a');
-      $query->addField('a', 'document_id');
+      $query->addField('a', 'pdf_document_id');
       $query->addExpression('COUNT(*)', 'total_events');
       $query->addExpression('SUM(CASE WHEN event_type = \'view\' THEN 1 ELSE 0 END)', 'views');
       $query->addExpression('SUM(CASE WHEN event_type = \'download\' THEN 1 ELSE 0 END)', 'downloads');
-      $query->condition('created_at', $cutoff, '>=');
-      $query->groupBy('document_id');
+      $query->condition('timestamp', $cutoff, '>=');
+      $query->groupBy('pdf_document_id');
       $query->orderBy('total_events', 'DESC');
       $query->range(0, $limit);
 
       $results = $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
 
       foreach ($results as &$result) {
-        $result['engagement_score'] = $this->getEngagementScore((int) $result['document_id']);
+        $result['engagement_score'] = $this->getEngagementScore((int) $result['pdf_document_id']);
       }
 
       return $results;
@@ -331,19 +331,19 @@ class AdvancedAnalytics {
    *   Geographic data.
    */
   public function getGeographicData(?int $document_id = NULL, int $days = 30): array {
-    $cutoff = date('Y-m-d H:i:s', strtotime("-{$days} days"));
+    $cutoff = strtotime("-{$days} days");
 
     try {
       $query = $this->database->select('pdf_embed_seo_analytics', 'a');
       $query->addField('a', 'country');
       $query->addExpression('COUNT(*)', 'count');
-      $query->condition('created_at', $cutoff, '>=');
+      $query->condition('timestamp', $cutoff, '>=');
       $query->isNotNull('country');
       $query->groupBy('country');
       $query->orderBy('count', 'DESC');
 
       if ($document_id !== NULL) {
-        $query->condition('document_id', $document_id);
+        $query->condition('pdf_document_id', $document_id);
       }
 
       return $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
@@ -365,19 +365,19 @@ class AdvancedAnalytics {
    *   Device data.
    */
   public function getDeviceData(?int $document_id = NULL, int $days = 30): array {
-    $cutoff = date('Y-m-d H:i:s', strtotime("-{$days} days"));
+    $cutoff = strtotime("-{$days} days");
 
     try {
       $query = $this->database->select('pdf_embed_seo_analytics', 'a');
       $query->addField('a', 'device_type');
       $query->addExpression('COUNT(*)', 'count');
-      $query->condition('created_at', $cutoff, '>=');
+      $query->condition('timestamp', $cutoff, '>=');
       $query->isNotNull('device_type');
       $query->groupBy('device_type');
       $query->orderBy('count', 'DESC');
 
       if ($document_id !== NULL) {
-        $query->condition('document_id', $document_id);
+        $query->condition('pdf_document_id', $document_id);
       }
 
       return $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
@@ -401,7 +401,7 @@ class AdvancedAnalytics {
    *   Time series data.
    */
   public function getTimeSeries(?int $document_id = NULL, int $days = 30, string $granularity = 'day'): array {
-    $cutoff = date('Y-m-d H:i:s', strtotime("-{$days} days"));
+    $cutoff = strtotime("-{$days} days");
 
     $date_format = match ($granularity) {
       'week' => '%Y-%u',
@@ -411,16 +411,16 @@ class AdvancedAnalytics {
 
     try {
       $query = $this->database->select('pdf_embed_seo_analytics', 'a');
-      $query->addExpression("DATE_FORMAT(created_at, '{$date_format}')", 'period');
+      $query->addExpression("DATE_FORMAT(FROM_UNIXTIME(timestamp), '{$date_format}')", 'period');
       $query->addExpression('COUNT(*)', 'count');
       $query->addExpression('SUM(CASE WHEN event_type = \'view\' THEN 1 ELSE 0 END)', 'views');
       $query->addExpression('SUM(CASE WHEN event_type = \'download\' THEN 1 ELSE 0 END)', 'downloads');
-      $query->condition('created_at', $cutoff, '>=');
+      $query->condition('timestamp', $cutoff, '>=');
       $query->groupBy('period');
       $query->orderBy('period', 'ASC');
 
       if ($document_id !== NULL) {
-        $query->condition('document_id', $document_id);
+        $query->condition('pdf_document_id', $document_id);
       }
 
       return $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
@@ -443,7 +443,7 @@ class AdvancedAnalytics {
     $cutoff = date('Y-m-d H:i:s', strtotime("-{$days} days"));
 
     try {
-      return $this->database->delete('pdf_heatmaps')
+      return $this->database->delete('pdf_embed_seo_heatmaps')
         ->condition('created_at', $cutoff, '<')
         ->execute();
     }

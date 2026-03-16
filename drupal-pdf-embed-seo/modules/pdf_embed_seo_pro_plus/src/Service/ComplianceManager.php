@@ -103,7 +103,7 @@ class ComplianceManager {
     }
 
     try {
-      return $this->database->insert('pdf_consents')
+      return $this->database->insert('pdf_embed_seo_consents')
         ->fields(
                 [
                   'user_id' => $this->currentUser->id() ?: NULL,
@@ -144,7 +144,7 @@ class ComplianceManager {
     $user_id = $user_id ?? $this->currentUser->id();
 
     try {
-      $query = $this->database->select('pdf_consents', 'c')
+      $query = $this->database->select('pdf_embed_seo_consents', 'c')
         ->fields('c', ['consented'])
         ->condition('consent_type', $consent_type)
         ->isNull('withdrawn_at')
@@ -186,7 +186,7 @@ class ComplianceManager {
     $user_id = $user_id ?? $this->currentUser->id();
 
     try {
-      $query = $this->database->update('pdf_consents')
+      $query = $this->database->update('pdf_embed_seo_consents')
         ->fields(['withdrawn_at' => date('Y-m-d H:i:s')])
         ->condition('consent_type', $consent_type)
         ->isNull('withdrawn_at');
@@ -226,7 +226,7 @@ class ComplianceManager {
     }
 
     try {
-      $query = $this->database->select('pdf_consents', 'c')
+      $query = $this->database->select('pdf_embed_seo_consents', 'c')
         ->fields('c')
         ->condition('user_id', $user_id)
         ->orderBy('created_at', 'DESC');
@@ -258,7 +258,7 @@ class ComplianceManager {
     ];
 
     try {
-      $query = $this->database->select('pdf_consents', 'c')
+      $query = $this->database->select('pdf_embed_seo_consents', 'c')
         ->fields('c')
         ->condition('user_id', $user_id);
       $data['consents'] = $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
@@ -270,15 +270,15 @@ class ComplianceManager {
         $data['analytics'] = $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
       }
 
-      if ($this->database->schema()->tableExists('pdf_annotations')) {
-        $query = $this->database->select('pdf_annotations', 'an')
+      if ($this->database->schema()->tableExists('pdf_embed_seo_annotations')) {
+        $query = $this->database->select('pdf_embed_seo_annotations', 'an')
           ->fields('an')
           ->condition('user_id', $user_id);
         $data['annotations'] = $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
       }
 
-      if ($this->database->schema()->tableExists('pdf_audit_log')) {
-        $query = $this->database->select('pdf_audit_log', 'al')
+      if ($this->database->schema()->tableExists('pdf_embed_seo_audit_log')) {
+        $query = $this->database->select('pdf_embed_seo_audit_log', 'al')
           ->fields('al')
           ->condition('user_id', $user_id);
         $data['audit_log'] = $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
@@ -314,7 +314,7 @@ class ComplianceManager {
     ];
 
     try {
-      $results['consents_deleted'] = $this->database->delete('pdf_consents')
+      $results['consents_deleted'] = $this->database->delete('pdf_embed_seo_consents')
         ->condition('user_id', $user_id)
         ->execute();
 
@@ -324,14 +324,14 @@ class ComplianceManager {
           ->execute();
       }
 
-      if ($this->database->schema()->tableExists('pdf_annotations')) {
-        $results['annotations_deleted'] = $this->database->delete('pdf_annotations')
+      if ($this->database->schema()->tableExists('pdf_embed_seo_annotations')) {
+        $results['annotations_deleted'] = $this->database->delete('pdf_embed_seo_annotations')
           ->condition('user_id', $user_id)
           ->execute();
       }
 
-      if ($this->database->schema()->tableExists('pdf_audit_log')) {
-        $results['audit_log_deleted'] = $this->database->update('pdf_audit_log')
+      if ($this->database->schema()->tableExists('pdf_embed_seo_audit_log')) {
+        $results['audit_log_deleted'] = $this->database->update('pdf_embed_seo_audit_log')
           ->fields(
                   [
                     'user_id' => NULL,
@@ -402,22 +402,22 @@ class ComplianceManager {
     $results = [];
 
     if ($this->database->schema()->tableExists('pdf_embed_seo_analytics')) {
-      $cutoff = date('Y-m-d H:i:s', strtotime("-{$policy['analytics_days']} days"));
+      $cutoff = strtotime("-{$policy['analytics_days']} days");
       $results['analytics'] = $this->database->delete('pdf_embed_seo_analytics')
-        ->condition('created_at', $cutoff, '<')
+        ->condition('timestamp', $cutoff, '<')
         ->execute();
     }
 
-    if ($this->database->schema()->tableExists('pdf_heatmaps')) {
+    if ($this->database->schema()->tableExists('pdf_embed_seo_heatmaps')) {
       $cutoff = date('Y-m-d H:i:s', strtotime("-{$policy['heatmaps_days']} days"));
-      $results['heatmaps'] = $this->database->delete('pdf_heatmaps')
+      $results['heatmaps'] = $this->database->delete('pdf_embed_seo_heatmaps')
         ->condition('created_at', $cutoff, '<')
         ->execute();
     }
 
-    if ($this->database->schema()->tableExists('pdf_audit_log')) {
+    if ($this->database->schema()->tableExists('pdf_embed_seo_audit_log')) {
       $cutoff = date('Y-m-d H:i:s', strtotime("-{$policy['audit_log_days']} days"));
-      $results['audit_log'] = $this->database->delete('pdf_audit_log')
+      $results['audit_log'] = $this->database->delete('pdf_embed_seo_audit_log')
         ->condition('created_at', $cutoff, '<')
         ->execute();
     }
@@ -485,7 +485,7 @@ class ComplianceManager {
       ];
 
       try {
-        $query = $this->database->select('pdf_consents', 'c');
+        $query = $this->database->select('pdf_embed_seo_consents', 'c');
         $query->addField('c', 'consent_type');
         $query->addExpression('SUM(CASE WHEN consented = 1 THEN 1 ELSE 0 END)', 'accepted');
         $query->addExpression('SUM(CASE WHEN consented = 0 THEN 1 ELSE 0 END)', 'declined');

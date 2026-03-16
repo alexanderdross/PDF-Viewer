@@ -30,10 +30,15 @@ function pdf_embed_seo_pro_plus_schema() {
         'length' => 20,
         'not null' => TRUE,
       ],
-      'file_uri' => [
+      'file_id' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+      ],
+      'file_url' => [
         'type' => 'varchar',
         'length' => 512,
-        'not null' => TRUE,
+        'not null' => FALSE,
       ],
       'file_size' => [
         'type' => 'int',
@@ -41,20 +46,15 @@ function pdf_embed_seo_pro_plus_schema() {
         'not null' => TRUE,
         'default' => 0,
       ],
-      'checksum' => [
-        'type' => 'varchar',
-        'length' => 64,
-        'not null' => FALSE,
-      ],
-      'changelog' => [
+      'change_notes' => [
         'type' => 'text',
         'size' => 'medium',
         'not null' => FALSE,
       ],
-      'author_id' => [
+      'created_by' => [
         'type' => 'int',
         'unsigned' => TRUE,
-        'not null' => TRUE,
+        'not null' => FALSE,
       ],
       'is_current' => [
         'type' => 'int',
@@ -63,9 +63,9 @@ function pdf_embed_seo_pro_plus_schema() {
         'not null' => TRUE,
         'default' => 0,
       ],
-      'created' => [
-        'type' => 'int',
-        'unsigned' => TRUE,
+      'created_at' => [
+        'type' => 'varchar',
+        'length' => 20,
         'not null' => TRUE,
       ],
     ],
@@ -95,23 +95,35 @@ function pdf_embed_seo_pro_plus_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ],
-      'page' => [
+      'user_id' => [
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
       ],
-      'type' => [
+      'page_number' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'annotation_type' => [
         'type' => 'varchar',
         'length' => 32,
         'not null' => TRUE,
       ],
-      'x' => [
-        'type' => 'float',
-        'not null' => TRUE,
+      'content' => [
+        'type' => 'text',
+        'size' => 'medium',
+        'not null' => FALSE,
       ],
-      'y' => [
+      'position_x' => [
         'type' => 'float',
-        'not null' => TRUE,
+        'not null' => FALSE,
+        'default' => 0,
+      ],
+      'position_y' => [
+        'type' => 'float',
+        'not null' => FALSE,
+        'default' => 0,
       ],
       'width' => [
         'type' => 'float',
@@ -125,35 +137,21 @@ function pdf_embed_seo_pro_plus_schema() {
         'type' => 'varchar',
         'length' => 20,
         'not null' => FALSE,
+        'default' => '#ffff00',
       ],
-      'opacity' => [
-        'type' => 'float',
-        'not null' => FALSE,
-        'default' => 1.0,
-      ],
-      'content' => [
+      'metadata' => [
         'type' => 'text',
         'size' => 'medium',
         'not null' => FALSE,
       ],
-      'path_data' => [
-        'type' => 'text',
-        'size' => 'big',
-        'not null' => FALSE,
-      ],
-      'author_id' => [
-        'type' => 'int',
-        'unsigned' => TRUE,
+      'created_at' => [
+        'type' => 'varchar',
+        'length' => 20,
         'not null' => TRUE,
       ],
-      'created' => [
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ],
-      'updated' => [
-        'type' => 'int',
-        'unsigned' => TRUE,
+      'updated_at' => [
+        'type' => 'varchar',
+        'length' => 20,
         'not null' => TRUE,
       ],
     ],
@@ -163,7 +161,7 @@ function pdf_embed_seo_pro_plus_schema() {
     ],
     'indexes' => [
       'document_id' => ['document_id'],
-      'author_id' => ['author_id'],
+      'user_id' => ['user_id'],
     ],
   ];
 
@@ -176,10 +174,10 @@ function pdf_embed_seo_pro_plus_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ],
-      'timestamp' => [
+      'document_id' => [
         'type' => 'int',
         'unsigned' => TRUE,
-        'not null' => TRUE,
+        'not null' => FALSE,
       ],
       'user_id' => [
         'type' => 'int',
@@ -191,14 +189,9 @@ function pdf_embed_seo_pro_plus_schema() {
         'length' => 64,
         'not null' => TRUE,
       ],
-      'object_type' => [
-        'type' => 'varchar',
-        'length' => 64,
-        'not null' => FALSE,
-      ],
-      'object_id' => [
-        'type' => 'int',
-        'unsigned' => TRUE,
+      'details' => [
+        'type' => 'text',
+        'size' => 'medium',
         'not null' => FALSE,
       ],
       'ip_address' => [
@@ -211,17 +204,18 @@ function pdf_embed_seo_pro_plus_schema() {
         'length' => 512,
         'not null' => FALSE,
       ],
-      'details' => [
-        'type' => 'text',
-        'size' => 'medium',
-        'not null' => FALSE,
+      'created_at' => [
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => TRUE,
       ],
     ],
     'primary key' => ['id'],
     'indexes' => [
-      'timestamp' => ['timestamp'],
+      'created_at' => ['created_at'],
       'user_id' => ['user_id'],
       'action' => ['action'],
+      'document_id' => ['document_id'],
     ],
   ];
 
@@ -254,17 +248,38 @@ function pdf_embed_seo_pro_plus_schema() {
         'size' => 'medium',
         'not null' => FALSE,
       ],
-      'active' => [
+      'is_active' => [
         'type' => 'int',
         'size' => 'tiny',
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 1,
       ],
-      'created' => [
+      'failure_count' => [
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
+        'default' => 0,
+      ],
+      'last_triggered' => [
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => FALSE,
+      ],
+      'last_status' => [
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => FALSE,
+      ],
+      'created_at' => [
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => TRUE,
+      ],
+      'updated_at' => [
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => FALSE,
       ],
     ],
     'primary key' => ['id'],
@@ -303,11 +318,10 @@ function pdf_embed_seo_pro_plus_schema() {
         'size' => 'medium',
         'not null' => FALSE,
       ],
-      'attempts' => [
+      'duration_ms' => [
         'type' => 'int',
         'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
+        'not null' => FALSE,
       ],
       'status' => [
         'type' => 'varchar',
@@ -315,15 +329,10 @@ function pdf_embed_seo_pro_plus_schema() {
         'not null' => TRUE,
         'default' => 'pending',
       ],
-      'created' => [
-        'type' => 'int',
-        'unsigned' => TRUE,
+      'created_at' => [
+        'type' => 'varchar',
+        'length' => 20,
         'not null' => TRUE,
-      ],
-      'delivered_at' => [
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => FALSE,
       ],
     ],
     'primary key' => ['id'],
@@ -368,21 +377,169 @@ function pdf_embed_seo_pro_plus_schema() {
         'length' => 45,
         'not null' => FALSE,
       ],
-      'consent_version' => [
+      'user_agent' => [
+        'type' => 'varchar',
+        'length' => 512,
+        'not null' => FALSE,
+      ],
+      'consent_text' => [
+        'type' => 'text',
+        'size' => 'medium',
+        'not null' => FALSE,
+      ],
+      'created_at' => [
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => TRUE,
+      ],
+      'withdrawn_at' => [
         'type' => 'varchar',
         'length' => 20,
         'not null' => FALSE,
-      ],
-      'created' => [
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
       ],
     ],
     'primary key' => ['id'],
     'indexes' => [
       'user_id' => ['user_id'],
       'session_id' => ['session_id'],
+      'consent_type' => ['consent_type'],
+    ],
+  ];
+
+  // Heatmap interactions table.
+  $schema['pdf_embed_seo_heatmaps'] = [
+    'description' => 'Stores PDF heatmap interaction data.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'document_id' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'page_number' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'x_position' => [
+        'type' => 'float',
+        'not null' => TRUE,
+      ],
+      'y_position' => [
+        'type' => 'float',
+        'not null' => TRUE,
+      ],
+      'interaction_type' => [
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => TRUE,
+        'default' => 'view',
+      ],
+      'duration_ms' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+      'session_id' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => FALSE,
+      ],
+      'created_at' => [
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => TRUE,
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'document_id' => ['document_id'],
+      'page_number' => ['document_id', 'page_number'],
+      'created_at' => ['created_at'],
+    ],
+  ];
+
+  // Two-factor authentication tokens table.
+  $schema['pdf_embed_seo_2fa_tokens'] = [
+    'description' => 'Stores 2FA verification tokens.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'user_id' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'token' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ],
+      'method' => [
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => TRUE,
+        'default' => 'email',
+      ],
+      'expires_at' => [
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => TRUE,
+      ],
+      'used_at' => [
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => FALSE,
+      ],
+      'created_at' => [
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => TRUE,
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'user_id' => ['user_id'],
+      'expires_at' => ['expires_at'],
+    ],
+  ];
+
+  // Two-factor authentication TOTP secrets table.
+  $schema['pdf_embed_seo_2fa_secrets'] = [
+    'description' => 'Stores TOTP secrets for 2FA.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'user_id' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'secret' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+      ],
+      'updated_at' => [
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => FALSE,
+      ],
+    ],
+    'primary key' => ['id'],
+    'unique keys' => [
+      'user_id' => ['user_id'],
     ],
   ];
 
@@ -393,6 +550,44 @@ function pdf_embed_seo_pro_plus_schema() {
  * Implements hook_install().
  */
 function pdf_embed_seo_pro_plus_install() {
+  // Add Pro+ columns to the analytics table owned by the base module.
+  $schema = \Drupal::database()->schema();
+  if ($schema->tableExists('pdf_embed_seo_analytics')) {
+    $pro_plus_columns = [
+      'event_type' => [
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => 'view',
+        'description' => 'Event type (view, download, print).',
+      ],
+      'session_id' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => FALSE,
+        'description' => 'Session ID for visitor tracking.',
+      ],
+      'country' => [
+        'type' => 'varchar',
+        'length' => 2,
+        'not null' => FALSE,
+        'description' => 'Country code (ISO 3166-1 alpha-2).',
+      ],
+      'device_type' => [
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => FALSE,
+        'description' => 'Device type (desktop, mobile, tablet).',
+      ],
+    ];
+
+    foreach ($pro_plus_columns as $column_name => $spec) {
+      if (!$schema->fieldExists('pdf_embed_seo_analytics', $column_name)) {
+        $schema->addField('pdf_embed_seo_analytics', $column_name, $spec);
+      }
+    }
+  }
+
   \Drupal::messenger()->addStatus(t('PDF Embed SEO Pro+ Enterprise has been installed. Please configure your license key at @link.', [
     '@link' => '/admin/config/content/pdf-embed-seo/pro-plus',
   ]));

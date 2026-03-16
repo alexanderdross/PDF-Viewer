@@ -101,11 +101,12 @@ class PdfDataController extends ControllerBase {
         $this->database->insert('pdf_embed_seo_analytics')
           ->fields(
                   [
-                    'pdf_id' => $pdf_document->id(),
+                    'pdf_document_id' => $pdf_document->id(),
+                    'user_id' => (int) $this->currentUser()->id(),
                     'ip_address' => _pdf_embed_seo_anonymize_ip($request ? $request->getClientIp() : ''),
                     'user_agent' => $request ? substr($request->headers->get('User-Agent', ''), 0, 255) : '',
-                    'referrer' => $request ? substr($request->headers->get('Referer', ''), 0, 255) : '',
-                    'created' => $this->time->getRequestTime(),
+                    'referer' => $request ? substr($request->headers->get('Referer', ''), 0, 255) : '',
+                    'timestamp' => $this->time->getRequestTime(),
                   ]
               )
           ->execute();

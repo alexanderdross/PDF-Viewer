@@ -82,6 +82,49 @@
         <span class="visually-hidden">{{ 'Fullscreen'|t }}</span>
         ⛶
       </button>
+
+      {# Pro+ Enterprise: Feature dropdown menu #}
+      {% if is_pro_plus %}
+        <div class="pdf-viewer-pro-plus-dropdown">
+          <button type="button" class="pdf-viewer-btn pdf-viewer-pro-plus-toggle" title="{{ 'Enterprise Features'|t }}" aria-expanded="false" aria-haspopup="true">
+            <span class="visually-hidden">{{ 'Enterprise Features'|t }}</span>
+            ⋯ <span class="pro-plus-caret">▾</span>
+          </button>
+          <div class="pdf-viewer-pro-plus-menu" role="menu">
+            <div class="pdf-viewer-pro-plus-menu-header">{{ 'Enterprise'|t }}</div>
+            {% if enable_annotations %}
+              <a href="#" data-action="annotations" role="menuitem">
+                <span class="menu-icon">✏</span>
+                <span class="menu-label">{{ 'Annotations'|t }}</span>
+              </a>
+            {% endif %}
+            {% if enable_versioning %}
+              <a href="#" data-action="versions" role="menuitem">
+                <span class="menu-icon">📋</span>
+                <span class="menu-label">{{ 'Version History'|t }}</span>
+              </a>
+            {% endif %}
+            {% if enable_advanced_analytics %}
+              <a href="#" data-action="heatmap" role="menuitem">
+                <span class="menu-icon">🔥</span>
+                <span class="menu-label">{{ 'Heatmap'|t }}</span>
+                <span class="menu-badge">{{ 'Pro+'|t }}</span>
+              </a>
+            {% endif %}
+            <div class="pdf-viewer-pro-plus-menu-divider"></div>
+            <a href="#" data-action="audit-log" role="menuitem">
+              <span class="menu-icon">📝</span>
+              <span class="menu-label">{{ 'Audit Log'|t }}</span>
+            </a>
+            {% if enable_compliance %}
+              <a href="#" data-action="compliance" role="menuitem">
+                <span class="menu-icon">🛡</span>
+                <span class="menu-label">{{ 'Compliance'|t }}</span>
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
     </div>
   </div>
 
@@ -93,6 +136,17 @@
     <button type="button" class="pdf-viewer-btn pdf-viewer-search-next" disabled>›</button>
     <button type="button" class="pdf-viewer-btn pdf-viewer-search-close">✕</button>
   </div>
+
+  {# Pro+: Annotations toolbar (shown when annotations are toggled) #}
+  {% if is_pro_plus and enable_annotations %}
+    <div class="pdf-viewer-annotations-toolbar">
+      <button type="button" class="pdf-viewer-btn" data-tool="highlight" title="{{ 'Highlight'|t }}">🖍 {{ 'Highlight'|t }}</button>
+      <button type="button" class="pdf-viewer-btn" data-tool="underline" title="{{ 'Underline'|t }}">U̲</button>
+      <button type="button" class="pdf-viewer-btn" data-tool="comment" title="{{ 'Comment'|t }}">💬 {{ 'Comment'|t }}</button>
+      <button type="button" class="pdf-viewer-btn" data-tool="text" title="{{ 'Text Note'|t }}">📝 {{ 'Note'|t }}</button>
+      <button type="button" class="pdf-viewer-btn" data-tool="drawing" title="{{ 'Draw'|t }}">✎ {{ 'Draw'|t }}</button>
+    </div>
+  {% endif %}
 
   {# Form toolbar (shown when PDF contains fillable forms) #}
   <div class="pdf-viewer-form-toolbar" style="display: none;">

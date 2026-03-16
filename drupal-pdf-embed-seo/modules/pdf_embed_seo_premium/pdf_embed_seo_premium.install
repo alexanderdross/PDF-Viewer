@@ -9,87 +9,9 @@
  * Implements hook_schema().
  */
 function pdf_embed_seo_premium_schema() {
-  $schema['pdf_embed_seo_analytics'] = [
-    'description' => 'Stores detailed PDF view analytics.',
-    'fields' => [
-      'id' => [
-        'type' => 'serial',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'description' => 'Primary key.',
-      ],
-      'pdf_document_id' => [
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
-        'description' => 'The PDF document entity ID.',
-      ],
-      'user_id' => [
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
-        'description' => 'The user ID (0 for anonymous).',
-      ],
-      'ip_address' => [
-        'type' => 'varchar',
-        'length' => 45,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'Visitor IP address.',
-      ],
-      'user_agent' => [
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'Browser user agent.',
-      ],
-      'referer' => [
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'HTTP referer.',
-      ],
-      'time_spent' => [
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
-        'description' => 'Time spent viewing (seconds).',
-      ],
-      'pages_viewed' => [
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 1,
-        'description' => 'Number of pages viewed.',
-      ],
-      'timestamp' => [
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
-        'description' => 'Unix timestamp of the view.',
-      ],
-      'created' => [
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
-        'description' => 'Unix timestamp when record was created.',
-      ],
-    ],
-    'primary key' => ['id'],
-    'indexes' => [
-      'pdf_document_id' => ['pdf_document_id'],
-      'user_id' => ['user_id'],
-      'timestamp' => ['timestamp'],
-      'created' => ['created'],
-    ],
-  ];
+  // Note: The pdf_embed_seo_analytics table is owned by the base module
+  // (pdf_embed_seo). Premium adds extra columns via update hooks.
+  // Do NOT redefine it here to avoid "table already exists" errors.
 
   $schema['pdf_embed_seo_progress'] = [
     'description' => 'Stores PDF reading progress.',
@@ -298,6 +220,38 @@ function pdf_embed_seo_premium_schema() {
  * Implements hook_install().
  */
 function pdf_embed_seo_premium_install() {
+  // Add premium columns to the analytics table owned by the base module.
+  $schema = \Drupal::database()->schema();
+  if ($schema->tableExists('pdf_embed_seo_analytics')) {
+    if (!$schema->fieldExists('pdf_embed_seo_analytics', 'time_spent')) {
+      $schema->addField('pdf_embed_seo_analytics', 'time_spent', [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Time spent viewing (seconds).',
+      ]);
+    }
+    if (!$schema->fieldExists('pdf_embed_seo_analytics', 'pages_viewed')) {
+      $schema->addField('pdf_embed_seo_analytics', 'pages_viewed', [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 1,
+        'description' => 'Number of pages viewed.',
+      ]);
+    }
+    if (!$schema->fieldExists('pdf_embed_seo_analytics', 'created')) {
+      $schema->addField('pdf_embed_seo_analytics', 'created', [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Unix timestamp when record was created.',
+      ]);
+    }
+  }
+
   // Set default configuration.
   $config = \Drupal::configFactory()->getEditable('pdf_embed_seo_premium.settings');
   $config->set('enable_analytics', TRUE);
@@ -478,6 +432,57 @@ function pdf_embed_seo_premium_update_9001() {
   _pdf_embed_seo_premium_migrate_state_tokens();
 
   return t('Added access tokens and rate limiting tables for improved security and scalability.');
+}
+
+/**
+ * Add premium columns to the analytics table owned by the base module.
+ */
+function pdf_embed_seo_premium_update_9002() {
+  $schema = \Drupal::database()->schema();
+
+  if ($schema->tableExists('pdf_embed_seo_analytics')) {
+    if (!$schema->fieldExists('pdf_embed_seo_analytics', 'time_spent')) {
+      $schema->addField('pdf_embed_seo_analytics', 'time_spent', [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Time spent viewing (seconds).',
+      ]);
+    }
+
+    if (!$schema->fieldExists('pdf_embed_seo_analytics', 'pages_viewed')) {
+      $schema->addField('pdf_embed_seo_analytics', 'pages_viewed', [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 1,
+        'description' => 'Number of pages viewed.',
+      ]);
+    }
+
+    if (!$schema->fieldExists('pdf_embed_seo_analytics', 'created')) {
+      $schema->addField('pdf_embed_seo_analytics', 'created', [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Unix timestamp when record was created.',
+      ]);
+      $schema->addIndex('pdf_embed_seo_analytics', 'created', ['created'], [
+        'fields' => [
+          'created' => [
+            'type' => 'int',
+            'unsigned' => TRUE,
+            'not null' => TRUE,
+            'default' => 0,
+          ],
+        ],
+      ]);
+    }
+  }
+
+  return t('Added premium columns (time_spent, pages_viewed, created) to analytics table.');
 }
 
 /**

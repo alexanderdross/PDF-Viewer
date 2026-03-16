@@ -272,18 +272,19 @@ class PdfApiController extends ControllerBase {
         $this->database->insert('pdf_embed_seo_analytics')
           ->fields(
                   [
-                    'pdf_id' => $pdf_document->id(),
+                    'pdf_document_id' => $pdf_document->id(),
+                    'user_id' => (int) $this->currentUser()->id(),
                     'ip_address' => _pdf_embed_seo_anonymize_ip($request->getClientIp()),
                     'user_agent' => substr($request->headers->get('User-Agent', ''), 0, 255),
-                    'referrer' => substr($request->headers->get('Referer', ''), 0, 255),
-                    'created' => $this->time->getRequestTime(),
+                    'referer' => substr($request->headers->get('Referer', ''), 0, 255),
+                    'timestamp' => $this->time->getRequestTime(),
                   ]
               )
           ->execute();
 
         // Get view count from analytics table.
         $view_count = (int) $this->database->select('pdf_embed_seo_analytics', 'a')
-          ->condition('pdf_id', $pdf_document->id())
+          ->condition('pdf_document_id', $pdf_document->id())
           ->countQuery()
           ->execute()
           ->fetchField();

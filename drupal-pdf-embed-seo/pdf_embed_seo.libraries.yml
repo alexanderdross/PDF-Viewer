@@ -107,3 +107,29 @@ premium-password:
   dependencies:
     - core/drupal
     - core/drupal.ajax
+
+# Pro+: Enterprise toolbar with feature dropdown.
+pro-plus-toolbar:
+  version: 1.x
+  js:
+    assets/js/pro-plus/pdf-pro-plus-toolbar.js: {}
+  css:
+    component:
+      assets/css/pro-plus/pdf-pro-plus-toolbar.css: {}
+  dependencies:
+    - pdf_embed_seo/viewer
+    - core/drupal
+    - core/drupalSettings
+
+# Pro+: Annotations.
+pro-plus-annotations:
+  version: 1.x
+  js:
+    assets/js/pro-plus/pdf-annotations.js: {}
+  css:
+    component:
+      assets/css/pro-plus/pdf-annotations.css: {}
+  dependencies:
+    - pdf_embed_seo/viewer
+    - core/drupal
+    - core/drupalSettings

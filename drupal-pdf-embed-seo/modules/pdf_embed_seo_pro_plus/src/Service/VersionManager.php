@@ -64,7 +64,7 @@ class VersionManager {
     $new_version = (int) $version_parts[0] . '.' . ((int) ($version_parts[1] ?? 0) + 1);
 
     // Mark all existing versions as not current.
-    $this->database->update('pdf_versions')
+    $this->database->update('pdf_embed_seo_versions')
       ->fields(['is_current' => 0])
       ->condition('document_id', $document_id)
       ->execute();
@@ -83,7 +83,7 @@ class VersionManager {
 
     // Insert new version.
     try {
-      $id = $this->database->insert('pdf_versions')
+      $id = $this->database->insert('pdf_embed_seo_versions')
         ->fields(
                 [
                   'document_id' => $document_id,
@@ -122,7 +122,7 @@ class VersionManager {
    */
   public function getVersions(int $document_id): array {
     try {
-      $query = $this->database->select('pdf_versions', 'v')
+      $query = $this->database->select('pdf_embed_seo_versions', 'v')
         ->fields('v')
         ->condition('document_id', $document_id)
         ->orderBy('created_at', 'DESC');
@@ -145,7 +145,7 @@ class VersionManager {
    */
   public function getCurrentVersion(int $document_id): ?array {
     try {
-      $query = $this->database->select('pdf_versions', 'v')
+      $query = $this->database->select('pdf_embed_seo_versions', 'v')
         ->fields('v')
         ->condition('document_id', $document_id)
         ->condition('is_current', 1);
@@ -169,7 +169,7 @@ class VersionManager {
    */
   public function getVersion(int $version_id): ?array {
     try {
-      $query = $this->database->select('pdf_versions', 'v')
+      $query = $this->database->select('pdf_embed_seo_versions', 'v')
         ->fields('v')
         ->condition('id', $version_id);
 
@@ -198,13 +198,13 @@ class VersionManager {
 
     try {
       // Mark all versions as not current.
-      $this->database->update('pdf_versions')
+      $this->database->update('pdf_embed_seo_versions')
         ->fields(['is_current' => 0])
         ->condition('document_id', $version['document_id'])
         ->execute();
 
       // Mark this version as current.
-      $this->database->update('pdf_versions')
+      $this->database->update('pdf_embed_seo_versions')
         ->fields(['is_current' => 1])
         ->condition('id', $version_id)
         ->execute();
@@ -237,7 +237,7 @@ class VersionManager {
     }
 
     try {
-      $this->database->delete('pdf_versions')
+      $this->database->delete('pdf_embed_seo_versions')
         ->condition('id', $version_id)
         ->execute();
 
@@ -259,7 +259,7 @@ class VersionManager {
    */
   public function getVersionCount(int $document_id): int {
     try {
-      $query = $this->database->select('pdf_versions', 'v')
+      $query = $this->database->select('pdf_embed_seo_versions', 'v')
         ->condition('document_id', $document_id);
       $query->addExpression('COUNT(*)', 'count');
 

@@ -2,7 +2,7 @@
 
 A comprehensive PDF management solution available for WordPress, Drupal, and React/Next.js that uses Mozilla's PDF.js library to securely display PDFs with SEO optimization. This repository also contains the marketing website (WordPress theme) and a centralized license management system.
 
-**Current Version:** 1.3.0/1.3.1 (Pro+ Enterprise), 1.2.16 (Drupal Free & Premium), 1.2.13 (WordPress Free & Premium), 1.2.12 (React Free & Premium)
+**Current Version:** 1.3.2 (Pro+ Enterprise), 1.2.17 (Drupal Free & Premium), 1.2.13 (WordPress Free & Premium), 1.2.12 (React Free & Premium)
 **Platforms:** WordPress (Free, Premium & Pro+), Drupal 10/11 (Free, Premium & Pro+), React/Next.js
 **License:** GPL v2 or later (WordPress/Drupal), MIT (React Free), Commercial (React Pro/Pro+)
 **Website:** https://pdfviewer.drossmedia.de
@@ -53,9 +53,9 @@ This monorepo contains **five major components**:
 | WP Free | `wordpress-pdf-embed-seo/` | WordPress 5.8+ | 1.2.13 | Core PDF viewer, SEO, REST API |
 | WP Premium | `wordpress-pdf-embed-seo/premium/` | WordPress 5.8+ | 1.2.13 | Analytics, passwords, progress, sitemap |
 | WP Pro+ | `wordpress-pdf-embed-seo/pro-plus/` | WordPress 5.8+ | 1.3.0 | Advanced analytics, annotations, versioning, webhooks, 2FA, compliance |
-| Drupal Free | `drupal-pdf-embed-seo/` | Drupal 10/11 | 1.2.16 | Core PDF viewer, SEO, REST API |
-| Drupal Premium | `drupal-pdf-embed-seo/modules/pdf_embed_seo_premium/` | Drupal 10/11 | 1.2.16 | Analytics, passwords, progress, sitemap |
-| Drupal Pro+ | `drupal-pdf-embed-seo/modules/pdf_embed_seo_pro_plus/` | Drupal 10/11 | 1.3.0 | Advanced analytics, annotations, versioning, webhooks, 2FA, compliance |
+| Drupal Free | `drupal-pdf-embed-seo/` | Drupal 10/11 | 1.2.17 | Core PDF viewer, SEO, REST API |
+| Drupal Premium | `drupal-pdf-embed-seo/modules/pdf_embed_seo_premium/` | Drupal 10/11 | 1.2.17 | Analytics, passwords, progress, sitemap |
+| Drupal Pro+ | `drupal-pdf-embed-seo/modules/pdf_embed_seo_pro_plus/` | Drupal 10/11 | 1.3.2 | Advanced analytics, annotations, versioning, webhooks, 2FA, compliance |
 | React Free | `react-pdf-embed-seo/packages/react/` | React 18+/Next.js 13+ | 1.2.12 | Components, hooks, SEO, API client |
 | React Pro | `react-pdf-embed-seo/packages/react-premium/` | React 18+/Next.js 13+ | 1.2.12 | Analytics, passwords, progress, search |
 | React Pro+ | `react-pdf-embed-seo/packages/react-pro-plus/` | React 18+/Next.js 13+ | 1.3.1 | Heatmaps, annotations, versioning, webhooks, 2FA, compliance |
@@ -360,7 +360,7 @@ Configurable via Settings page (`/wp-admin/edit.php?post_type=pdf_document&page=
 ### Overview
 
 **Location:** `drupal-pdf-embed-seo/`
-**Version:** 1.2.16 (Free/Premium), 1.3.1 (Pro+)
+**Version:** 1.2.17 (Free/Premium), 1.3.2 (Pro+)
 **Requires:** Drupal 10 or 11, PHP 8.1+
 **Dependencies:** node, file, taxonomy, path, path_alias, media
 
@@ -1208,7 +1208,7 @@ cd react-pdf-embed-seo && pnpm build       # Build all packages
 | Package | Version | Contents |
 |---------|---------|----------|
 | `pdf-embed-seo-optimize-v1.2.13.zip` | 1.2.13 | WordPress plugin (Free + Premium + Pro+, license-gated) |
-| `drupal-pdf-embed-seo-v1.2.16.zip` | 1.2.16 | Drupal module (Free + Premium + Pro+) |
+| `drupal-pdf-embed-seo-v1.2.17.zip` | 1.2.17 | Drupal module (Free + Premium + Pro+) |
 | `react-pdf-embed-seo-v1.2.12.zip` | 1.2.12 | React/Next.js packages |
 | `pdfviewer-theme.zip` | 2.2.97 | Marketing website WordPress theme |
 | `pdf-license-manager-v1.0.1.zip` | 1.0.1 | License management WordPress plugin |
@@ -1222,10 +1222,10 @@ cd react-pdf-embed-seo && pnpm build       # Build all packages
 ## Changelog Summary
 
 ### Current Versions
-- **Drupal Free/Premium:** v1.2.16 (2026-03-12)
+- **Drupal Free/Premium:** v1.2.17 (2026-03-16)
+- **Drupal Pro+ Enterprise:** v1.3.2 (2026-03-16)
 - **WP Free/Premium:** v1.2.13 (2026-03-12)
 - **React Free/Premium:** v1.2.12 (2026-03-11)
-- **Pro+ Enterprise:** v1.3.1 (2026-03-11)
 - **Theme:** v2.2.97 (2026-03-12)
 - **License Manager:** v1.0.1
 
@@ -1233,6 +1233,7 @@ cd react-pdf-embed-seo && pnpm build       # Build all packages
 
 | Version | Highlights |
 |---------|-----------|
+| **1.2.17/1.3.2** | Drupal: Pro+ activation fix, schema/service alignment, XSS fix, permission logic fix, security hardening |
 | **1.2.16/1.2.13** | AcroForms annotation layer fix, form toolbar rendering, GDPR/HIPAA compliance info |
 | **1.3.0** | Pro+ Enterprise: advanced analytics, annotations, versioning, webhooks, 2FA, compliance |
 | **1.2.13** | Drupal: PHPStan level 5 + PHPCS compliance, DI overhaul (40+ static calls removed), type safety fixes |

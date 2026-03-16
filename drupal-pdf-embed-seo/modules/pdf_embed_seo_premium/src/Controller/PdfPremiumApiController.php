@@ -637,7 +637,7 @@ class PdfPremiumApiController extends ControllerBase {
 
     // Check document ID.
     $doc_id = $token_data['document_id'] ?? $token_data['pdf_id'] ?? NULL;
-    if ($doc_id != $pdf_document->id()) {
+    if ((int) $doc_id !== (int) $pdf_document->id()) {
       return new JsonResponse(
             [
               'valid' => FALSE,
