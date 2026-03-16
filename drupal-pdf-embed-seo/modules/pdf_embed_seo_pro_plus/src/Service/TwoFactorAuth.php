@@ -88,14 +88,14 @@ class TwoFactorAuth {
 
     try {
       // Invalidate any existing tokens.
-      $this->database->update('pdf_2fa_tokens')
+      $this->database->update('pdf_embed_seo_2fa_tokens')
         ->fields(['used_at' => date('Y-m-d H:i:s')])
         ->condition('user_id', $user_id)
         ->isNull('used_at')
         ->execute();
 
       // Insert new token.
-      $this->database->insert('pdf_2fa_tokens')
+      $this->database->insert('pdf_embed_seo_2fa_tokens')
         ->fields(
                 [
                   'user_id' => $user_id,
@@ -131,7 +131,7 @@ class TwoFactorAuth {
    */
   public function verifyToken(int $user_id, string $token): bool {
     try {
-      $query = $this->database->select('pdf_2fa_tokens', 't')
+      $query = $this->database->select('pdf_embed_seo_2fa_tokens', 't')
         ->fields('t', ['id', 'token', 'expires_at'])
         ->condition('user_id', $user_id)
         ->isNull('used_at')
@@ -146,7 +146,7 @@ class TwoFactorAuth {
       }
 
       if ($this->password->check($token, $result['token'])) {
-        $this->database->update('pdf_2fa_tokens')
+        $this->database->update('pdf_embed_seo_2fa_tokens')
           ->fields(['used_at' => date('Y-m-d H:i:s')])
           ->condition('id', $result['id'])
           ->execute();
@@ -286,7 +286,7 @@ class TwoFactorAuth {
    */
   public function cleanup(): int {
     try {
-      return $this->database->delete('pdf_2fa_tokens')
+      return $this->database->delete('pdf_embed_seo_2fa_tokens')
         ->condition('expires_at', date('Y-m-d H:i:s'), '<')
         ->execute();
     }
@@ -313,7 +313,7 @@ class TwoFactorAuth {
     }
 
     try {
-      $this->database->merge('pdf_2fa_secrets')
+      $this->database->merge('pdf_embed_seo_2fa_secrets')
         ->keys(['user_id' => $user_id])
         ->fields(
                 [
@@ -343,7 +343,7 @@ class TwoFactorAuth {
    */
   public function verifyTotp(int $user_id, string $code): bool {
     try {
-      $query = $this->database->select('pdf_2fa_secrets', 's')
+      $query = $this->database->select('pdf_embed_seo_2fa_secrets', 's')
         ->fields('s', ['secret'])
         ->condition('user_id', $user_id);
 

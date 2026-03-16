@@ -139,11 +139,12 @@ function pdf_embed_seo_pdf_document_view(array &$build, EntityInterface $entity,
       try {
         \Drupal::database()->insert('pdf_embed_seo_analytics')
           ->fields([
-            'pdf_id' => $entity->id(),
+            'pdf_document_id' => $entity->id(),
+            'user_id' => (int) \Drupal::currentUser()->id(),
             'ip_address' => _pdf_embed_seo_anonymize_ip(\Drupal::request()->getClientIp()),
             'user_agent' => substr(\Drupal::request()->headers->get('User-Agent', ''), 0, 255),
-            'referrer' => substr(\Drupal::request()->headers->get('Referer', ''), 0, 255),
-            'created' => \Drupal::time()->getRequestTime(),
+            'referer' => substr(\Drupal::request()->headers->get('Referer', ''), 0, 255),
+            'timestamp' => \Drupal::time()->getRequestTime(),
           ])
           ->execute();
       }

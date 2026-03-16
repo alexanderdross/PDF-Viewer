@@ -93,7 +93,7 @@ class WebhookDispatcher {
     }
 
     try {
-      $id = $this->database->insert('pdf_webhooks')
+      $id = $this->database->insert('pdf_embed_seo_webhooks')
         ->fields(
                 [
                   'name' => $name,
@@ -131,7 +131,7 @@ class WebhookDispatcher {
    */
   public function get(int $id): ?array {
     try {
-      $query = $this->database->select('pdf_webhooks', 'w')
+      $query = $this->database->select('pdf_embed_seo_webhooks', 'w')
         ->fields('w')
         ->condition('id', $id);
 
@@ -159,7 +159,7 @@ class WebhookDispatcher {
    */
   public function getAll(bool $active_only = FALSE): array {
     try {
-      $query = $this->database->select('pdf_webhooks', 'w')
+      $query = $this->database->select('pdf_embed_seo_webhooks', 'w')
         ->fields('w')
         ->orderBy('name', 'ASC');
 
@@ -218,7 +218,7 @@ class WebhookDispatcher {
     }
 
     try {
-      $this->database->update('pdf_webhooks')
+      $this->database->update('pdf_embed_seo_webhooks')
         ->fields($fields)
         ->condition('id', $id)
         ->execute();
@@ -241,12 +241,12 @@ class WebhookDispatcher {
    */
   public function delete(int $id): bool {
     try {
-      $this->database->delete('pdf_webhooks')
+      $this->database->delete('pdf_embed_seo_webhooks')
         ->condition('id', $id)
         ->execute();
 
       // Also delete deliveries.
-      $this->database->delete('pdf_webhook_deliveries')
+      $this->database->delete('pdf_embed_seo_webhook_deliveries')
         ->condition('webhook_id', $id)
         ->execute();
 
@@ -424,7 +424,7 @@ class WebhookDispatcher {
    */
   protected function createDelivery(int $webhook_id, string $event, string $payload) {
     try {
-      return $this->database->insert('pdf_webhook_deliveries')
+      return $this->database->insert('pdf_embed_seo_webhook_deliveries')
         ->fields(
                 [
                   'webhook_id' => $webhook_id,
@@ -451,13 +451,13 @@ class WebhookDispatcher {
    */
   protected function updateDelivery(int $delivery_id, array $data): void {
     try {
-      $this->database->update('pdf_webhook_deliveries')
+      $this->database->update('pdf_embed_seo_webhook_deliveries')
         ->fields($data)
         ->condition('id', $delivery_id)
         ->execute();
 
       // Also update webhook last triggered.
-      $this->database->update('pdf_webhooks')
+      $this->database->update('pdf_embed_seo_webhooks')
         ->fields(
                 [
                   'last_triggered' => date('Y-m-d H:i:s'),
@@ -483,7 +483,7 @@ class WebhookDispatcher {
    */
   protected function getDeliveryWebhookId(int $delivery_id): ?int {
     try {
-      $query = $this->database->select('pdf_webhook_deliveries', 'd')
+      $query = $this->database->select('pdf_embed_seo_webhook_deliveries', 'd')
         ->fields('d', ['webhook_id'])
         ->condition('id', $delivery_id);
 
@@ -502,7 +502,7 @@ class WebhookDispatcher {
    */
   protected function resetFailureCount(int $webhook_id): void {
     try {
-      $this->database->update('pdf_webhooks')
+      $this->database->update('pdf_embed_seo_webhooks')
         ->fields(['failure_count' => 0])
         ->condition('id', $webhook_id)
         ->execute();
@@ -520,7 +520,7 @@ class WebhookDispatcher {
    */
   protected function incrementFailureCount(int $webhook_id): void {
     try {
-      $this->database->update('pdf_webhooks')
+      $this->database->update('pdf_embed_seo_webhooks')
         ->expression('failure_count', 'failure_count + 1')
         ->condition('id', $webhook_id)
         ->execute();
@@ -554,7 +554,7 @@ class WebhookDispatcher {
    */
   public function getDeliveries(int $webhook_id, int $limit = 50): array {
     try {
-      $query = $this->database->select('pdf_webhook_deliveries', 'd')
+      $query = $this->database->select('pdf_embed_seo_webhook_deliveries', 'd')
         ->fields('d')
         ->condition('webhook_id', $webhook_id)
         ->orderBy('created_at', 'DESC')

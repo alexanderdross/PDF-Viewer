@@ -76,7 +76,7 @@ class AnnotationManager {
     $annotation_uuid = $this->uuid->generate();
 
     try {
-      $this->database->insert('pdf_annotations')
+      $this->database->insert('pdf_embed_seo_annotations')
         ->fields(
                 [
                   'uuid' => $annotation_uuid,
@@ -120,7 +120,7 @@ class AnnotationManager {
    */
   public function get(string $uuid): ?array {
     try {
-      $query = $this->database->select('pdf_annotations', 'a')
+      $query = $this->database->select('pdf_embed_seo_annotations', 'a')
         ->fields('a')
         ->condition('uuid', $uuid);
 
@@ -152,7 +152,7 @@ class AnnotationManager {
    */
   public function getByDocument(int $document_id, ?int $page_number = NULL, ?int $user_id = NULL): array {
     try {
-      $query = $this->database->select('pdf_annotations', 'a')
+      $query = $this->database->select('pdf_embed_seo_annotations', 'a')
         ->fields('a')
         ->condition('document_id', $document_id)
         ->orderBy('page_number', 'ASC')
@@ -218,7 +218,7 @@ class AnnotationManager {
     }
 
     try {
-      $this->database->update('pdf_annotations')
+      $this->database->update('pdf_embed_seo_annotations')
         ->fields($fields)
         ->condition('uuid', $uuid)
         ->execute();
@@ -251,7 +251,7 @@ class AnnotationManager {
     }
 
     try {
-      $this->database->delete('pdf_annotations')
+      $this->database->delete('pdf_embed_seo_annotations')
         ->condition('uuid', $uuid)
         ->execute();
 
@@ -273,7 +273,7 @@ class AnnotationManager {
    */
   public function getCount(int $document_id): int {
     try {
-      $query = $this->database->select('pdf_annotations', 'a')
+      $query = $this->database->select('pdf_embed_seo_annotations', 'a')
         ->condition('document_id', $document_id);
       $query->addExpression('COUNT(*)', 'count');
 
@@ -397,7 +397,7 @@ class AnnotationManager {
    */
   public function deleteByDocument(int $document_id): int {
     try {
-      return $this->database->delete('pdf_annotations')
+      return $this->database->delete('pdf_embed_seo_annotations')
         ->condition('document_id', $document_id)
         ->execute();
     }
