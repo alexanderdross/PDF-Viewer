@@ -155,8 +155,8 @@ class WhiteLabel {
 
     // Set company name.
     if (!empty($config['company_name'])) {
-      $company = addslashes($config['company_name']);
-      $js .= "document.querySelectorAll('.pdf-viewer-title').forEach(function(el) { el.setAttribute('data-company', '{$company}'); });\n";
+      $company = json_encode($config['company_name']);
+      $js .= "document.querySelectorAll('.pdf-viewer-title').forEach(function(el) { el.setAttribute('data-company', {$company}); });\n";
     }
 
     // Add custom JS.

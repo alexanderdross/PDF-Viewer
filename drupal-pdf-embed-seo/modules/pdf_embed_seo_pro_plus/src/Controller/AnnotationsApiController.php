@@ -165,16 +165,21 @@ class AnnotationsApiController extends ControllerBase {
       ], 404);
     }
 
-    // Check permission.
+    // Check permission: owner needs 'edit own', non-owner needs 'edit any'.
     $current_uid = (int) $this->currentUser()->id();
     $owner_uid = (int) ($existing['user_id'] ?? 0);
-    if ($current_uid !== $owner_uid && !$this->currentUser()->hasPermission('edit any pdf annotations')) {
-      if (!$this->currentUser()->hasPermission('edit own pdf annotations')) {
-        return new JsonResponse([
-          'success' => FALSE,
-          'message' => 'Permission denied.',
-        ], 403);
-      }
+    $is_owner = ($current_uid === $owner_uid);
+    if ($is_owner && !$this->currentUser()->hasPermission('edit own pdf annotations')) {
+      return new JsonResponse([
+        'success' => FALSE,
+        'message' => 'Permission denied.',
+      ], 403);
+    }
+    if (!$is_owner && !$this->currentUser()->hasPermission('edit any pdf annotations')) {
+      return new JsonResponse([
+        'success' => FALSE,
+        'message' => 'Permission denied.',
+      ], 403);
     }
 
     $updated = $this->annotationManager->update($uuid, $content['data'] ?? []);
@@ -213,16 +218,21 @@ class AnnotationsApiController extends ControllerBase {
       ], 404);
     }
 
-    // Check permission.
+    // Check permission: owner needs 'delete own', non-owner needs 'delete any'.
     $current_uid = (int) $this->currentUser()->id();
     $owner_uid = (int) ($existing['user_id'] ?? 0);
-    if ($current_uid !== $owner_uid && !$this->currentUser()->hasPermission('delete any pdf annotations')) {
-      if (!$this->currentUser()->hasPermission('delete own pdf annotations')) {
-        return new JsonResponse([
-          'success' => FALSE,
-          'message' => 'Permission denied.',
-        ], 403);
-      }
+    $is_owner = ($current_uid === $owner_uid);
+    if ($is_owner && !$this->currentUser()->hasPermission('delete own pdf annotations')) {
+      return new JsonResponse([
+        'success' => FALSE,
+        'message' => 'Permission denied.',
+      ], 403);
+    }
+    if (!$is_owner && !$this->currentUser()->hasPermission('delete any pdf annotations')) {
+      return new JsonResponse([
+        'success' => FALSE,
+        'message' => 'Permission denied.',
+      ], 403);
     }
 
     $deleted = $this->annotationManager->delete($uuid);
