@@ -252,6 +252,26 @@ $changelog_wordpress = array(
 // ─── Drupal Changelog ──────────────────────────────────────────────────
 $changelog_drupal = array(
     array(
+        'version' => '1.2.17 / 1.3.2',
+        'date'    => 'March 16, 2026',
+        'type'    => 'both',
+        'title'   => 'Pro+ Activation Fix, Schema Alignment & Security Hardening',
+        'changes' => array(
+            array('type' => 'fixed', 'description' => 'Pro+ Module Activation - Resolved critical installation failures preventing Pro+ Enterprise tier from activating (added 8 missing controllers, ProPlusSettingsForm, routing, and asset files)'),
+            array('type' => 'fixed', 'description' => 'Database Schema Alignment - Rewrote Pro+ hook_schema() for 6 tables and added 3 missing table schemas (heatmaps, 2fa_tokens, 2fa_secrets)'),
+            array('type' => 'fixed', 'description' => 'Table Name Prefix - Fixed all 9 Pro+ services using short table names instead of required pdf_embed_seo_ prefix (60+ query references)'),
+            array('type' => 'fixed', 'description' => 'Analytics Column Names - Fixed document_id to pdf_document_id in free module analytics queries'),
+            array('type' => 'fixed', 'description' => 'Timestamp Type Alignment - Fixed schema columns using int type where services insert datetime strings'),
+            array('type' => 'fixed', 'description' => 'AdvancedAnalytics SQL - Fixed DATE_FORMAT to use FROM_UNIXTIME() for integer timestamp columns'),
+            array('type' => 'fixed', 'description' => 'Premium Duplicate Table - Removed duplicate pdf_embed_seo_analytics definition from Premium schema that caused install conflicts'),
+            array('type' => 'fixed', 'description' => 'Null Safety - Added null coalescing for PDF file URL access in PdfViewController and PdfDocumentForm'),
+            array('type' => 'fixed', 'description' => 'Security: XSS in WhiteLabel - Replaced addslashes() with json_encode() for JavaScript context output'),
+            array('type' => 'fixed', 'description' => 'Security: Annotation Permission Logic - Fixed broken owner-based permission checks in AnnotationsApiController'),
+            array('type' => 'fixed', 'description' => 'Security: Strict Equality - Changed loose != to strict !== with int cast in expiring link validation'),
+            array('type' => 'changed', 'description' => 'Version bump: Free/Premium 1.2.16 -> 1.2.17, Pro+ 1.3.1 -> 1.3.2'),
+        ),
+    ),
+    array(
         'version' => '1.2.16',
         'date'    => 'March 12, 2026',
         'type'    => 'both',
