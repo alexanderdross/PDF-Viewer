@@ -14,7 +14,7 @@ jobs:
       run:
         working-directory: react-pdf-embed-seo
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
         with:
           version: 8.15.0
@@ -34,7 +34,7 @@ jobs:
       run:
         working-directory: theme
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
@@ -49,7 +49,7 @@ jobs:
       run:
         working-directory: wordpress-pdf-embed-seo
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
@@ -72,7 +72,7 @@ jobs:
     name: Drupal Module Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
@@ -95,7 +95,7 @@ jobs:
     name: Distribution ZIP Integrity
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Verify all dist ZIPs are valid
         run: |
           echo "Checking distribution ZIP integrity..."
