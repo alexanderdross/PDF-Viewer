@@ -45,51 +45,86 @@ jobs:
   wordpress-tests:
     name: WordPress Plugin Tests
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: wordpress-pdf-embed-seo
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
     steps:
       - uses: actions/checkout@v6
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
+          extensions: mysqli, pdo_mysql
           tools: phpunit:9
           coverage: none
+
+      - name: Install WordPress test suite
+        run: |
+          bash <(curl -s https://raw.githubusercontent.com/wp-cli/scaffold-command/main/templates/install-wp-tests.sh) \
+            wordpress_test root root 127.0.0.1 latest true
+
       - name: Run free tier unit tests
-        run: |
-          cd tests
-          phpunit --testsuite unit --no-interaction || true
+        working-directory: wordpress-pdf-embed-seo
+        run: cd tests && phpunit --testsuite unit
+
       - name: Run premium unit tests
-        run: |
-          cd premium/tests
-          phpunit --testsuite unit --no-interaction || true
+        working-directory: wordpress-pdf-embed-seo
+        run: cd tests && phpunit --testsuite unit --configuration ../premium/phpunit.xml
+
       - name: Run pro-plus unit tests
-        run: |
-          cd pro-plus/tests
-          phpunit --testsuite unit --no-interaction || true
+        working-directory: wordpress-pdf-embed-seo
+        run: cd tests && phpunit --testsuite unit --configuration ../pro-plus/phpunit.xml
 
   drupal-tests:
-    name: Drupal Module Tests
+    name: Drupal Module Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          tools: phpunit:10
+          tools: phpcs
           coverage: none
-      - name: Run free module unit tests
+      - name: Validate module structure
         run: |
-          cd drupal-pdf-embed-seo
-          find tests/src/Unit -name '*Test.php' -exec echo "Found: {}" \;
-      - name: Run premium module unit tests
+          echo "=== Drupal Free Module ==="
+          test -f drupal-pdf-embed-seo/pdf_embed_seo.info.yml || { echo "FAIL: missing info.yml"; exit 1; }
+          test -f drupal-pdf-embed-seo/pdf_embed_seo.module || { echo "FAIL: missing .module"; exit 1; }
+          echo "Free module structure OK"
+
+          echo "=== Drupal Premium Module ==="
+          test -f drupal-pdf-embed-seo/modules/pdf_embed_seo_premium/pdf_embed_seo_premium.info.yml || { echo "FAIL: missing premium info.yml"; exit 1; }
+          echo "Premium module structure OK"
+
+          echo "=== Drupal Pro+ Module ==="
+          test -f drupal-pdf-embed-seo/modules/pdf_embed_seo_pro_plus/pdf_embed_seo_pro_plus.info.yml || { echo "FAIL: missing pro-plus info.yml"; exit 1; }
+          echo "Pro+ module structure OK"
+
+      - name: Check for PHP syntax errors
         run: |
-          cd drupal-pdf-embed-seo/modules/pdf_embed_seo_premium
-          find tests/src/Unit -name '*Test.php' -exec echo "Found: {}" \;
-      - name: Run pro-plus module unit tests
+          find drupal-pdf-embed-seo -name '*.php' -print0 | xargs -0 -n1 php -l 2>&1 | grep -v "^No syntax errors" | head -20
+          if find drupal-pdf-embed-seo -name '*.php' -print0 | xargs -0 -n1 php -l 2>&1 | grep -q "^Parse error"; then
+            echo "PHP syntax errors found!"
+            exit 1
+          fi
+          echo "All PHP files pass syntax check."
+
+      - name: Count test files
         run: |
-          cd drupal-pdf-embed-seo/modules/pdf_embed_seo_pro_plus
-          find tests/src/Unit -name '*Test.php' -exec echo "Found: {}" \;
+          FREE=$(find drupal-pdf-embed-seo/tests -name '*Test.php' | wc -l)
+          PREMIUM=$(find drupal-pdf-embed-seo/modules/pdf_embed_seo_premium/tests -name '*Test.php' 2>/dev/null | wc -l)
+          PROPLUS=$(find drupal-pdf-embed-seo/modules/pdf_embed_seo_pro_plus/tests -name '*Test.php' 2>/dev/null | wc -l)
+          echo "Free tests: $FREE, Premium tests: $PREMIUM, Pro+ tests: $PROPLUS"
+          echo "Total: $(( FREE + PREMIUM + PROPLUS )) test files"
 
   dist-integrity:
     name: Distribution ZIP Integrity
