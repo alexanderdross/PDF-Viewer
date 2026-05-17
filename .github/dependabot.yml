@@ -1,0 +1,73 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/react-pdf-embed-seo"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "npm"
+    groups:
+      dev-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+      testing:
+        patterns:
+          - "@testing-library/*"
+          - "vitest"
+          - "jsdom"
+
+  - package-ecosystem: "npm"
+    directory: "/react-pdf-embed-seo/packages/core"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "npm"
+      - "core"
+
+  - package-ecosystem: "npm"
+    directory: "/react-pdf-embed-seo/packages/react"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "npm"
+
+  - package-ecosystem: "npm"
+    directory: "/react-pdf-embed-seo/packages/react-premium"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "npm"
+
+  - package-ecosystem: "npm"
+    directory: "/react-pdf-embed-seo/packages/react-pro-plus"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "npm"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"

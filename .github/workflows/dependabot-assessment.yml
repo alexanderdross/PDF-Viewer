@@ -1,0 +1,94 @@
+name: Dependabot Assessment
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  assess-dependabot:
+    name: Assess Dependency Updates
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Classify update risk
+        id: risk
+        run: |
+          TYPE="${{ steps.metadata.outputs.update-type }}"
+          ECOSYSTEM="${{ steps.metadata.outputs.package-ecosystem }}"
+          DEP="${{ steps.metadata.outputs.dependency-names }}"
+          FROM="${{ steps.metadata.outputs.previous-version }}"
+          TO="${{ steps.metadata.outputs.new-version }}"
+
+          echo "dependency=$DEP" >> "$GITHUB_OUTPUT"
+          echo "from=$FROM" >> "$GITHUB_OUTPUT"
+          echo "to=$TO" >> "$GITHUB_OUTPUT"
+          echo "ecosystem=$ECOSYSTEM" >> "$GITHUB_OUTPUT"
+
+          if [ "$TYPE" = "version-update:semver-patch" ]; then
+            echo "risk=low" >> "$GITHUB_OUTPUT"
+            echo "label=patch" >> "$GITHUB_OUTPUT"
+          elif [ "$TYPE" = "version-update:semver-minor" ]; then
+            echo "risk=medium" >> "$GITHUB_OUTPUT"
+            echo "label=minor" >> "$GITHUB_OUTPUT"
+          else
+            echo "risk=high" >> "$GITHUB_OUTPUT"
+            echo "label=major" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Post assessment comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const risk = '${{ steps.risk.outputs.risk }}';
+            const label = '${{ steps.risk.outputs.label }}';
+            const dep = '${{ steps.risk.outputs.dependency }}';
+            const from = '${{ steps.risk.outputs.from }}';
+            const to = '${{ steps.risk.outputs.to }}';
+            const ecosystem = '${{ steps.risk.outputs.ecosystem }}';
+
+            const icons = { low: '🟢', medium: '🟡', high: '🔴' };
+            const icon = icons[risk] || '⚪';
+
+            const body = [
+              `## ${icon} Dependabot Assessment`,
+              '',
+              `| Field | Value |`,
+              `|-------|-------|`,
+              `| **Dependency** | \`${dep}\` |`,
+              `| **Update** | ${from} → ${to} |`,
+              `| **Type** | ${label} |`,
+              `| **Ecosystem** | ${ecosystem} |`,
+              `| **Risk** | ${risk} |`,
+              '',
+              risk === 'low'
+                ? '✅ **Patch update** — safe to auto-merge if tests pass.'
+                : risk === 'medium'
+                ? '⚠️ **Minor update** — review changelog for new features or deprecations before merging.'
+                : '🚨 **Major update** — breaking changes likely. Manual review required.',
+            ].join('\n');
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+
+      - name: Auto-approve patch updates
+        if: steps.risk.outputs.risk == 'low'
+        run: gh pr review --approve "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
