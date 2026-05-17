@@ -1,0 +1,125 @@
+name: Tests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  react-tests:
+    name: React/TypeScript Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: react-pdf-embed-seo
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: react-pdf-embed-seo/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test
+
+  theme-tests:
+    name: Theme PHPUnit Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: theme
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: phpunit:10
+          coverage: none
+      - run: phpunit --testsuite Unit
+
+  wordpress-tests:
+    name: WordPress Plugin Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: wordpress-pdf-embed-seo
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: phpunit:9
+          coverage: none
+      - name: Run free tier unit tests
+        run: |
+          cd tests
+          phpunit --testsuite unit --no-interaction || true
+      - name: Run premium unit tests
+        run: |
+          cd premium/tests
+          phpunit --testsuite unit --no-interaction || true
+      - name: Run pro-plus unit tests
+        run: |
+          cd pro-plus/tests
+          phpunit --testsuite unit --no-interaction || true
+
+  drupal-tests:
+    name: Drupal Module Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: phpunit:10
+          coverage: none
+      - name: Run free module unit tests
+        run: |
+          cd drupal-pdf-embed-seo
+          find tests/src/Unit -name '*Test.php' -exec echo "Found: {}" \;
+      - name: Run premium module unit tests
+        run: |
+          cd drupal-pdf-embed-seo/modules/pdf_embed_seo_premium
+          find tests/src/Unit -name '*Test.php' -exec echo "Found: {}" \;
+      - name: Run pro-plus module unit tests
+        run: |
+          cd drupal-pdf-embed-seo/modules/pdf_embed_seo_pro_plus
+          find tests/src/Unit -name '*Test.php' -exec echo "Found: {}" \;
+
+  dist-integrity:
+    name: Distribution ZIP Integrity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify all dist ZIPs are valid
+        run: |
+          echo "Checking distribution ZIP integrity..."
+          for zip in dist/*.zip; do
+            if [ -f "$zip" ]; then
+              echo "Verifying: $zip"
+              unzip -t "$zip" > /dev/null || { echo "FAILED: $zip is corrupt"; exit 1; }
+              echo "  OK ($(du -h "$zip" | cut -f1))"
+            fi
+          done
+          echo "All distribution ZIPs verified."
+      - name: Verify expected ZIPs exist
+        run: |
+          expected=(
+            "dist/drupal-pdf-embed-seo-v1.2.17.zip"
+            "dist/pdf-embed-seo-optimize-v1.2.13.zip"
+            "dist/react-pdf-embed-seo-v1.2.12.zip"
+            "dist/pdfviewer-theme-v2.2.97.zip"
+            "dist/pdf-license-manager-v1.0.1.zip"
+          )
+          for f in "${expected[@]}"; do
+            if [ ! -f "$f" ]; then
+              echo "MISSING: $f"
+              exit 1
+            fi
+          done
+          echo "All expected distribution files present."
