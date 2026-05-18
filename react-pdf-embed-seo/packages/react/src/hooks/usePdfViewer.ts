@@ -26,7 +26,7 @@ export interface UsePdfViewerOptions {
  */
 export interface UsePdfViewerResult {
   /** Ref to attach to viewer container */
-  viewerRef: RefObject<HTMLDivElement>;
+  viewerRef: RefObject<HTMLDivElement | null>;
   /** Current page number */
   currentPage: number;
   /** Total pages */
