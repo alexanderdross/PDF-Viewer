@@ -8,8 +8,7 @@
 
 // Prevent direct access.
 if ( ! defined( 'ABSPATH' ) ) {
-	// Define ABSPATH for testing.
-	define( 'ABSPATH', dirname( dirname( dirname( dirname( dirname( __DIR__ ) ) ) ) ) . '/wordpress/' );
+	exit;
 }
 
 // Define test mode.
@@ -38,18 +37,21 @@ require_once "{$_tests_dir}/includes/functions.php";
 
 /**
  * Manually load the plugin being tested.
+ *
+ * Paths resolved from this file: <repo>/wordpress-pdf-embed-seo/pro-plus/tests/bootstrap.php
+ *   dirname( __DIR__ )                 = pro-plus/
+ *   dirname( dirname( __DIR__ ) )      = wordpress-pdf-embed-seo/
  */
 function _manually_load_plugin() {
-	// Load main plugin.
-	require dirname( dirname( dirname( dirname( __DIR__ ) ) ) ) . '/pdf-embed-seo-optimize.php';
+	$wp_plugin_dir = dirname( dirname( __DIR__ ) );
 
-	// Simulate premium being loaded.
-	if ( file_exists( dirname( dirname( dirname( __DIR__ ) ) ) . '/premium/class-pdf-embed-seo-premium.php' ) ) {
-		require dirname( dirname( dirname( __DIR__ ) ) ) . '/premium/class-pdf-embed-seo-premium.php';
+	require $wp_plugin_dir . '/pdf-embed-seo-optimize.php';
+
+	if ( file_exists( $wp_plugin_dir . '/premium/class-pdf-embed-seo-premium.php' ) ) {
+		require $wp_plugin_dir . '/premium/class-pdf-embed-seo-premium.php';
 	}
 
-	// Load Pro-plus.
-	require dirname( dirname( __DIR__ ) ) . '/class-pdf-embed-seo-pro-plus.php';
+	require dirname( __DIR__ ) . '/class-pdf-embed-seo-pro-plus.php';
 }
 
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
