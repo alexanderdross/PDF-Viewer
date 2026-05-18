@@ -18,7 +18,7 @@
         </testsuite>
     </testsuites>
 
-    <coverage>
+    <source>
         <include>
             <directory suffix=".php">./</directory>
         </include>
@@ -27,11 +27,7 @@
             <directory suffix=".php">./vendor</directory>
             <directory suffix=".php">./patterns</directory>
         </exclude>
-        <report>
-            <html outputDirectory="tests/coverage"/>
-            <text outputFile="tests/coverage.txt"/>
-        </report>
-    </coverage>
+    </source>
 
     <php>
         <const name="ABSPATH" value="/var/www/html/"/>
