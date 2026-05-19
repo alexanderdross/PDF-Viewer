@@ -42,13 +42,13 @@
     "@pdf-embed-seo/core": "workspace:*"
   },
   "devDependencies": {
-    "@testing-library/react": "^14.0.0",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^20.10.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "tsup": "^8.0.0",
     "typescript": "^5.3.0",
-    "vitest": "^2.0.0"
+    "vitest": "^4.1.6"
   },
   "peerDependencies": {
     "next": "^13.0.0 || ^14.0.0 || ^15.0.0",
