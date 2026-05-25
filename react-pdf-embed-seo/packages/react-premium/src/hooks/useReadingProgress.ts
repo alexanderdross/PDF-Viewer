@@ -80,7 +80,7 @@ export function useReadingProgress(
 
   const storageKey = document ? `${storagePrefix}${document.id}` : '';
   const pendingProgress = useRef<{ page: number; scroll?: number; zoom?: number } | null>(null);
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Calculate percent complete
   const percentComplete = progress && document?.pageCount
