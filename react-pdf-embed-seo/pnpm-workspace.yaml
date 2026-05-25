@@ -1,3 +1,6 @@
 packages:
   - 'packages/*'
   - 'apps/*'
+
+minimumReleaseAge: 20160
+minimumReleaseAgeStrict: true
