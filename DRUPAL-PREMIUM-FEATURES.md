@@ -1,7 +1,7 @@
 # Drupal Premium Module - Complete Feature List
 
 **Module:** `pdf_embed_seo_premium`
-**Version:** 1.2.5
+**Version:** 1.2.17 (Free/Premium) · 1.3.2 (Pro+ Enterprise)
 **Platform:** Drupal 10/11
 **Purchase:** https://pdfviewer.drossmedia.de
 

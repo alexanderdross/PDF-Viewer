@@ -23,6 +23,11 @@ class PLM_Admin {
 		add_action( 'admin_post_plm_create_license', array( $this, 'handle_create_license' ) );
 		add_action( 'admin_post_plm_revoke_license', array( $this, 'handle_revoke_license' ) );
 		add_action( 'admin_post_plm_extend_license', array( $this, 'handle_extend_license' ) );
+		add_action( 'admin_post_plm_reactivate_license', array( $this, 'handle_reactivate_license' ) );
+		add_action( 'admin_post_plm_resend_key', array( $this, 'handle_resend_key' ) );
+		add_action( 'admin_post_plm_export_licenses', array( $this, 'handle_export_licenses' ) );
+		add_action( 'admin_post_plm_export_installations', array( $this, 'handle_export_installations' ) );
+		add_action( 'admin_post_plm_update_geoip', array( $this, 'handle_update_geoip' ) );
 	}
 
 	/**
@@ -342,6 +347,15 @@ class PLM_Admin {
 			 ORDER BY count DESC LIMIT 20"
 		);
 
+		// Coordinate clusters for the world map (rounded to ~11km buckets).
+		$geo_points = $wpdb->get_results(
+			"SELECT ROUND(g.latitude, 1) AS lat, ROUND(g.longitude, 1) AS lng, COUNT(*) AS count
+			 FROM {$t_geo} g JOIN {$t_inst} i ON i.id = g.installation_id
+			 WHERE i.is_active = 1 AND g.latitude IS NOT NULL AND g.longitude IS NOT NULL
+			 GROUP BY ROUND(g.latitude, 1), ROUND(g.longitude, 1)
+			 ORDER BY count DESC LIMIT 500"
+		);
+
 		$platform_distribution = $wpdb->get_results(
 			"SELECT platform, COUNT(*) AS count FROM {$t_inst} WHERE is_active = 1 GROUP BY platform ORDER BY count DESC"
 		);
@@ -418,7 +432,12 @@ class PLM_Admin {
 		$duration   = sanitize_text_field( wp_unslash( $_POST['duration'] ?? '365' ) );
 		$notes     = sanitize_textarea_field( wp_unslash( $_POST['notes'] ?? '' ) );
 
-		$key_type    = 'pro_plus' === $type ? 'pro_plus' : 'premium';
+		// Map the selected type to (a) the key format to generate and (b) the
+		// enum-safe value stored in the license_type column, which only permits
+		// 'premium' or 'pro_plus'. 'unlimited'/'dev' are key formats on the
+		// top/base tier respectively.
+		$key_type    = in_array( $type, array( 'premium', 'pro_plus', 'unlimited', 'dev' ), true ) ? $type : 'premium';
+		$db_type     = in_array( $key_type, array( 'pro_plus', 'unlimited' ), true ) ? 'pro_plus' : 'premium';
 		$license_key = PLM_License::generate_key( $key_type );
 
 		$expires_at = null;
@@ -426,14 +445,19 @@ class PLM_Admin {
 			$expires_at = gmdate( 'Y-m-d H:i:s', time() + ( absint( $duration ) * DAY_IN_SECONDS ) );
 		}
 
+		// A lifetime license (no expiry) cannot be API-activated from an 'inactive'
+		// state, so issue it 'active' and immediately usable. Dated licenses stay
+		// 'inactive' until first activation.
+		$status = ( null === $expires_at ) ? 'active' : 'inactive';
+
 		$table = PLM_Database::table( 'licenses' );
 		$wpdb->insert(
 			$table,
 			array(
 				'license_key'    => $license_key,
-				'license_type'   => $type,
+				'license_type'   => $db_type,
 				'plan'           => $plan,
-				'status'         => 'inactive',
+				'status'         => $status,
 				'site_limit'     => $site_limit,
 				'customer_email' => $email,
 				'customer_name'  => $name ?: null,
@@ -446,9 +470,11 @@ class PLM_Admin {
 		$license_id = $wpdb->insert_id;
 
 		PLM_License::audit_log( $license_id, 'license.created', array(
-			'source' => 'manual',
-			'plan'   => $plan,
-			'type'   => $type,
+			'source'   => 'manual',
+			'plan'     => $plan,
+			'type'     => $db_type,
+			'key_type' => $key_type,
+			'status'   => $status,
 		) );
 
 		wp_safe_redirect( admin_url( 'admin.php?page=plm-licenses&id=' . $license_id . '&created=1' ) );
@@ -525,6 +551,216 @@ class PLM_Admin {
 		) );
 
 		wp_safe_redirect( admin_url( 'admin.php?page=plm-licenses&id=' . $license_id . '&extended=1' ) );
+		exit;
+	}
+
+	/**
+	 * Reactivate a revoked or inactive license (admin override).
+	 *
+	 * Sets status back to 'active' without touching the expiration date. For an
+	 * expired license, use Extend instead (which also sets a new expiry).
+	 */
+	public function handle_reactivate_license(): void {
+		check_admin_referer( 'plm_reactivate_license' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Unauthorized.', 'pdf-license-manager' ) );
+		}
+
+		global $wpdb;
+
+		$license_id = absint( $_POST['license_id'] ?? 0 );
+		if ( ! $license_id ) {
+			wp_die( esc_html__( 'Invalid license ID.', 'pdf-license-manager' ) );
+		}
+
+		$wpdb->update(
+			PLM_Database::table( 'licenses' ),
+			array( 'status' => 'active' ),
+			array( 'id' => $license_id ),
+			array( '%s' ),
+			array( '%d' )
+		);
+
+		PLM_License::audit_log( $license_id, 'license.reactivated', array( 'source' => 'admin' ) );
+
+		wp_safe_redirect( admin_url( 'admin.php?page=plm-licenses&id=' . $license_id . '&reactivated=1' ) );
+		exit;
+	}
+
+	/**
+	 * Resend the license-key email to the customer on file.
+	 */
+	public function handle_resend_key(): void {
+		check_admin_referer( 'plm_resend_key' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Unauthorized.', 'pdf-license-manager' ) );
+		}
+
+		global $wpdb;
+
+		$license_id = absint( $_POST['license_id'] ?? 0 );
+		if ( ! $license_id ) {
+			wp_die( esc_html__( 'Invalid license ID.', 'pdf-license-manager' ) );
+		}
+
+		$license = $wpdb->get_row( $wpdb->prepare(
+			'SELECT * FROM ' . PLM_Database::table( 'licenses' ) . ' WHERE id = %d',
+			$license_id
+		) );
+
+		if ( ! $license ) {
+			wp_die( esc_html__( 'License not found.', 'pdf-license-manager' ) );
+		}
+
+		$sent = 0;
+		if ( ! empty( $license->customer_email ) ) {
+			// The license row exposes the same license_type/plan/site_limit fields
+			// that PLM_Email::send_purchase() reads from a Stripe product mapping,
+			// so it can be passed directly as the "mapping" argument.
+			$sent = PLM_Email::send_purchase(
+				$license->customer_email,
+				$license->license_key,
+				$license,
+				$license->expires_at
+			) ? 1 : 0;
+
+			PLM_License::audit_log( $license_id, 'license.key_resent', array(
+				'source'  => 'admin',
+				'to'      => $license->customer_email,
+				'success' => (bool) $sent,
+			) );
+		}
+
+		wp_safe_redirect( admin_url( 'admin.php?page=plm-licenses&id=' . $license_id . '&resent=' . $sent ) );
+		exit;
+	}
+
+	// -------------------------------------------------------------------------
+	// CSV Export & GeoIP
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Stream an array of rows to the browser as a CSV download and exit.
+	 *
+	 * @param string  $filename Download filename.
+	 * @param array   $header   Header row.
+	 * @param array[] $rows     Data rows.
+	 */
+	private function stream_csv( string $filename, array $header, array $rows ): void {
+		nocache_headers();
+		header( 'Content-Type: text/csv; charset=utf-8' );
+		header( 'Content-Disposition: attachment; filename=' . sanitize_file_name( $filename ) );
+
+		$out = fopen( 'php://output', 'w' );
+		fputcsv( $out, $header );
+		foreach ( $rows as $row ) {
+			fputcsv( $out, $row );
+		}
+		fclose( $out );
+		exit;
+	}
+
+	/**
+	 * Export all licenses as CSV.
+	 */
+	public function handle_export_licenses(): void {
+		check_admin_referer( 'plm_export_licenses' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Unauthorized.', 'pdf-license-manager' ) );
+		}
+
+		global $wpdb;
+		$rows = $wpdb->get_results( 'SELECT * FROM ' . PLM_Database::table( 'licenses' ) . ' ORDER BY created_at DESC' );
+
+		$data = array();
+		foreach ( $rows as $r ) {
+			$data[] = array(
+				$r->id,
+				$r->license_key,
+				$r->license_type,
+				$r->plan,
+				$r->status,
+				$r->site_limit,
+				PLM_License::count_active_sites( (int) $r->id ),
+				$r->customer_email,
+				$r->customer_name,
+				$r->expires_at,
+				$r->activated_at,
+				$r->created_at,
+			);
+		}
+
+		$this->stream_csv(
+			'plm-licenses-' . gmdate( 'Ymd-His' ) . '.csv',
+			array( 'id', 'license_key', 'type', 'plan', 'status', 'site_limit', 'active_sites', 'customer_email', 'customer_name', 'expires_at', 'activated_at', 'created_at' ),
+			$data
+		);
+	}
+
+	/**
+	 * Export all installations as CSV (license keys masked).
+	 */
+	public function handle_export_installations(): void {
+		check_admin_referer( 'plm_export_installations' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Unauthorized.', 'pdf-license-manager' ) );
+		}
+
+		global $wpdb;
+		$t_inst = PLM_Database::table( 'installations' );
+		$t_lic  = PLM_Database::table( 'licenses' );
+		$t_geo  = PLM_Database::table( 'geo_data' );
+
+		$rows = $wpdb->get_results(
+			"SELECT i.*, l.license_key, l.license_type, g.country_code, g.country_name
+			 FROM {$t_inst} i
+			 JOIN {$t_lic} l ON l.id = i.license_id
+			 LEFT JOIN {$t_geo} g ON g.installation_id = i.id
+			 ORDER BY i.last_checked_at DESC"
+		);
+
+		$data = array();
+		foreach ( $rows as $r ) {
+			$data[] = array(
+				$r->id,
+				PLM_License::mask_key( $r->license_key ),
+				$r->license_type,
+				$r->platform,
+				$r->site_url,
+				$r->plugin_version,
+				$r->is_active ? 'active' : 'inactive',
+				$r->is_local ? 'yes' : 'no',
+				$r->country_code,
+				$r->country_name,
+				$r->activated_at,
+				$r->last_checked_at,
+			);
+		}
+
+		$this->stream_csv(
+			'plm-installations-' . gmdate( 'Ymd-His' ) . '.csv',
+			array( 'id', 'license_key', 'type', 'platform', 'site_url', 'plugin_version', 'status', 'is_local', 'country_code', 'country_name', 'activated_at', 'last_checked_at' ),
+			$data
+		);
+	}
+
+	/**
+	 * Trigger an on-demand GeoLite2 database update.
+	 */
+	public function handle_update_geoip(): void {
+		check_admin_referer( 'plm_update_geoip' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Unauthorized.', 'pdf-license-manager' ) );
+		}
+
+		$ok = PLM_Cron::update_geoip_db();
+
+		wp_safe_redirect( admin_url( 'admin.php?page=plm-settings&geoip_updated=' . ( $ok ? '1' : '0' ) ) );
 		exit;
 	}
 }

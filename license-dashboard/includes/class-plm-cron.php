@@ -290,13 +290,21 @@ class PLM_Cron {
 	 * Requires geoipupdate CLI tool to be installed, or a MaxMind license key.
 	 * Configure via PLM_MAXMIND_LICENSE_KEY constant.
 	 */
-	public static function update_geoip_db(): void {
-		if ( ! defined( 'PLM_MAXMIND_LICENSE_KEY' ) || empty( PLM_MAXMIND_LICENSE_KEY ) ) {
-			return;
+	public static function update_geoip_db(): bool {
+		// License key from the wp-config constant, falling back to an encrypted option.
+		$license_key = '';
+		if ( defined( 'PLM_MAXMIND_LICENSE_KEY' ) && ! empty( PLM_MAXMIND_LICENSE_KEY ) ) {
+			$license_key = PLM_MAXMIND_LICENSE_KEY;
+		} elseif ( class_exists( 'PLM_Encryption' ) ) {
+			$license_key = PLM_Encryption::get_option( 'plm_maxmind_license_key', '' );
 		}
 
-		$upload_dir = wp_upload_dir();
-		$target_dir = $upload_dir['basedir'] . '/plm';
+		if ( empty( $license_key ) ) {
+			return false;
+		}
+
+		$upload_dir  = wp_upload_dir();
+		$target_dir  = $upload_dir['basedir'] . '/plm';
 		$target_file = $target_dir . '/GeoLite2-City.mmdb';
 
 		// Ensure directory exists.
@@ -306,22 +314,28 @@ class PLM_Cron {
 
 		$download_url = sprintf(
 			'https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-City&license_key=%s&suffix=tar.gz',
-			urlencode( PLM_MAXMIND_LICENSE_KEY )
+			rawurlencode( $license_key )
 		);
+
+		// download_url() lives in wp-admin/includes/file.php, which is not always loaded on cron.
+		if ( ! function_exists( 'download_url' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
 
 		$tmp_file = download_url( $download_url, 300 );
 		if ( is_wp_error( $tmp_file ) ) {
 			error_log( '[PLM Cron] GeoIP download failed: ' . $tmp_file->get_error_message() );
-			return;
+			return false;
 		}
 
 		// Extract .mmdb from tar.gz.
-		$phar_path = 'phar://' . $tmp_file;
+		$updated = false;
 		try {
 			$phar = new PharData( $tmp_file );
 			foreach ( new RecursiveIteratorIterator( $phar ) as $file ) {
 				if ( str_ends_with( $file->getPathname(), '.mmdb' ) ) {
 					copy( $file->getPathname(), $target_file );
+					$updated = true;
 					error_log( '[PLM Cron] GeoIP database updated successfully.' );
 					break;
 				}
@@ -331,5 +345,11 @@ class PLM_Cron {
 		}
 
 		wp_delete_file( $tmp_file );
+
+		if ( $updated ) {
+			update_option( 'plm_geoip_last_update', time() );
+		}
+
+		return $updated;
 	}
 }

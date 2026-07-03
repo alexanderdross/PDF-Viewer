@@ -17,6 +17,16 @@ $active_count = PLM_License::count_active_sites( (int) $license->id );
 	<?php if ( isset( $_GET['revoked'] ) ) : ?>
 		<div class="notice notice-warning"><p><?php esc_html_e( 'License has been revoked.', 'pdf-license-manager' ); ?></p></div>
 	<?php endif; ?>
+	<?php if ( isset( $_GET['reactivated'] ) ) : ?>
+		<div class="notice notice-success"><p><?php esc_html_e( 'License has been reactivated.', 'pdf-license-manager' ); ?></p></div>
+	<?php endif; ?>
+	<?php if ( isset( $_GET['resent'] ) ) : ?>
+		<?php if ( 1 === (int) $_GET['resent'] ) : ?>
+			<div class="notice notice-success"><p><?php esc_html_e( 'License key email sent to the customer.', 'pdf-license-manager' ); ?></p></div>
+		<?php else : ?>
+			<div class="notice notice-error"><p><?php esc_html_e( 'Could not send the license key email (no address on file or a mail delivery failure).', 'pdf-license-manager' ); ?></p></div>
+		<?php endif; ?>
+	<?php endif; ?>
 
 	<!-- License Info -->
 	<div class="plm-section">
@@ -87,6 +97,24 @@ $active_count = PLM_License::count_active_sites( (int) $license->id );
 				<input type="hidden" name="action" value="plm_revoke_license">
 				<input type="hidden" name="license_id" value="<?php echo esc_attr( $license->id ); ?>">
 				<button type="submit" class="button button-link-delete"><?php esc_html_e( 'Revoke License', 'pdf-license-manager' ); ?></button>
+			</form>
+			<?php endif; ?>
+
+			<?php if ( in_array( $license->status, array( 'revoked', 'inactive' ), true ) ) : ?>
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="plm-inline-form">
+				<?php wp_nonce_field( 'plm_reactivate_license' ); ?>
+				<input type="hidden" name="action" value="plm_reactivate_license">
+				<input type="hidden" name="license_id" value="<?php echo esc_attr( $license->id ); ?>">
+				<button type="submit" class="button button-primary"><?php esc_html_e( 'Reactivate', 'pdf-license-manager' ); ?></button>
+			</form>
+			<?php endif; ?>
+
+			<?php if ( ! empty( $license->customer_email ) ) : ?>
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="plm-inline-form">
+				<?php wp_nonce_field( 'plm_resend_key' ); ?>
+				<input type="hidden" name="action" value="plm_resend_key">
+				<input type="hidden" name="license_id" value="<?php echo esc_attr( $license->id ); ?>">
+				<button type="submit" class="button"><?php esc_html_e( 'Resend Key Email', 'pdf-license-manager' ); ?></button>
 			</form>
 			<?php endif; ?>
 		</div>

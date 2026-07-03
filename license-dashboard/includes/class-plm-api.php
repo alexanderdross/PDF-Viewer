@@ -239,7 +239,11 @@ class PLM_API {
 		}
 
 		$status = PLM_License::compute_status( $license->expires_at, $license->status );
-		if ( in_array( $status, array( 'expired', 'revoked', 'inactive' ), true ) ) {
+		// 'inactive' is the pre-activation state (created but never activated) and
+		// MUST be activatable — flipping it to 'active' is the whole purpose of this
+		// call (see the documented lifecycle: inactive -> active on first activation).
+		// Only expired or revoked licenses are refused.
+		if ( in_array( $status, array( 'expired', 'revoked' ), true ) ) {
 			return new WP_REST_Response( array(
 				'activated' => false,
 				'message'   => sprintf( 'Cannot activate: license is %s.', $status ),
@@ -330,7 +334,8 @@ class PLM_API {
 		);
 		$installation_id = $wpdb->insert_id;
 
-		// Set activated_at on first activation.
+		// Set activated_at on first activation, flipping a freshly created
+		// 'inactive' license to 'active' so the response reflects reality.
 		if ( ! $license->activated_at ) {
 			$wpdb->update(
 				PLM_Database::table( 'licenses' ),
@@ -342,6 +347,7 @@ class PLM_API {
 				array( '%s', '%s' ),
 				array( '%d' )
 			);
+			$status = 'active';
 		}
 
 		// Geo-IP lookup.

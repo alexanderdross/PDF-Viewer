@@ -22,6 +22,56 @@
 		</div>
 	</div>
 
+	<!-- World Map -->
+	<div class="plm-section">
+		<h2><?php esc_html_e( 'Installation World Map', 'pdf-license-manager' ); ?></h2>
+		<?php if ( empty( $geo_points ) ) : ?>
+			<p class="description"><?php esc_html_e( 'No geolocated installations yet. Points appear once the GeoIP database resolves installation locations.', 'pdf-license-manager' ); ?></p>
+		<?php else : ?>
+			<?php $plm_map_max = max( array_map( fn( $g ) => (int) $g->count, $geo_points ) ); ?>
+			<div class="plm-worldmap-wrap" style="max-width: 860px;">
+			<svg viewBox="0 0 360 180" role="img" aria-label="<?php esc_attr_e( 'World map of active installations', 'pdf-license-manager' ); ?>" style="width:100%;height:auto;background:#0b1f33;border-radius:6px;">
+				<g stroke="#1c3a57" stroke-width="0.3" fill="none">
+					<?php for ( $lon = 0; $lon <= 360; $lon += 30 ) : ?>
+						<line x1="<?php echo esc_attr( $lon ); ?>" y1="0" x2="<?php echo esc_attr( $lon ); ?>" y2="180" />
+					<?php endfor; ?>
+					<?php for ( $lat = 0; $lat <= 180; $lat += 30 ) : ?>
+						<line x1="0" y1="<?php echo esc_attr( $lat ); ?>" x2="360" y2="<?php echo esc_attr( $lat ); ?>" />
+					<?php endfor; ?>
+				</g>
+				<g stroke="#2b567d" stroke-width="0.5">
+					<line x1="0" y1="90" x2="360" y2="90" />
+					<line x1="180" y1="0" x2="180" y2="180" />
+				</g>
+				<g fill="#5b7fa3" font-size="5" font-family="sans-serif" text-anchor="middle">
+					<text x="80" y="45"><?php esc_html_e( 'N. America', 'pdf-license-manager' ); ?></text>
+					<text x="120" y="108"><?php esc_html_e( 'S. America', 'pdf-license-manager' ); ?></text>
+					<text x="196" y="38"><?php esc_html_e( 'Europe', 'pdf-license-manager' ); ?></text>
+					<text x="202" y="88"><?php esc_html_e( 'Africa', 'pdf-license-manager' ); ?></text>
+					<text x="272" y="46"><?php esc_html_e( 'Asia', 'pdf-license-manager' ); ?></text>
+					<text x="315" y="118"><?php esc_html_e( 'Oceania', 'pdf-license-manager' ); ?></text>
+				</g>
+				<g fill="#41d1a7" fill-opacity="0.75" stroke="#0b1f33" stroke-width="0.2">
+					<?php foreach ( $geo_points as $pt ) : ?>
+						<?php
+						$cx = (float) $pt->lng + 180;
+						$cy = 90 - (float) $pt->lat;
+						$r  = 1.2 + sqrt( (int) $pt->count / max( 1, (int) $plm_map_max ) ) * 4.5;
+						?>
+						<circle cx="<?php echo esc_attr( round( $cx, 2 ) ); ?>" cy="<?php echo esc_attr( round( $cy, 2 ) ); ?>" r="<?php echo esc_attr( round( $r, 2 ) ); ?>">
+							<title><?php echo esc_html( sprintf( '%d @ %s, %s', (int) $pt->count, $pt->lat, $pt->lng ) ); ?></title>
+						</circle>
+					<?php endforeach; ?>
+				</g>
+			</svg>
+			</div>
+			<p class="description"><?php
+				/* translators: %d: number of installation location clusters */
+				printf( esc_html__( '%d location clusters of active installations (bubble size = install count).', 'pdf-license-manager' ), (int) count( $geo_points ) );
+			?></p>
+		<?php endif; ?>
+	</div>
+
 	<div class="plm-grid-2">
 		<!-- Geo Distribution -->
 		<div class="plm-section">

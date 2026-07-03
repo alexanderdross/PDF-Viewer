@@ -4,6 +4,9 @@
 	<a href="<?php echo esc_url( admin_url( 'admin.php?page=plm-licenses&action=new' ) ); ?>" class="page-title-action">
 		<?php esc_html_e( 'Add New', 'pdf-license-manager' ); ?>
 	</a>
+	<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=plm_export_licenses' ), 'plm_export_licenses' ) ); ?>" class="page-title-action">
+		<?php esc_html_e( 'Export CSV', 'pdf-license-manager' ); ?>
+	</a>
 
 	<?php if ( isset( $_GET['action'] ) && 'new' === sanitize_text_field( wp_unslash( $_GET['action'] ) ) ) : ?>
 		<!-- Create License Form -->
@@ -19,7 +22,10 @@
 							<select name="license_type" id="license_type">
 								<option value="premium"><?php esc_html_e( 'Premium', 'pdf-license-manager' ); ?></option>
 								<option value="pro_plus"><?php esc_html_e( 'Pro+ Enterprise', 'pdf-license-manager' ); ?></option>
+								<option value="unlimited"><?php esc_html_e( 'Unlimited (top tier)', 'pdf-license-manager' ); ?></option>
+								<option value="dev"><?php esc_html_e( 'Development', 'pdf-license-manager' ); ?></option>
 							</select>
+							<p class="description"><?php esc_html_e( 'For an "Unlimited" key: set Plan = Enterprise, Site Limit = 0, Duration = Lifetime. The key is issued active and never expires.', 'pdf-license-manager' ); ?></p>
 						</td>
 					</tr>
 					<tr>

@@ -236,6 +236,15 @@ Added `$request->hasSession()` checks before accessing sessions:
 
 ### Removed Remote License Validation (Premium + Pro+)
 
+> **⚠️ Superseded (2026-07-03):** This section describes a temporary state in the
+> 2026-03-09 snapshot. Remote (phone-home) license validation was **re-introduced**
+> afterwards and is present in the current code. Both
+> `modules/pdf_embed_seo_premium/src/Service/LicenseValidator.php` and
+> `modules/pdf_embed_seo_pro_plus/src/Service/LicenseValidator.php` exist and make
+> live `POST` calls to `https://pdfviewer.drossmedia.de/wp-json/plm/v1/license/{validate,activate,deactivate,check}`,
+> with the local pattern-match used only as an offline fallback. Treat the text
+> below as historical, not current.
+
 The original module contained a `LicenseValidator` service in the premium module that made HTTP requests to the central license dashboard API (`pdfviewer.drossmedia.de`). This was removed:
 
 - **Deleted:** `modules/pdf_embed_seo_premium/src/Service/LicenseValidator.php` (439 lines)

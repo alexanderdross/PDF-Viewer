@@ -1,0 +1,21 @@
+{
+	"name": "drossmedia/pdf-license-manager",
+	"description": "Central license management dashboard for PDF Embed & SEO Optimize (WordPress, Drupal, React/Next.js).",
+	"type": "wordpress-plugin",
+	"license": "GPL-2.0-or-later",
+	"authors": [
+		{
+			"name": "Dross:Media",
+			"homepage": "https://dross.net/media/"
+		}
+	],
+	"require": {
+		"php": ">=8.0"
+	},
+	"require-dev": {
+		"phpunit/phpunit": "^10.5"
+	},
+	"scripts": {
+		"test": "phpunit"
+	}
+}

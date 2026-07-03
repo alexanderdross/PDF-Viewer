@@ -24,7 +24,7 @@ This document contains updated content for the website pages. Copy the relevant 
 
 Unlock the full potential of your PDF management with advanced analytics, password protection, reading progress tracking, and more.
 
-**Version 1.2.11** | WordPress, Drupal & React/Next.js
+**Version:** Drupal 1.2.17 · WordPress 1.2.13 · React 1.2.12 (Pro+ Enterprise: 1.3.2 / 1.3.0 / 1.3.1) | WordPress, Drupal & React/Next.js
 ```
 
 ### Pricing Tiers

@@ -672,7 +672,7 @@ The module creates a dedicated analytics table for view tracking:
 ```markdown
 ## Drupal Module
 
-**Current Version:** 1.2.9
+**Current Version:** 1.2.17 (Free/Premium) · 1.3.2 (Pro+ Enterprise)
 **Compatibility:** Drupal 10, Drupal 11
 **PHP Requirement:** 8.1+
 ```
