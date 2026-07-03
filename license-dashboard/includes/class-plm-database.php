@@ -142,10 +142,28 @@ class PLM_Database {
 			site_limit INT UNSIGNED NOT NULL DEFAULT 1,
 			duration_days INT UNSIGNED NOT NULL DEFAULT 365,
 			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			PRIMARY KEY (id)
+			PRIMARY KEY (id),
+			UNIQUE KEY stripe_product_id (stripe_product_id)
 		) {$charset_collate};";
 
 		dbDelta( $sql_product_map );
+
+		// dbDelta does not add a UNIQUE index to a table that already exists, so
+		// add it on upgrade — but only when the data is free of duplicates, since
+		// the ALTER would otherwise fail.
+		$pm_index = $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND INDEX_NAME = 'stripe_product_id'",
+			DB_NAME,
+			$table_product_map
+		) );
+		if ( ! $pm_index ) {
+			$dupes = (int) $wpdb->get_var(
+				"SELECT COUNT(*) FROM ( SELECT stripe_product_id FROM {$table_product_map} GROUP BY stripe_product_id HAVING COUNT(*) > 1 ) d"
+			);
+			if ( 0 === $dupes ) {
+				$wpdb->query( "ALTER TABLE {$table_product_map} ADD UNIQUE KEY stripe_product_id (stripe_product_id)" );
+			}
+		}
 
 		// Rate limits table (replaces transients-based rate limiting).
 		$table_rate_limits = $wpdb->prefix . 'plm_rate_limits';

@@ -43,6 +43,12 @@ class PLM_Stripe {
 	/**
 	 * Get the Stripe webhook secret (supports wp-config constant or encrypted option).
 	 */
+	/**
+	 * Maximum accepted webhook payload size in bytes. Stripe events are small
+	 * (a few KB); anything larger is rejected before parsing/hashing.
+	 */
+	private const MAX_PAYLOAD_BYTES = 1048576;
+
 	private static function get_webhook_secret(): string {
 		if ( defined( 'PLM_STRIPE_WEBHOOK_SECRET' ) && ! empty( PLM_STRIPE_WEBHOOK_SECRET ) ) {
 			return PLM_STRIPE_WEBHOOK_SECRET;
@@ -57,6 +63,14 @@ class PLM_Stripe {
 	public static function handle_webhook( WP_REST_Request $request ): WP_REST_Response {
 		$payload   = $request->get_body();
 		$signature = $request->get_header( 'stripe-signature' );
+
+		// Reject oversized payloads before any parsing or HMAC work.
+		if ( strlen( (string) $payload ) > self::MAX_PAYLOAD_BYTES ) {
+			return new WP_REST_Response( array(
+				'error'   => 'payload_too_large',
+				'message' => 'Webhook payload exceeds the maximum allowed size.',
+			), 413 );
+		}
 
 		if ( ! $signature ) {
 			return new WP_REST_Response( array(
