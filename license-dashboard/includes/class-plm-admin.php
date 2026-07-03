@@ -418,7 +418,12 @@ class PLM_Admin {
 		$duration   = sanitize_text_field( wp_unslash( $_POST['duration'] ?? '365' ) );
 		$notes     = sanitize_textarea_field( wp_unslash( $_POST['notes'] ?? '' ) );
 
-		$key_type    = 'pro_plus' === $type ? 'pro_plus' : 'premium';
+		// Map the selected type to (a) the key format to generate and (b) the
+		// enum-safe value stored in the license_type column, which only permits
+		// 'premium' or 'pro_plus'. 'unlimited'/'dev' are key formats on the
+		// top/base tier respectively.
+		$key_type    = in_array( $type, array( 'premium', 'pro_plus', 'unlimited', 'dev' ), true ) ? $type : 'premium';
+		$db_type     = in_array( $key_type, array( 'pro_plus', 'unlimited' ), true ) ? 'pro_plus' : 'premium';
 		$license_key = PLM_License::generate_key( $key_type );
 
 		$expires_at = null;
@@ -426,14 +431,19 @@ class PLM_Admin {
 			$expires_at = gmdate( 'Y-m-d H:i:s', time() + ( absint( $duration ) * DAY_IN_SECONDS ) );
 		}
 
+		// A lifetime license (no expiry) cannot be API-activated from an 'inactive'
+		// state, so issue it 'active' and immediately usable. Dated licenses stay
+		// 'inactive' until first activation.
+		$status = ( null === $expires_at ) ? 'active' : 'inactive';
+
 		$table = PLM_Database::table( 'licenses' );
 		$wpdb->insert(
 			$table,
 			array(
 				'license_key'    => $license_key,
-				'license_type'   => $type,
+				'license_type'   => $db_type,
 				'plan'           => $plan,
-				'status'         => 'inactive',
+				'status'         => $status,
 				'site_limit'     => $site_limit,
 				'customer_email' => $email,
 				'customer_name'  => $name ?: null,
@@ -446,9 +456,11 @@ class PLM_Admin {
 		$license_id = $wpdb->insert_id;
 
 		PLM_License::audit_log( $license_id, 'license.created', array(
-			'source' => 'manual',
-			'plan'   => $plan,
-			'type'   => $type,
+			'source'   => 'manual',
+			'plan'     => $plan,
+			'type'     => $db_type,
+			'key_type' => $key_type,
+			'status'   => $status,
 		) );
 
 		wp_safe_redirect( admin_url( 'admin.php?page=plm-licenses&id=' . $license_id . '&created=1' ) );

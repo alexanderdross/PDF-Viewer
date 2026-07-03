@@ -19,7 +19,10 @@
 							<select name="license_type" id="license_type">
 								<option value="premium"><?php esc_html_e( 'Premium', 'pdf-license-manager' ); ?></option>
 								<option value="pro_plus"><?php esc_html_e( 'Pro+ Enterprise', 'pdf-license-manager' ); ?></option>
+								<option value="unlimited"><?php esc_html_e( 'Unlimited (top tier)', 'pdf-license-manager' ); ?></option>
+								<option value="dev"><?php esc_html_e( 'Development', 'pdf-license-manager' ); ?></option>
 							</select>
+							<p class="description"><?php esc_html_e( 'For an "Unlimited" key: set Plan = Enterprise, Site Limit = 0, Duration = Lifetime. The key is issued active and never expires.', 'pdf-license-manager' ); ?></p>
 						</td>
 					</tr>
 					<tr>
