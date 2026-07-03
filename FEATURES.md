@@ -6,7 +6,7 @@
 
 A comprehensive PDF management solution for WordPress, Drupal, and React/Next.js.
 
-**Current Version:** 1.2.11 | **[Get Premium](https://pdfviewer.drossmedia.de)** | **[Documentation](https://github.com/alexanderdross/PDF-Viewer-2026/blob/main/DOCUMENTATION.md)**
+**Current Version:** Drupal 1.2.17 · WordPress 1.2.13 · React 1.2.12 (Pro+ Enterprise: 1.3.2 / 1.3.0 / 1.3.1) | **[Get Premium](https://pdfviewer.drossmedia.de)** | **[Documentation](https://github.com/alexanderdross/PDF-Viewer-2026/blob/main/DOCUMENTATION.md)**
 
 ---
 
@@ -242,9 +242,10 @@ A comprehensive PDF management solution for WordPress, Drupal, and React/Next.js
 
 | Package | Version | License | Description |
 |---------|---------|---------|-------------|
-| `@pdf-embed-seo/core` | 1.2.11 | MIT | Core types, utilities, API client |
-| `@pdf-embed-seo/react` | 1.2.11 | MIT | Free React components |
-| `@pdf-embed-seo/react-premium` | 1.2.11 | Commercial | Pro React components |
+| `@pdf-embed-seo/core` | 1.2.12 | MIT | Core types, utilities, API client |
+| `@pdf-embed-seo/react` | 1.2.12 | MIT | Free React components |
+| `@pdf-embed-seo/react-premium` | 1.2.12 | Commercial | Pro React components |
+| `@pdf-embed-seo/react-pro-plus` | 1.3.1 | Commercial | Pro+ Enterprise components |
 
 ### Free Components
 

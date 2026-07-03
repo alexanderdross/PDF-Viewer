@@ -2,7 +2,7 @@
 
 A comprehensive PDF management solution available for WordPress, Drupal, and React/Next.js that uses Mozilla's PDF.js library to securely display PDFs with SEO optimization.
 
-**Current Version:** 1.2.8 (WP/Drupal), 1.3.0 (React - Planned)
+**Current Version:** Drupal 1.2.17 · WordPress 1.2.13 · React 1.2.12 (Pro+ Enterprise: 1.3.2 / 1.3.0 / 1.3.1)
 **Platforms:** WordPress (Free & Premium), Drupal 10/11, React/Next.js
 **License:** GPL v2 or later (WP/Drupal), MIT (React Free), Commercial (React Pro)
 
@@ -724,7 +724,11 @@ interface PdfProviderProps {
 
 ## Changelog
 
-### 1.3.0 (Planned - React Module)
+### 1.3.0 (React Module — Shipped)
+
+> The React/Next.js packages have since shipped and are current at 1.2.12 (Free/Premium)
+> and 1.3.1 (Pro+ Enterprise). See CHANGELOG-REACT.md for the up-to-date history.
+
 - Initial React/Next.js module release
 - `@pdf-embed-seo/react` npm package (free)
 - `@pdf-embed-seo/react-premium` npm package (pro)
@@ -737,7 +741,7 @@ interface PdfProviderProps {
 - API clients for WordPress and Drupal backends
 - Standalone mode (no backend required)
 
-### 1.2.8 (Current - WP/Drupal)
+### 1.2.8 (WP/Drupal)
 - Version bump to 1.2.8 across all modules
 
 ### 1.2.7

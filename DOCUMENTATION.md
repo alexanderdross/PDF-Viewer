@@ -6,7 +6,7 @@
 
 Complete guide for installing, configuring, and using the PDF Embed & SEO Optimize plugin.
 
-**Website:** [pdfviewer.drossmedia.de](https://pdfviewer.drossmedia.de) | **Version:** 1.2.5
+**Website:** [pdfviewer.drossmedia.de](https://pdfviewer.drossmedia.de) | **Version:** Drupal 1.2.17 · WordPress 1.2.13 · React 1.2.12 (Pro+ Enterprise: 1.3.2 / 1.3.0 / 1.3.1)
 
 ---
 

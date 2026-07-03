@@ -18,7 +18,7 @@
 
 ---
 
-**Current Version:** 1.2.11
+**Current Version:** Drupal 1.2.17 · WordPress 1.2.13 · React 1.2.12 (Pro+ Enterprise: 1.3.2 / 1.3.0 / 1.3.1)
 **Platforms:** WordPress 5.8+, Drupal 10/11, React 18+/Next.js 13+
 **License:** Commercial (Premium), GPL v2 (Free WordPress/Drupal), MIT (Free React)
 

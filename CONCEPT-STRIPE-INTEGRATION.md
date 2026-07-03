@@ -7,6 +7,22 @@
 
 ---
 
+> **📌 Implementation status update (2026-07-03):** Items this concept lists as
+> future work are now shipped, so read the "TODO" markers below as historical:
+> - **Phone-home license validation is IMPLEMENTED** in all three clients — WordPress
+>   (`premium/` + `pro-plus/`), Drupal (`LicenseValidator` services in both submodules),
+>   and React (`react-pro-plus` / `react-premium`). Each performs live
+>   `validate`/`activate`/`deactivate`/`check` calls to `…/wp-json/plm/v1`, with a
+>   local format check only as an offline fallback; WordPress schedules a daily
+>   heartbeat via WP-Cron.
+> - **License-key email delivery is IMPLEMENTED** (`license-dashboard/includes/class-plm-email.php`
+>   + `email-templates/`), so the "Send email via wp_mail()" TODOs in §13 are done.
+>
+> The License Dashboard itself is current at v1.2.0. Sections below are retained as
+> the original design record.
+
+---
+
 ## Table of Contents
 
 1. [Overview](#1-overview)

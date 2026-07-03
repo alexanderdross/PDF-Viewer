@@ -16,7 +16,7 @@
   <a href="https://github.com/alexanderdross/PDF-Viewer-2026/blob/main/FEATURES.md">Features</a>
 </p>
 
-**Current Version:** 1.2.11 | **Platforms:** WordPress, Drupal, React/Next.js
+**Current Version:** Drupal 1.2.17 · WordPress 1.2.13 · React 1.2.12 (Pro+ Enterprise: 1.3.2 / 1.3.0 / 1.3.1) | **Platforms:** WordPress, Drupal, React/Next.js
 
 ---
 
@@ -175,7 +175,7 @@ Upgrade to Premium for advanced features:
 
 ## Changelog
 
-### 1.2.11 (Current)
+### 1.2.11
 - **Drupal Code Review Fixes** - CSRF protection, rate limiting, session cache context
 - **Media Library Integration** - PDFs managed via Drupal's Media Library
 - **New Services** - Rate limiter and access token storage with database backend
