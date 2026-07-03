@@ -1211,7 +1211,7 @@ cd react-pdf-embed-seo && pnpm build       # Build all packages
 | `drupal-pdf-embed-seo-v1.2.17.zip` | 1.2.17 | Drupal module (Free + Premium + Pro+) |
 | `react-pdf-embed-seo-v1.2.12.zip` | 1.2.12 | React/Next.js packages |
 | `pdfviewer-theme.zip` | 2.2.97 | Marketing website WordPress theme |
-| `pdf-license-manager-v1.0.1.zip` | 1.0.1 | License management WordPress plugin |
+| `pdf-license-manager-v1.2.0.zip` | 1.2.0 | License management WordPress plugin |
 
 ### Premium Purchase
 

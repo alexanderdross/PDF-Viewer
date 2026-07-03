@@ -167,7 +167,7 @@ jobs:
             "dist/pdf-embed-seo-optimize-v1.2.13.zip"
             "dist/react-pdf-embed-seo-v1.2.12.zip"
             "dist/pdfviewer-theme-v2.2.97.zip"
-            "dist/pdf-license-manager-v1.0.1.zip"
+            "dist/pdf-license-manager-v1.2.0.zip"
           )
           for f in "${expected[@]}"; do
             if [ ! -f "$f" ]; then
