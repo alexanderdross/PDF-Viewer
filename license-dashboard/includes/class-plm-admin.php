@@ -23,6 +23,8 @@ class PLM_Admin {
 		add_action( 'admin_post_plm_create_license', array( $this, 'handle_create_license' ) );
 		add_action( 'admin_post_plm_revoke_license', array( $this, 'handle_revoke_license' ) );
 		add_action( 'admin_post_plm_extend_license', array( $this, 'handle_extend_license' ) );
+		add_action( 'admin_post_plm_reactivate_license', array( $this, 'handle_reactivate_license' ) );
+		add_action( 'admin_post_plm_resend_key', array( $this, 'handle_resend_key' ) );
 	}
 
 	/**
@@ -537,6 +539,89 @@ class PLM_Admin {
 		) );
 
 		wp_safe_redirect( admin_url( 'admin.php?page=plm-licenses&id=' . $license_id . '&extended=1' ) );
+		exit;
+	}
+
+	/**
+	 * Reactivate a revoked or inactive license (admin override).
+	 *
+	 * Sets status back to 'active' without touching the expiration date. For an
+	 * expired license, use Extend instead (which also sets a new expiry).
+	 */
+	public function handle_reactivate_license(): void {
+		check_admin_referer( 'plm_reactivate_license' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Unauthorized.', 'pdf-license-manager' ) );
+		}
+
+		global $wpdb;
+
+		$license_id = absint( $_POST['license_id'] ?? 0 );
+		if ( ! $license_id ) {
+			wp_die( esc_html__( 'Invalid license ID.', 'pdf-license-manager' ) );
+		}
+
+		$wpdb->update(
+			PLM_Database::table( 'licenses' ),
+			array( 'status' => 'active' ),
+			array( 'id' => $license_id ),
+			array( '%s' ),
+			array( '%d' )
+		);
+
+		PLM_License::audit_log( $license_id, 'license.reactivated', array( 'source' => 'admin' ) );
+
+		wp_safe_redirect( admin_url( 'admin.php?page=plm-licenses&id=' . $license_id . '&reactivated=1' ) );
+		exit;
+	}
+
+	/**
+	 * Resend the license-key email to the customer on file.
+	 */
+	public function handle_resend_key(): void {
+		check_admin_referer( 'plm_resend_key' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Unauthorized.', 'pdf-license-manager' ) );
+		}
+
+		global $wpdb;
+
+		$license_id = absint( $_POST['license_id'] ?? 0 );
+		if ( ! $license_id ) {
+			wp_die( esc_html__( 'Invalid license ID.', 'pdf-license-manager' ) );
+		}
+
+		$license = $wpdb->get_row( $wpdb->prepare(
+			'SELECT * FROM ' . PLM_Database::table( 'licenses' ) . ' WHERE id = %d',
+			$license_id
+		) );
+
+		if ( ! $license ) {
+			wp_die( esc_html__( 'License not found.', 'pdf-license-manager' ) );
+		}
+
+		$sent = 0;
+		if ( ! empty( $license->customer_email ) ) {
+			// The license row exposes the same license_type/plan/site_limit fields
+			// that PLM_Email::send_purchase() reads from a Stripe product mapping,
+			// so it can be passed directly as the "mapping" argument.
+			$sent = PLM_Email::send_purchase(
+				$license->customer_email,
+				$license->license_key,
+				$license,
+				$license->expires_at
+			) ? 1 : 0;
+
+			PLM_License::audit_log( $license_id, 'license.key_resent', array(
+				'source'  => 'admin',
+				'to'      => $license->customer_email,
+				'success' => (bool) $sent,
+			) );
+		}
+
+		wp_safe_redirect( admin_url( 'admin.php?page=plm-licenses&id=' . $license_id . '&resent=' . $sent ) );
 		exit;
 	}
 }
