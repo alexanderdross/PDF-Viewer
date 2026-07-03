@@ -2,6 +2,14 @@
 <div class="wrap plm-wrap">
 	<h1><?php esc_html_e( 'Settings', 'pdf-license-manager' ); ?></h1>
 
+	<?php if ( isset( $_GET['geoip_updated'] ) ) : ?>
+		<?php if ( 1 === (int) $_GET['geoip_updated'] ) : ?>
+			<div class="notice notice-success"><p><?php esc_html_e( 'GeoIP database updated successfully.', 'pdf-license-manager' ); ?></p></div>
+		<?php else : ?>
+			<div class="notice notice-error"><p><?php esc_html_e( 'GeoIP update failed. Check that a MaxMind license key is configured and the server can reach MaxMind.', 'pdf-license-manager' ); ?></p></div>
+		<?php endif; ?>
+	<?php endif; ?>
+
 	<!-- Stripe Product Mapping -->
 	<div class="plm-section">
 		<h2><?php esc_html_e( 'Stripe Product Mapping', 'pdf-license-manager' ); ?></h2>
@@ -150,6 +158,22 @@
 					<?php else : ?>
 						<span class="plm-text-warning"><?php esc_html_e( 'Not found', 'pdf-license-manager' ); ?></span>
 					<?php endif; ?>
+					<?php $geoip_last = (int) get_option( 'plm_geoip_last_update', 0 ); ?>
+					<?php if ( $geoip_last ) : ?>
+						<span class="description"> &mdash; <?php
+							printf(
+								/* translators: %s: last update time */
+								esc_html__( 'Last updated: %s', 'pdf-license-manager' ),
+								esc_html( date_i18n( 'Y-m-d H:i', $geoip_last ) )
+							);
+						?></span>
+					<?php endif; ?>
+					<p>
+						<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=plm_update_geoip' ), 'plm_update_geoip' ) ); ?>" class="button button-secondary">
+							<?php esc_html_e( 'Update GeoIP Now', 'pdf-license-manager' ); ?>
+						</a>
+						<span class="description"><?php esc_html_e( 'Requires a MaxMind license key (PLM_MAXMIND_LICENSE_KEY or the plm_maxmind_license_key option).', 'pdf-license-manager' ); ?></span>
+					</p>
 				</td>
 			</tr>
 			<tr>

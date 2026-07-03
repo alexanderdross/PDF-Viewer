@@ -25,6 +25,9 @@ class PLM_Admin {
 		add_action( 'admin_post_plm_extend_license', array( $this, 'handle_extend_license' ) );
 		add_action( 'admin_post_plm_reactivate_license', array( $this, 'handle_reactivate_license' ) );
 		add_action( 'admin_post_plm_resend_key', array( $this, 'handle_resend_key' ) );
+		add_action( 'admin_post_plm_export_licenses', array( $this, 'handle_export_licenses' ) );
+		add_action( 'admin_post_plm_export_installations', array( $this, 'handle_export_installations' ) );
+		add_action( 'admin_post_plm_update_geoip', array( $this, 'handle_update_geoip' ) );
 	}
 
 	/**
@@ -622,6 +625,133 @@ class PLM_Admin {
 		}
 
 		wp_safe_redirect( admin_url( 'admin.php?page=plm-licenses&id=' . $license_id . '&resent=' . $sent ) );
+		exit;
+	}
+
+	// -------------------------------------------------------------------------
+	// CSV Export & GeoIP
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Stream an array of rows to the browser as a CSV download and exit.
+	 *
+	 * @param string  $filename Download filename.
+	 * @param array   $header   Header row.
+	 * @param array[] $rows     Data rows.
+	 */
+	private function stream_csv( string $filename, array $header, array $rows ): void {
+		nocache_headers();
+		header( 'Content-Type: text/csv; charset=utf-8' );
+		header( 'Content-Disposition: attachment; filename=' . sanitize_file_name( $filename ) );
+
+		$out = fopen( 'php://output', 'w' );
+		fputcsv( $out, $header );
+		foreach ( $rows as $row ) {
+			fputcsv( $out, $row );
+		}
+		fclose( $out );
+		exit;
+	}
+
+	/**
+	 * Export all licenses as CSV.
+	 */
+	public function handle_export_licenses(): void {
+		check_admin_referer( 'plm_export_licenses' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Unauthorized.', 'pdf-license-manager' ) );
+		}
+
+		global $wpdb;
+		$rows = $wpdb->get_results( 'SELECT * FROM ' . PLM_Database::table( 'licenses' ) . ' ORDER BY created_at DESC' );
+
+		$data = array();
+		foreach ( $rows as $r ) {
+			$data[] = array(
+				$r->id,
+				$r->license_key,
+				$r->license_type,
+				$r->plan,
+				$r->status,
+				$r->site_limit,
+				PLM_License::count_active_sites( (int) $r->id ),
+				$r->customer_email,
+				$r->customer_name,
+				$r->expires_at,
+				$r->activated_at,
+				$r->created_at,
+			);
+		}
+
+		$this->stream_csv(
+			'plm-licenses-' . gmdate( 'Ymd-His' ) . '.csv',
+			array( 'id', 'license_key', 'type', 'plan', 'status', 'site_limit', 'active_sites', 'customer_email', 'customer_name', 'expires_at', 'activated_at', 'created_at' ),
+			$data
+		);
+	}
+
+	/**
+	 * Export all installations as CSV (license keys masked).
+	 */
+	public function handle_export_installations(): void {
+		check_admin_referer( 'plm_export_installations' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Unauthorized.', 'pdf-license-manager' ) );
+		}
+
+		global $wpdb;
+		$t_inst = PLM_Database::table( 'installations' );
+		$t_lic  = PLM_Database::table( 'licenses' );
+		$t_geo  = PLM_Database::table( 'geo_data' );
+
+		$rows = $wpdb->get_results(
+			"SELECT i.*, l.license_key, l.license_type, g.country_code, g.country_name
+			 FROM {$t_inst} i
+			 JOIN {$t_lic} l ON l.id = i.license_id
+			 LEFT JOIN {$t_geo} g ON g.installation_id = i.id
+			 ORDER BY i.last_checked_at DESC"
+		);
+
+		$data = array();
+		foreach ( $rows as $r ) {
+			$data[] = array(
+				$r->id,
+				PLM_License::mask_key( $r->license_key ),
+				$r->license_type,
+				$r->platform,
+				$r->site_url,
+				$r->plugin_version,
+				$r->is_active ? 'active' : 'inactive',
+				$r->is_local ? 'yes' : 'no',
+				$r->country_code,
+				$r->country_name,
+				$r->activated_at,
+				$r->last_checked_at,
+			);
+		}
+
+		$this->stream_csv(
+			'plm-installations-' . gmdate( 'Ymd-His' ) . '.csv',
+			array( 'id', 'license_key', 'type', 'platform', 'site_url', 'plugin_version', 'status', 'is_local', 'country_code', 'country_name', 'activated_at', 'last_checked_at' ),
+			$data
+		);
+	}
+
+	/**
+	 * Trigger an on-demand GeoLite2 database update.
+	 */
+	public function handle_update_geoip(): void {
+		check_admin_referer( 'plm_update_geoip' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Unauthorized.', 'pdf-license-manager' ) );
+		}
+
+		$ok = PLM_Cron::update_geoip_db();
+
+		wp_safe_redirect( admin_url( 'admin.php?page=plm-settings&geoip_updated=' . ( $ok ? '1' : '0' ) ) );
 		exit;
 	}
 }

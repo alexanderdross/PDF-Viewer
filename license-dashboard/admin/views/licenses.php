@@ -4,6 +4,9 @@
 	<a href="<?php echo esc_url( admin_url( 'admin.php?page=plm-licenses&action=new' ) ); ?>" class="page-title-action">
 		<?php esc_html_e( 'Add New', 'pdf-license-manager' ); ?>
 	</a>
+	<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=plm_export_licenses' ), 'plm_export_licenses' ) ); ?>" class="page-title-action">
+		<?php esc_html_e( 'Export CSV', 'pdf-license-manager' ); ?>
+	</a>
 
 	<?php if ( isset( $_GET['action'] ) && 'new' === sanitize_text_field( wp_unslash( $_GET['action'] ) ) ) : ?>
 		<!-- Create License Form -->

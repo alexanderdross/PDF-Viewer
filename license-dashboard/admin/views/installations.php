@@ -1,6 +1,9 @@
 <?php if ( ! defined( 'ABSPATH' ) ) exit; ?>
 <div class="wrap plm-wrap">
-	<h1><?php esc_html_e( 'Installations', 'pdf-license-manager' ); ?></h1>
+	<h1 class="wp-heading-inline"><?php esc_html_e( 'Installations', 'pdf-license-manager' ); ?></h1>
+	<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=plm_export_installations' ), 'plm_export_installations' ) ); ?>" class="page-title-action">
+		<?php esc_html_e( 'Export CSV', 'pdf-license-manager' ); ?>
+	</a>
 
 	<!-- Filter -->
 	<form method="get" class="plm-filter-bar">
