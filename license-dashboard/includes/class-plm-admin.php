@@ -347,6 +347,15 @@ class PLM_Admin {
 			 ORDER BY count DESC LIMIT 20"
 		);
 
+		// Coordinate clusters for the world map (rounded to ~11km buckets).
+		$geo_points = $wpdb->get_results(
+			"SELECT ROUND(g.latitude, 1) AS lat, ROUND(g.longitude, 1) AS lng, COUNT(*) AS count
+			 FROM {$t_geo} g JOIN {$t_inst} i ON i.id = g.installation_id
+			 WHERE i.is_active = 1 AND g.latitude IS NOT NULL AND g.longitude IS NOT NULL
+			 GROUP BY ROUND(g.latitude, 1), ROUND(g.longitude, 1)
+			 ORDER BY count DESC LIMIT 500"
+		);
+
 		$platform_distribution = $wpdb->get_results(
 			"SELECT platform, COUNT(*) AS count FROM {$t_inst} WHERE is_active = 1 GROUP BY platform ORDER BY count DESC"
 		);
