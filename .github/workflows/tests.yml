@@ -9,7 +9,7 @@ on:
 jobs:
   react-tests:
     name: React/TypeScript Tests
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     defaults:
       run:
         working-directory: react-pdf-embed-seo
@@ -29,7 +29,7 @@ jobs:
 
   theme-tests:
     name: Theme PHPUnit Tests
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     defaults:
       run:
         working-directory: theme
@@ -44,7 +44,7 @@ jobs:
 
   license-manager-tests:
     name: License Manager PHPUnit Tests
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     defaults:
       run:
         working-directory: license-dashboard
@@ -60,7 +60,7 @@ jobs:
 
   wordpress-tests:
     name: WordPress Plugin Tests
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     services:
       mysql:
         image: mysql:8.0
@@ -102,7 +102,7 @@ jobs:
 
   drupal-tests:
     name: Drupal Module Lint
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
@@ -144,7 +144,7 @@ jobs:
 
   dist-integrity:
     name: Distribution ZIP Integrity
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v7
         with:
