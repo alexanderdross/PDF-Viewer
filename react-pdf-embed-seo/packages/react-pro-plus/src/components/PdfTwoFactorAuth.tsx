@@ -159,7 +159,7 @@ export const PdfTwoFactorAuth: React.FC<TwoFactorAuthProps> = ({
               Copy Codes
             </button>
             <button className="pdf-2fa-btn pdf-2fa-btn-primary" onClick={() => setStep('done')}>
-              I've Saved My Codes
+              I&apos;ve Saved My Codes
             </button>
           </div>
         </div>

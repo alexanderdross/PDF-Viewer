@@ -9,7 +9,6 @@ import React, { useState, useMemo, useEffect, ReactNode } from 'react';
 import { PdfContext, PdfContextValue } from './PdfContext';
 import type { PdfProviderConfig, ViewerTheme } from '@pdf-embed-seo/core';
 import {
-  createApiClient,
   createWordPressClient,
   createDrupalClient,
   createStandaloneClient,

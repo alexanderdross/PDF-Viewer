@@ -3,7 +3,6 @@
  * For creating API routes for PDF operations
  */
 
-import type { PdfDocument } from '@pdf-embed-seo/core';
 import { PdfApiClient, createWordPressClient, createDrupalClient } from '@pdf-embed-seo/core';
 
 /**

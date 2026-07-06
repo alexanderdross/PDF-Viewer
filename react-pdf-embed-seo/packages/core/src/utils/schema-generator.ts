@@ -2,7 +2,7 @@
  * Schema.org JSON-LD generator for PDF documents
  */
 
-import type { PdfDocument, FaqItem, TocItem } from '../types/document';
+import type { PdfDocument, FaqItem } from '../types/document';
 
 /**
  * Schema.org types used by this module

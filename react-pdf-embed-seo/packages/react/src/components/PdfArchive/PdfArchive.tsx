@@ -53,7 +53,6 @@ export interface PdfArchiveProps extends ArchiveOptions {
  */
 export function PdfArchive({
   documents: propDocuments,
-  apiEndpoint,
   view = DEFAULT_ARCHIVE_OPTIONS.view,
   columns = DEFAULT_ARCHIVE_OPTIONS.columns,
   perPage = DEFAULT_ARCHIVE_OPTIONS.perPage,

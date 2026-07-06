@@ -4,7 +4,6 @@
  */
 
 import { useState, useCallback, useEffect } from 'react';
-import type { DocumentAnalytics } from '@pdf-embed-seo/core';
 import { usePdfContext } from '@pdf-embed-seo/react';
 import type { AnalyticsSummary } from '../components/PdfAnalytics/PdfAnalyticsDashboard';
 

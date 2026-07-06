@@ -93,7 +93,6 @@ export const PdfViewer = forwardRef<HTMLDivElement, PdfViewerProps>(
       onError,
       enableSearch = false,
       enableBookmarks = false,
-      enableProgress = false,
       className = '',
       style = {},
     },
@@ -131,7 +130,6 @@ export const PdfViewer = forwardRef<HTMLDivElement, PdfViewerProps>(
     // Check if premium features are allowed
     const canUseSearch = enableSearch && isPremium;
     const canUseBookmarks = enableBookmarks && isPremium;
-    const canUseProgress = enableProgress && isPremium;
 
     // Load PDF document
     useEffect(() => {
